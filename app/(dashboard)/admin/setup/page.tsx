@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSetupChecklist } from "@/lib/queries";
+import { Loader2 } from "lucide-react";
+import { useSetupChecklist, useDisconnectCRM } from "@/lib/queries";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,11 +69,12 @@ function FullChecklist() {
 
 export default function SetupPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const disconnectMut = useDisconnectCRM();
 
   function handleConfirm() {
-    setDialogOpen(false);
-    setConfirmed(true);
+    disconnectMut.mutate(undefined, {
+      onSuccess: () => setDialogOpen(false),
+    });
   }
 
   return (
@@ -95,7 +97,7 @@ export default function SetupPage() {
           </CardContent>
         </Card>
 
-        {confirmed && (
+        {disconnectMut.isSuccess && (
           <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
             CRM desconectado com sucesso. Configure a nova integração em Integrações.
           </p>
@@ -116,7 +118,8 @@ export default function SetupPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={handleConfirm}>
+            <Button variant="destructive" onClick={handleConfirm} disabled={disconnectMut.isPending}>
+              {disconnectMut.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
               Confirmar troca
             </Button>
           </DialogFooter>

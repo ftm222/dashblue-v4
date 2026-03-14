@@ -14,6 +14,7 @@ const MARKETING_KEYS: KPIKey[] = [
   "investment",
   "leads",
   "cpl",
+  "cac",
   "conversion_rate",
   "roas",
 ];

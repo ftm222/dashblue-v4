@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Check, ChevronRight, Pencil, X } from "lucide-react";
 import { usePeriodFilter } from "@/providers/PeriodFilterProvider";
-import { usePeople } from "@/lib/queries";
-import { useLocalStorage } from "@/lib/use-local-storage";
+import { usePeople, useUpsertIndividualGoal } from "@/lib/queries";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,6 @@ import { cn } from "@/lib/utils";
 import type {
   Person,
   IndividualGoalConfig,
-  IndividualGoalTargets,
 } from "@/types";
 import { SDR_GOAL_METRICS, CLOSER_GOAL_METRICS } from "@/lib/goal-metrics";
 
@@ -221,17 +219,23 @@ export default function IndividualGoalsPage() {
   const { period } = usePeriodFilter();
   const { data: sdrs, isLoading: sdrsLoading, isError: sdrsError, refetch: refetchSdrs } = usePeople("sdr", period);
   const { data: closers, isLoading: closersLoading, isError: closersError, refetch: refetchClosers } = usePeople("closer", period);
+  const upsertGoal = useUpsertIndividualGoal();
 
-  const [targets, setTargets] = useLocalStorage<IndividualGoalTargets>("dashblue:individual-goals", {});
+  const [targets, setTargets] = useState<Record<string, Record<string, number>>>({});
 
   function handleSaveTarget(personId: string, metric: string, value: number) {
     setTargets((prev) => ({
       ...prev,
-      [personId]: {
-        ...(prev[personId] ?? {}),
-        [metric]: value,
-      },
+      [personId]: { ...(prev[personId] ?? {}), [metric]: value },
     }));
+
+    upsertGoal.mutate({
+      personId,
+      type: metric,
+      target: value,
+      periodStart: period.from.toISOString().slice(0, 10),
+      periodEnd: period.to.toISOString().slice(0, 10),
+    });
   }
 
   const isLoading = sdrsLoading || closersLoading;

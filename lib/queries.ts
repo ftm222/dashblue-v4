@@ -3,6 +3,7 @@
 import {
   useQuery,
   useInfiniteQuery,
+  useMutation,
   useQueryClient,
   type UseQueryOptions,
   type QueryClient,
@@ -19,9 +20,12 @@ import type {
   SetupChecklistItem,
   Integration,
   Goal,
+  Collaborator,
   PeriodRange,
   CursorPagination,
   FinancialSummary,
+  FunnelMapping,
+  LogEntry,
 } from "@/types";
 import {
   fetchKPIs,
@@ -35,6 +39,23 @@ import {
   fetchIntegrations,
   fetchGoals,
   fetchFinancialData,
+  fetchTags,
+  insertTag,
+  updateTag,
+  deleteTag,
+  fetchCollaborators,
+  insertCollaborator,
+  updateCollaborator,
+  fetchFunnelMappings,
+  upsertFunnelMappings,
+  updateGoalTarget,
+  upsertIndividualGoal,
+  updateProfile,
+  updateIntegrationStatus,
+  disconnectCRM,
+  fetchLogs,
+  signIn,
+  signOut,
 } from "@/lib/api";
 
 function periodKey(period: PeriodRange) {
@@ -201,4 +222,172 @@ export function usePrefetch() {
   );
 
   return { prefetchPeople, prefetchCampaigns };
+}
+
+// ---------------------------------------------------------------------------
+// Tags
+// ---------------------------------------------------------------------------
+
+interface TagAlias { id: string; name: string; alias: string }
+
+export function useTags() {
+  return useQuery<TagAlias[]>({ queryKey: ["tags"], queryFn: fetchTags });
+}
+
+export function useInsertTag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (tag: { name: string; alias: string }) => insertTag(tag),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
+  });
+}
+
+export function useUpdateTag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: { name?: string; alias?: string } }) =>
+      updateTag(id, fields),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
+  });
+}
+
+export function useDeleteTag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteTag(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Collaborators
+// ---------------------------------------------------------------------------
+
+export function useCollaborators() {
+  return useQuery<Collaborator[]>({ queryKey: ["collaborators"], queryFn: fetchCollaborators });
+}
+
+export function useInsertCollaborator() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (collab: { name: string; email: string; role: "admin" | "viewer" }) =>
+      insertCollaborator(collab),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["collaborators"] }),
+  });
+}
+
+export function useUpdateCollaborator() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: { active?: boolean; role?: "admin" | "viewer" } }) =>
+      updateCollaborator(id, fields),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["collaborators"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Funnel Mappings
+// ---------------------------------------------------------------------------
+
+interface FunnelMappingRow { id: string; stepKey: string; stepLabel: string; crmField: string; crmValue: string }
+
+export function useFunnelMappings() {
+  return useQuery<FunnelMappingRow[]>({ queryKey: ["funnel-mappings"], queryFn: fetchFunnelMappings });
+}
+
+export function useUpsertFunnelMappings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (mappings: FunnelMappingRow[]) => upsertFunnelMappings(mappings),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["funnel-mappings"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Goals mutations
+// ---------------------------------------------------------------------------
+
+export function useUpdateGoalTarget() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ goalId, target }: { goalId: string; target: number }) =>
+      updateGoalTarget(goalId, target),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["goals"] }),
+  });
+}
+
+export function useUpsertIndividualGoal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (params: { personId: string; type: string; target: number; periodStart: string; periodEnd: string }) =>
+      upsertIndividualGoal(params),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["goals"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Profile mutation
+// ---------------------------------------------------------------------------
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: { name?: string; email?: string; phone?: string | null } }) =>
+      updateProfile(id, fields),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Integration mutations
+// ---------------------------------------------------------------------------
+
+export function useUpdateIntegrationStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "connected" | "disconnected" }) =>
+      updateIntegrationStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Setup mutations
+// ---------------------------------------------------------------------------
+
+export function useDisconnectCRM() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => disconnectCRM(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["integrations"] });
+      qc.invalidateQueries({ queryKey: ["setup-checklist"] });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Logs
+// ---------------------------------------------------------------------------
+
+export function useLogs(page: number, pageSize: number) {
+  return useQuery<{ data: LogEntry[]; total: number }>({
+    queryKey: ["logs", page, pageSize],
+    queryFn: () => fetchLogs(page, pageSize),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+export function useSignIn() {
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      signIn(email, password),
+  });
+}
+
+export function useSignOut() {
+  return useMutation({ mutationFn: () => signOut() });
 }

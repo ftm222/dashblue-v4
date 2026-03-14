@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { DollarSign, CalendarCheck } from "lucide-react";
+import { DollarSign, CalendarCheck, Loader2 } from "lucide-react";
 import { usePeriodFilter } from "@/providers/PeriodFilterProvider";
-import { useGoals } from "@/lib/queries";
-import { useLocalStorage } from "@/lib/use-local-storage";
+import { useGoals, useUpdateGoalTarget } from "@/lib/queries";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,13 +23,13 @@ function formatCurrency(value: number): string {
   return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-function GoalCard({ goal, savedTarget, onSave }: { goal: Goal; savedTarget?: number; onSave: (value: number) => void }) {
+function GoalCard({ goal, onSave, saving }: { goal: Goal; onSave: (value: number) => void; saving: boolean }) {
   const [editing, setEditing] = useState(false);
-  const effectiveTarget = savedTarget ?? goal.target;
-  const [target, setTarget] = useState(String(effectiveTarget));
-  const config = GOAL_CONFIG[goal.type];
+  const [target, setTarget] = useState(String(goal.target));
+  const config = GOAL_CONFIG[goal.type as keyof typeof GOAL_CONFIG];
+  if (!config) return null;
   const Icon = config.icon;
-  const percentage = Math.min(Math.round((goal.current / effectiveTarget) * 100), 100);
+  const percentage = Math.min(Math.round((goal.current / goal.target) * 100), 100);
 
   function save() {
     const parsed = Number(target);
@@ -68,7 +67,8 @@ function GoalCard({ goal, savedTarget, onSave }: { goal: Goal; savedTarget?: num
               />
             </div>
             <div className="flex gap-2">
-              <Button size="sm" className="h-7 text-xs" onClick={save}>
+              <Button size="sm" className="h-7 text-xs" onClick={save} disabled={saving}>
+                {saving && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
                 Salvar
               </Button>
               <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditing(false)}>
@@ -86,7 +86,7 @@ function GoalCard({ goal, savedTarget, onSave }: { goal: Goal; savedTarget?: num
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Meta</p>
                 <p className="text-sm font-medium tabular-nums text-muted-foreground">
-                  {config.format(effectiveTarget)}
+                  {config.format(goal.target)}
                 </p>
               </div>
             </div>
@@ -104,10 +104,10 @@ function GoalCard({ goal, savedTarget, onSave }: { goal: Goal; savedTarget?: num
 export default function GoalsPage() {
   const { period } = usePeriodFilter();
   const { data, isLoading, isError, refetch } = useGoals(period);
-  const [overrides, setOverrides] = useLocalStorage<Record<string, number>>("dashblue:goal-overrides", {});
+  const updateMut = useUpdateGoalTarget();
 
   function handleSaveGoal(goalId: string, value: number) {
-    setOverrides((prev) => ({ ...prev, [goalId]: value }));
+    updateMut.mutate({ goalId, target: value });
   }
 
   return (
@@ -127,8 +127,8 @@ export default function GoalsPage() {
             <GoalCard
               key={goal.id}
               goal={goal}
-              savedTarget={overrides[goal.id]}
               onSave={(value) => handleSaveGoal(goal.id, value)}
+              saving={updateMut.isPending}
             />
           ))}
         </div>

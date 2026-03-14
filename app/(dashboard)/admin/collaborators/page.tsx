@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
-import { useLocalStorage } from "@/lib/use-local-storage";
+import { useCollaborators, useInsertCollaborator, useUpdateCollaborator } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/shared/ErrorState";
 import {
   Table,
   TableBody,
@@ -31,82 +33,91 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Collaborator } from "@/types";
-
-const INITIAL_COLLABORATORS: Collaborator[] = [
-  { id: "1", name: "Lucas Silva", email: "lucas@dashblue.com", role: "admin", active: true },
-  { id: "2", name: "Mariana Santos", email: "mariana@dashblue.com", role: "admin", active: true },
-  { id: "3", name: "Pedro Oliveira", email: "pedro@dashblue.com", role: "viewer", active: true },
-  { id: "4", name: "Ana Souza", email: "ana@dashblue.com", role: "viewer", active: false },
-];
 
 export default function CollaboratorsPage() {
-  const [collaborators, setCollaborators] = useLocalStorage<Collaborator[]>("dashblue:collaborators", INITIAL_COLLABORATORS);
+  const { data: collaborators, isLoading, isError, refetch } = useCollaborators();
+  const insertMut = useInsertCollaborator();
+  const updateMut = useUpdateCollaborator();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<"admin" | "viewer">("viewer");
 
-  function toggleActive(id: string) {
-    setCollaborators((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c)),
-    );
+  function toggleActive(id: string, currentActive: boolean) {
+    updateMut.mutate({ id, fields: { active: !currentActive } });
   }
 
   function handleInvite() {
     if (!newName || !newEmail) return;
-    setCollaborators((prev) => [
-      ...prev,
-      { id: String(Date.now()), name: newName, email: newEmail, role: newRole, active: true },
-    ]);
-    setNewName("");
-    setNewEmail("");
-    setNewRole("viewer");
-    setDialogOpen(false);
+    insertMut.mutate(
+      { name: newName, email: newEmail, role: newRole },
+      {
+        onSuccess: () => {
+          setNewName("");
+          setNewEmail("");
+          setNewRole("viewer");
+          setDialogOpen(false);
+        },
+      },
+    );
   }
 
   return (
     <AdminPageWrapper title="Colaboradores" description="Gerencie os membros da equipe">
-      <div className="space-y-4">
-        <div className="flex justify-end">
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            Convidar
-          </Button>
-        </div>
+      {isError && <ErrorState onRetry={() => refetch()} />}
 
-        <div className="rounded-lg border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Papel</TableHead>
-                <TableHead className="text-center">Ativo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {collaborators.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{c.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={c.role === "admin" ? "default" : "secondary"}>
-                      {c.role === "admin" ? "Admin" : "Viewer"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Switch
-                      checked={c.active}
-                      onCheckedChange={() => toggleActive(c.id)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {isLoading && (
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
         </div>
-      </div>
+      )}
+
+      {collaborators && (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Convidar
+            </Button>
+          </div>
+
+          <div className="rounded-lg border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Papel</TableHead>
+                  <TableHead className="text-center">Ativo</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {collaborators.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{c.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={c.role === "admin" ? "default" : "secondary"}>
+                        {c.role === "admin" ? "Admin" : "Viewer"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch
+                        checked={c.active}
+                        onCheckedChange={() => toggleActive(c.id, c.active)}
+                        disabled={updateMut.isPending}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
@@ -139,7 +150,10 @@ export default function CollaboratorsPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleInvite}>Convidar</Button>
+            <Button onClick={handleInvite} disabled={insertMut.isPending}>
+              {insertMut.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Convidar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

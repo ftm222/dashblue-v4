@@ -125,7 +125,7 @@ export interface Integration {
   id: string;
   name: string;
   type: "crm" | "ads";
-  status: "connected" | "disconnected" | "error";
+  status: "connected" | "syncing" | "disconnected" | "error";
   lastSync?: string;
 }
 
@@ -146,7 +146,7 @@ export interface Collaborator {
 
 export interface Goal {
   id: string;
-  type: "revenue" | "booked";
+  type: "revenue" | "booked" | "leads" | "received" | "won";
   target: number;
   current: number;
   period: PeriodRange;
@@ -174,6 +174,47 @@ export interface IndividualGoalConfig {
 }
 
 export type IndividualGoalTargets = Record<string, Record<string, number>>;
+
+export interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  avatar_url: string | null;
+  role: "admin" | "viewer";
+  active?: boolean;
+}
+
+export interface LogEntry {
+  id: string;
+  timestamp: string;
+  user: string;
+  action: string;
+  details: string;
+}
+
+export interface LogWithProfile {
+  id: string;
+  user_id: string | null;
+  action: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  details: Record<string, unknown> | null;
+  created_at: string;
+  profiles: { name: string } | null;
+}
+
+export interface PersonWithSquad {
+  id: string;
+  name: string;
+  avatar_url: string | null;
+  role: "sdr" | "closer";
+  squad_id: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+  squads: { name: string } | null;
+}
 
 export interface FinancialContract {
   id: string;

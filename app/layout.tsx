@@ -1,5 +1,5 @@
 import "@/app/globals.css";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import type { Metadata } from "next";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -7,9 +7,10 @@ import { PeriodFilterProvider } from "@/providers/PeriodFilterProvider";
 import { TVModeProvider } from "@/providers/TVModeProvider";
 import { DrillDownProvider } from "@/providers/DrillDownProvider";
 import { DataFreshnessProvider } from "@/providers/DataFreshnessProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
   title: "Dashblue",
@@ -39,18 +40,20 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${outfit.className} antialiased`}>
         <QueryProvider>
           <ThemeProvider>
-            <PeriodFilterProvider>
-              <TVModeProvider>
-                <DrillDownProvider>
-                  <DataFreshnessProvider>
-                    <TooltipProvider>{children}</TooltipProvider>
-                  </DataFreshnessProvider>
-                </DrillDownProvider>
-              </TVModeProvider>
-            </PeriodFilterProvider>
+            <AuthProvider>
+              <PeriodFilterProvider>
+                <TVModeProvider>
+                  <DrillDownProvider>
+                    <DataFreshnessProvider>
+                      <TooltipProvider>{children}</TooltipProvider>
+                    </DataFreshnessProvider>
+                  </DrillDownProvider>
+                </TVModeProvider>
+              </PeriodFilterProvider>
+            </AuthProvider>
           </ThemeProvider>
         </QueryProvider>
       </body>

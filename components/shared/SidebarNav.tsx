@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useCallback } from "react";
 import {
   Brain,
+  ChevronsLeft,
+  ChevronsRight,
   Crosshair,
   DollarSign,
   FileText,
@@ -25,8 +27,15 @@ import {
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { usePrefetch } from "@/lib/queries";
 import { usePeriodFilter } from "@/providers/PeriodFilterProvider";
+import { useLocalStorage } from "@/lib/use-local-storage";
 
 interface NavItem {
   label: string;
@@ -37,7 +46,7 @@ interface NavItem {
 
 const MAIN_NAV: NavItem[] = [
   { label: "Overview", href: "/overview", icon: LayoutDashboard, prefetchKey: "overview" },
-  { label: "Marketing", href: "/marketing", icon: Megaphone, prefetchKey: "marketing" },
+  { label: "Tráfego", href: "/marketing", icon: Megaphone, prefetchKey: "marketing" },
   { label: "SDRs", href: "/sdrs", icon: PhoneCall, prefetchKey: "sdr" },
   { label: "Closers", href: "/closers", icon: Handshake, prefetchKey: "closer" },
   { label: "Squads", href: "/squads", icon: Swords },
@@ -61,35 +70,55 @@ const ADMIN_NAV: NavItem[] = [
 function NavLink({
   item,
   active,
+  collapsed,
   onHover,
 }: {
   item: NavItem;
   active: boolean;
+  collapsed: boolean;
   onHover?: () => void;
 }) {
   const Icon = item.icon;
-  return (
+
+  const link = (
     <Link
       href={item.href}
       prefetch={true}
       onMouseEnter={onHover}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        "flex items-center rounded-md text-sm font-medium transition-colors",
+        collapsed ? "justify-center px-2 py-2" : "gap-3 px-3 py-2",
         active
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
           : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      {item.label}
+      {!collapsed && (
+        <span className="truncate">{item.label}</span>
+      )}
     </Link>
   );
+
+  if (collapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right" sideOffset={8}>
+          {item.label}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return link;
 }
 
 export function SidebarNav() {
   const pathname = usePathname();
   const { prefetchPeople, prefetchCampaigns } = usePrefetch();
   const { period } = usePeriodFilter();
+  const [collapsed, setCollapsed] = useLocalStorage("sidebar-collapsed", false);
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + "/");
@@ -105,35 +134,67 @@ export function SidebarNav() {
   );
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex h-14 items-center px-4">
-        <span className="text-lg font-bold tracking-tight text-white">
-          Dashblue
-        </span>
-      </div>
-
-      <ScrollArea className="flex-1 px-3">
-        <nav className="flex flex-col gap-1 py-2">
-          {MAIN_NAV.map((item) => (
-            <NavLink
-              key={item.href}
-              item={item}
-              active={isActive(item.href)}
-              onHover={() => handleHover(item.prefetchKey)}
-            />
-          ))}
-
-          <Separator className="my-3 bg-sidebar-border" />
-
-          <span className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-            Admin
+    <TooltipProvider>
+      <aside
+        className={cn(
+          "flex h-screen shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out",
+          collapsed ? "w-16" : "w-60",
+        )}
+      >
+        <div className={cn(
+          "flex h-14 items-center",
+          collapsed ? "justify-between px-2" : "justify-between px-4",
+        )}>
+          <span className={cn(
+            "font-bold tracking-tight text-white transition-all duration-200",
+            collapsed ? "text-sm" : "text-lg",
+          )}>
+            {collapsed ? "DB" : "Dashblue"}
           </span>
+          <button
+            onClick={() => setCollapsed((prev) => !prev)}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          >
+            {collapsed ? (
+              <ChevronsRight className="h-4 w-4" />
+            ) : (
+              <ChevronsLeft className="h-4 w-4" />
+            )}
+          </button>
+        </div>
 
-          {ADMIN_NAV.map((item) => (
-            <NavLink key={item.href} item={item} active={isActive(item.href)} />
-          ))}
-        </nav>
-      </ScrollArea>
-    </aside>
+        <ScrollArea className={cn("flex-1", collapsed ? "px-2" : "px-3")}>
+          <nav className="flex flex-col gap-1 py-2">
+            {MAIN_NAV.map((item) => (
+              <NavLink
+                key={item.href}
+                item={item}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+                onHover={() => handleHover(item.prefetchKey)}
+              />
+            ))}
+
+            <Separator className="my-3 bg-sidebar-border" />
+
+            {!collapsed && (
+              <span className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                Admin
+              </span>
+            )}
+
+            {ADMIN_NAV.map((item) => (
+              <NavLink
+                key={item.href}
+                item={item}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+              />
+            ))}
+          </nav>
+        </ScrollArea>
+
+      </aside>
+    </TooltipProvider>
   );
 }

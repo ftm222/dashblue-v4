@@ -10,6 +10,7 @@ import { useAlerts, prefetchDashboardData } from "@/lib/queries";
 import { SidebarNav } from "@/components/shared/SidebarNav";
 import { Topbar } from "@/components/shared/Topbar";
 import { TVHeader } from "@/components/shared/TVHeader";
+import { DrawerSkeleton } from "@/components/shared/DrawerSkeleton";
 import type { Alert } from "@/types";
 
 const EvidenceDrawer = lazy(() =>
@@ -100,7 +101,7 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-auto">{children}</main>
 
         {showEvidence && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<DrawerSkeleton />}>
             <EvidenceDrawer
               open
               onClose={drillDown.close}
@@ -111,7 +112,7 @@ export default function DashboardLayout({
           </Suspense>
         )}
         {showCalc && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<DrawerSkeleton />}>
             <CalcDrawer
               open
               onClose={drillDown.close}
@@ -143,7 +144,7 @@ export default function DashboardLayout({
       </div>
 
       {showEvidence && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<DrawerSkeleton />}>
           <EvidenceDrawer
             open
             onClose={drillDown.close}
@@ -154,7 +155,7 @@ export default function DashboardLayout({
         </Suspense>
       )}
       {showCalc && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<DrawerSkeleton />}>
           <CalcDrawer
             open
             onClose={drillDown.close}
