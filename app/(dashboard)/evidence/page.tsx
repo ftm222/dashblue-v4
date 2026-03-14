@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { Table2 } from "lucide-react";
 import { EvidencePageContent } from "@/features/evidence/EvidencePageContent";
+import { PageSkeleton } from "@/components/shared/DrawerSkeleton";
 
 export default function EvidencePage() {
   return (
@@ -17,7 +18,7 @@ export default function EvidencePage() {
         </p>
       </div>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageSkeleton />}>
         <EvidencePageContent />
       </Suspense>
     </div>

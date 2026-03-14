@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, Mail, Phone, Shield, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Camera, Loader2, Mail, Phone, Shield, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,25 +9,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useUpdateProfile } from "@/lib/queries";
+import { getCurrentProfile } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ProfilePage() {
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const [form, setForm] = useState({
-    name: "Usuário Dashblue",
-    email: "usuario@dashblue.com",
-    phone: "+55 11 99999-0000",
-    role: "admin" as "admin" | "viewer",
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getCurrentProfile,
   });
 
+  const updateMut = useUpdateProfile();
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "viewer" as "admin" | "viewer",
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone ?? "",
+        role: profile.role as "admin" | "viewer",
+      });
+    }
+  }, [profile]);
+
   function handleSave() {
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }, 800);
+    if (!profile) return;
+    updateMut.mutate({
+      id: profile.id,
+      fields: {
+        name: form.name,
+        email: form.email,
+        phone: form.phone || null,
+      },
+    });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-8 space-y-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-60 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -110,14 +142,21 @@ export default function ProfilePage() {
           <Separator />
 
           <div className="flex items-center justify-between">
-            {saved && (
+            {updateMut.isSuccess && (
               <p className="text-sm text-emerald-600 font-medium">
                 Salvo com sucesso
               </p>
             )}
-            {!saved && <span />}
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Salvando..." : "Salvar alterações"}
+            {!updateMut.isSuccess && <span />}
+            <Button onClick={handleSave} disabled={updateMut.isPending}>
+              {updateMut.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar alterações"
+              )}
             </Button>
           </div>
         </CardContent>

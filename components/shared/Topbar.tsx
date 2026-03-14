@@ -18,14 +18,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataFreshnessIndicator } from "@/components/shared/DataFreshnessIndicator";
 import { usePeriodFilter } from "@/providers/PeriodFilterProvider";
 import { useTVMode } from "@/providers/TVModeProvider";
+import { useAuth } from "@/providers/AuthProvider";
 
 const PAGE_TITLES: Record<string, string> = {
   "/overview": "Overview",
-  "/marketing": "Marketing",
+  "/marketing": "Tráfego",
   "/sdrs": "SDRs",
   "/closers": "Closers",
   "/ai": "AI Diagnosis",
@@ -68,7 +69,11 @@ export function Topbar({ alerts = [], onDismissAlert }: TopbarProps) {
   const router = useRouter();
   const { period, setPreset, setCustomRange, presets, isCustom } = usePeriodFilter();
   const { toggle: toggleTV } = useTVMode();
+  const { profile, user, signOut } = useAuth();
   const [showCalendar, setShowCalendar] = useState(false);
+
+  const displayName = profile?.name ?? user?.email?.split("@")[0] ?? "U";
+  const initials = displayName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 
   const dateRange: DateRange = {
     from: period.from,
@@ -173,11 +178,17 @@ export function Topbar({ alerts = [], onDismissAlert }: TopbarProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">U</AvatarFallback>
+                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuContent align="end" className="w-52">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium truncate">{displayName}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push("/profile")}>
               <User className="h-4 w-4" />
               Perfil
@@ -187,7 +198,7 @@ export function Topbar({ alerts = [], onDismissAlert }: TopbarProps) {
               Configurações
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push("/login")}>
+            <DropdownMenuItem onClick={signOut} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
               <LogOut className="h-4 w-4" />
               Sair
             </DropdownMenuItem>
