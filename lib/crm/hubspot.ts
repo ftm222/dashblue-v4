@@ -66,7 +66,7 @@ export function createHubSpotAdapter(env: CRMProviderConfig): CRMAdapter {
       };
     },
 
-    async fetchContacts(tokens: CRMTokens, since?: string): Promise<CRMContact[]> {
+    async fetchContacts(tokens: CRMTokens, since?: string, _config?: import("./types").CRMConfig): Promise<CRMContact[]> {
       const properties = [
         "dealname", "amount", "dealstage", "pipeline",
         "hs_analytics_source", "hs_analytics_source_data_1",

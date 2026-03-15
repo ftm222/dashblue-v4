@@ -20,7 +20,11 @@ async function ensureValidTokens(integrationId: string, config: CRMConfig): Prom
   const adapter = getCRMAdapter(config.provider);
   const newTokens = await adapter.refreshTokens(tokens);
 
-  const updatedConfig: CRMConfig = { ...config, tokens: newTokens };
+  const updatedConfig: CRMConfig = {
+    ...config,
+    tokens: newTokens,
+    ...(newTokens.company_domain && { company_domain: newTokens.company_domain }),
+  };
   await adminClient
     .from("integrations")
     .update({ config: updatedConfig })
@@ -63,7 +67,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
     const tokens = await ensureValidTokens(integrationId, config);
     const adapter = getCRMAdapter(config.provider);
 
-    const contacts = await adapter.fetchContacts(tokens, integration.last_sync || undefined);
+    const contacts = await adapter.fetchContacts(tokens, integration.last_sync || undefined, config);
 
     const { data: mappings } = await adminClient
       .from("funnel_mappings")

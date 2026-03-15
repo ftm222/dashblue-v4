@@ -36,7 +36,11 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${redirectPage}?error=connection_test_failed`);
     }
 
-    const config: CRMConfig = { provider, tokens };
+    const config: CRMConfig = {
+      provider,
+      tokens,
+      ...(tokens.company_domain && { company_domain: tokens.company_domain }),
+    };
 
     await adminClient
       .from("integrations")

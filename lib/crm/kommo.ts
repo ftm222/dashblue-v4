@@ -63,7 +63,7 @@ export function createKommoAdapter(env: CRMProviderConfig): CRMAdapter {
       };
     },
 
-    async fetchContacts(tokens: CRMTokens, since?: string): Promise<CRMContact[]> {
+    async fetchContacts(tokens: CRMTokens, since?: string, _config?: import("./types").CRMConfig): Promise<CRMContact[]> {
       const params = new URLSearchParams({ limit: "250" });
       if (since) params.set("filter[updated_at][from]", String(Math.floor(new Date(since).getTime() / 1000)));
 

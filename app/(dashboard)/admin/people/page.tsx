@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, AlertCircle } from "lucide-react";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
 import {
   useAllPeople,
@@ -40,6 +40,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+const NONE_SQUAD = "__none__";
+
 interface PersonRow {
   id: string;
   name: string;
@@ -47,7 +49,7 @@ interface PersonRow {
   squad_id: string | null;
   avatar_url: string | null;
   active: boolean;
-  squads: { name: string } | null;
+  squads?: { name: string } | null;
 }
 
 export default function PeoplePage() {
@@ -62,12 +64,15 @@ export default function PeoplePage() {
   const [form, setForm] = useState({
     name: "",
     role: "sdr" as "sdr" | "closer",
-    squad_id: "",
+    squad_id: NONE_SQUAD,
+    avatar_url: "",
   });
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   function openCreate() {
     setEditingId(null);
-    setForm({ name: "", role: "sdr", squad_id: "" });
+    setForm({ name: "", role: "sdr", squad_id: NONE_SQUAD, avatar_url: "" });
+    setToast(null);
     setDialogOpen(true);
   }
 
@@ -76,41 +81,81 @@ export default function PeoplePage() {
     setForm({
       name: p.name,
       role: p.role,
-      squad_id: p.squad_id ?? "",
+      squad_id: p.squad_id ?? NONE_SQUAD,
+      avatar_url: p.avatar_url ?? "",
     });
+    setToast(null);
     setDialogOpen(true);
   }
 
   function handleSubmit() {
+    const squadId = form.squad_id === NONE_SQUAD ? null : form.squad_id;
+    const avatarUrl = form.avatar_url.trim() || null;
+
     if (editingId) {
       updateMut.mutate(
         {
           id: editingId,
           fields: {
-            name: form.name,
+            name: form.name.trim(),
             role: form.role,
-            squad_id: form.squad_id || null,
+            squad_id: squadId,
+            avatar_url: avatarUrl,
           },
         },
-        { onSuccess: () => setDialogOpen(false) },
+        {
+          onSuccess: () => {
+            setDialogOpen(false);
+            setToast({ type: "success", message: "Pessoa atualizada com sucesso." });
+          },
+          onError: (err) => {
+            setToast({
+              type: "error",
+              message: err instanceof Error ? err.message : "Erro ao atualizar. Tente novamente.",
+            });
+          },
+        },
       );
     } else {
       createMut.mutate(
         {
-          name: form.name,
+          name: form.name.trim(),
           role: form.role,
-          squad_id: form.squad_id || null,
+          squad_id: squadId,
+          avatar_url: avatarUrl,
         },
-        { onSuccess: () => setDialogOpen(false) },
+        {
+          onSuccess: () => {
+            setDialogOpen(false);
+            setToast({ type: "success", message: "Pessoa cadastrada com sucesso." });
+          },
+          onError: (err) => {
+            setToast({
+              type: "error",
+              message: err instanceof Error ? err.message : "Erro ao cadastrar. Tente novamente.",
+            });
+          },
+        },
       );
     }
   }
 
   function toggleActive(p: PersonRow) {
     if (p.active) {
-      deleteMut.mutate(p.id);
+      deleteMut.mutate(p.id, {
+        onSuccess: () => setToast({ type: "success", message: "Pessoa desativada." }),
+        onError: (err) =>
+          setToast({ type: "error", message: err instanceof Error ? err.message : "Erro ao desativar." }),
+      });
     } else {
-      updateMut.mutate({ id: p.id, fields: { active: true } });
+      updateMut.mutate(
+        { id: p.id, fields: { active: true } },
+        {
+          onSuccess: () => setToast({ type: "success", message: "Pessoa reativada." }),
+          onError: (err) =>
+            setToast({ type: "error", message: err instanceof Error ? err.message : "Erro ao reativar." }),
+        },
+      );
     }
   }
 
@@ -121,6 +166,33 @@ export default function PeoplePage() {
       title="Equipe (SDRs e Closers)"
       description="Gerencie os SDRs e Closers da sua organização"
     >
+      {toast && (
+        <div
+          className={`mb-4 flex items-center gap-2 rounded-lg border px-4 py-3 ${
+            toast.type === "success"
+              ? "border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400"
+              : "border-red-200 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400"
+          }`}
+        >
+          {toast.type === "success" ? (
+            <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <AlertCircle className="h-4 w-4 shrink-0" />
+          )}
+          <p className="text-sm">{toast.message}</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto h-6 w-6 p-0"
+            onClick={() => setToast(null)}
+          >
+            ×
+          </Button>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <Button size="sm" className="gap-1.5" onClick={openCreate}>
           <Plus className="h-4 w-4" />
@@ -232,7 +304,7 @@ export default function PeoplePage() {
                   <SelectValue placeholder="Selecione um squad" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
+                  <SelectItem value={NONE_SQUAD}>Nenhum</SelectItem>
                   {squads?.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
@@ -240,6 +312,17 @@ export default function PeoplePage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="person-avatar">URL do avatar (opcional)</Label>
+              <Input
+                id="person-avatar"
+                type="url"
+                value={form.avatar_url}
+                onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                placeholder="https://..."
+              />
             </div>
           </div>
 

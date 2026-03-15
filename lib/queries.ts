@@ -51,6 +51,7 @@ import {
   updateGoalTarget,
   upsertIndividualGoal,
   updateProfile,
+  createIntegration,
   updateIntegrationStatus,
   disconnectCRM,
   fetchLogs,
@@ -357,6 +358,14 @@ export function useUpdateProfile() {
 // ---------------------------------------------------------------------------
 // Integration mutations
 // ---------------------------------------------------------------------------
+
+export function useCreateIntegration() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (fields: { name: string; type: "crm" | "ads" }) => createIntegration(fields),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
+  });
+}
 
 export function useUpdateIntegrationStatus() {
   const qc = useQueryClient();

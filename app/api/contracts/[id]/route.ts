@@ -1,33 +1,14 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { adminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-async function getAuthUser(request: Request) {
-  const token = request.headers.get("authorization")?.replace("Bearer ", "");
-  if (!token) throw new ApiError("UNAUTHORIZED", "Token ausente.", 401);
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { persistSession: false },
-  });
-  const { data } = await supabase.auth.getUser(token);
-  if (!data?.user) throw new ApiError("UNAUTHORIZED", "Token inválido.", 401);
-
-  const orgId = data.user.user_metadata?.organization_id as string | undefined;
-  if (!orgId) throw new ApiError("FORBIDDEN", "Usuário sem organização.", 403);
-
-  return { user: data.user, orgId };
-}
+import { getAuthUserWithOrg } from "@/lib/api-auth";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { orgId } = await getAuthUser(request);
+    const { orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
     const body = await request.json();
 
@@ -65,7 +46,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { orgId } = await getAuthUser(request);
+    const { orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
 
     const { error } = await adminClient

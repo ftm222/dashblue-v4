@@ -680,19 +680,21 @@ export async function fetchSetupChecklist(): Promise<SetupChecklistItem[]> {
 // fetchIntegrations
 // ---------------------------------------------------------------------------
 
+/** Lista integrações via API (evita RLS quando organization_id está desatualizado) */
 export async function fetchIntegrations(): Promise<Integration[]> {
-  const { data } = await supabase
-    .from("integrations")
-    .select("*")
-    .order("name");
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) return [];
 
-  return (data ?? []).map((i) => ({
-    id: i.id,
-    name: i.name,
-    type: i.type as Integration["type"],
-    status: i.status as Integration["status"],
-    lastSync: i.last_sync ?? undefined,
-  }));
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.message || "Erro ao listar integrações.");
+  }
+  return res.json();
 }
 
 // ---------------------------------------------------------------------------
@@ -905,13 +907,43 @@ export async function updateProfile(id: string, fields: { name?: string; email?:
 // MUTATIONS — Integrations
 // ---------------------------------------------------------------------------
 
+/** Cria integração via API (bypassa RLS - evita erro de permissão) */
+export async function createIntegration(fields: { name: string; type: "crm" | "ads" }) {
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(fields),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || "Erro ao criar integração.");
+  return { id: json.id, name: json.name, type: json.type, status: json.status };
+}
+
+/** Atualiza status da integração via API (evita RLS quando organization_id está desatualizado) */
 export async function updateIntegrationStatus(id: string, status: "connected" | "disconnected") {
-  const update: Record<string, unknown> = { status };
-  if (status === "disconnected") {
-    update.last_sync = null;
-  }
-  const { error } = await supabase.from("integrations").update(update).eq("id", id);
-  if (error) throw error;
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || "Erro ao atualizar integração.");
 }
 
 // ---------------------------------------------------------------------------

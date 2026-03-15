@@ -128,12 +128,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!user && !isPublic) {
       router.replace("/login");
+      return;
     }
 
     const isAuthRoute = ["/login", "/register", "/forgot-password", "/reset-password"].some(
       (r) => pathname.startsWith(r),
     );
     if (user && isAuthRoute) {
+      const isNewUser = user.user_metadata?.is_new_user === true ||
+        (user.created_at && Date.now() - new Date(user.created_at).getTime() < 60_000);
+      router.replace(isNewUser ? "/admin/setup" : "/overview");
+      return;
+    }
+
+    // Logado na landing page (/) → redirecionar para o dashboard
+    if (user && pathname === "/") {
       const isNewUser = user.user_metadata?.is_new_user === true ||
         (user.created_at && Date.now() - new Date(user.created_at).getTime() < 60_000);
       router.replace(isNewUser ? "/admin/setup" : "/overview");
