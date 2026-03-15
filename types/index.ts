@@ -140,7 +140,7 @@ export interface Collaborator {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "viewer";
+  role: "owner" | "admin" | "manager" | "viewer";
   active: boolean;
 }
 
@@ -181,8 +181,44 @@ export interface Profile {
   email: string;
   phone: string | null;
   avatar_url: string | null;
-  role: "admin" | "viewer";
+  role: "owner" | "admin" | "manager" | "viewer";
+  organization_id?: string | null;
   active?: boolean;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url?: string | null;
+  plan: "free" | "starter" | "pro" | "enterprise";
+  subscription_status: "trialing" | "active" | "past_due" | "canceled" | "unpaid";
+  trial_ends_at?: string | null;
+  max_members: number;
+  max_integrations: number;
+}
+
+export interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  price_monthly: number;
+  price_yearly: number;
+  max_members: number;
+  max_integrations: number;
+  features: string[];
+}
+
+export interface Invoice {
+  id: string;
+  amount: number;
+  currency: string;
+  status: "draft" | "open" | "paid" | "void" | "uncollectible";
+  invoice_url?: string | null;
+  period_start?: string | null;
+  period_end?: string | null;
+  paid_at?: string | null;
+  created_at: string;
 }
 
 export interface LogEntry {

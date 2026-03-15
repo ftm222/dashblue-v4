@@ -505,15 +505,137 @@ export async function fetchEvidence(
 }
 
 // ---------------------------------------------------------------------------
-// fetchDiagnostics — mantém geração baseada em dados reais futuramente
+// fetchDiagnostics — análise baseada em dados reais
 // ---------------------------------------------------------------------------
 
-import { generateDiagnostics } from "@/lib/mock-data";
-
 export async function fetchDiagnostics(
-  _period: PeriodRange,
+  period: PeriodRange,
 ): Promise<DiagnosticCard[]> {
-  return generateDiagnostics();
+  const diagnostics: DiagnosticCard[] = [];
+  let diagId = 0;
+
+  const { data: evidence } = await supabase
+    .from("evidence")
+    .select("funnel_step, value, sdr_id, closer_id")
+    .gte("created_at", isoDate(period.from))
+    .lte("created_at", isoDate(period.to));
+
+  const rows = evidence ?? [];
+  if (rows.length === 0) return [];
+
+  const leads = rows.filter((r) => r.funnel_step === "leads").length;
+  const booked = rows.filter((r) => r.funnel_step === "booked").length;
+  const received = rows.filter((r) => r.funnel_step === "received").length;
+  const won = rows.filter((r) => r.funnel_step === "won").length;
+  const totalRevenue = rows
+    .filter((r) => r.funnel_step === "won")
+    .reduce((s, r) => s + (r.value ?? 0), 0);
+
+  const showRate = booked > 0 ? (received / booked) * 100 : 0;
+  const conversionRate = leads > 0 ? (won / leads) * 100 : 0;
+  const ticketMedio = won > 0 ? totalRevenue / won : 0;
+
+  if (showRate > 0 && showRate < 60) {
+    diagnostics.push({
+      id: `diag-${++diagId}`,
+      domain: "sdrs",
+      bottleneck: "Taxa de comparecimento baixa",
+      impact: `Show rate de ${showRate.toFixed(1)}% — abaixo dos 60% recomendados. ${booked - received} oportunidades perdidas.`,
+      recommendation: "Revisar processo de confirmação de agenda: enviar lembretes por WhatsApp/SMS 1h antes.",
+      evidenceLink: "/evidence?funnelStep=booked",
+      severity: showRate < 40 ? "critical" : "high",
+    });
+  }
+
+  if (leads > 0 && conversionRate < 10) {
+    diagnostics.push({
+      id: `diag-${++diagId}`,
+      domain: "funnel",
+      bottleneck: "Conversão geral crítica",
+      impact: `Apenas ${conversionRate.toFixed(1)}% dos leads são convertidos em vendas.`,
+      recommendation: "Analisar cada etapa do funil para identificar onde está o maior drop-off.",
+      evidenceLink: "/evidence",
+      severity: conversionRate < 5 ? "critical" : "high",
+    });
+  }
+
+  const { data: campaigns } = await supabase
+    .from("campaigns")
+    .select("investment, leads")
+    .gte("period_start", period.from.toISOString().slice(0, 10))
+    .lte("period_end", period.to.toISOString().slice(0, 10));
+
+  const totalInvestment = (campaigns ?? []).reduce((s, c) => s + (c.investment ?? 0), 0);
+  const totalCampaignLeads = (campaigns ?? []).reduce((s, c) => s + (c.leads ?? 0), 0);
+  const cpl = totalCampaignLeads > 0 ? totalInvestment / totalCampaignLeads : 0;
+
+  if (cpl > 0 && ticketMedio > 0 && cpl > ticketMedio / 3) {
+    diagnostics.push({
+      id: `diag-${++diagId}`,
+      domain: "marketing",
+      bottleneck: "CPL elevado vs ticket médio",
+      impact: `CPL de R$ ${cpl.toFixed(2)} é maior que 1/3 do ticket médio (R$ ${ticketMedio.toFixed(2)}).`,
+      recommendation: "Otimizar campanhas: testar novos criativos, revisar segmentação e pausar campanhas de baixo ROI.",
+      evidenceLink: "/marketing",
+      severity: cpl > ticketMedio / 2 ? "critical" : "medium",
+    });
+  }
+
+  const { data: people } = await supabase
+    .from("people")
+    .select("id, name, role")
+    .eq("active", true);
+
+  if (people && people.length > 0) {
+    const sdrsWithoutLeads = people
+      .filter((p) => p.role === "sdr")
+      .filter((p) => !rows.some((r) => r.sdr_id === p.id));
+
+    if (sdrsWithoutLeads.length > 0) {
+      diagnostics.push({
+        id: `diag-${++diagId}`,
+        domain: "sdrs",
+        bottleneck: `${sdrsWithoutLeads.length} SDR(s) sem leads no período`,
+        impact: `${sdrsWithoutLeads.map((p) => p.name).join(", ")} não geraram leads.`,
+        recommendation: "Verificar se os SDRs estão ativos e se as evidências estão corretamente vinculadas.",
+        evidenceLink: "/sdrs",
+        severity: "medium",
+      });
+    }
+
+    const closersWithoutWon = people
+      .filter((p) => p.role === "closer")
+      .filter((p) => !rows.some((r) => r.closer_id === p.id && r.funnel_step === "won"));
+
+    if (closersWithoutWon.length > 0) {
+      diagnostics.push({
+        id: `diag-${++diagId}`,
+        domain: "closers",
+        bottleneck: `${closersWithoutWon.length} Closer(s) sem vendas no período`,
+        impact: `${closersWithoutWon.map((p) => p.name).join(", ")} não fecharam negócios.`,
+        recommendation: "Acompanhar pipeline de cada closer e identificar gargalos na negociação.",
+        evidenceLink: "/closers",
+        severity: "medium",
+      });
+    }
+  }
+
+  if (booked > 0 && received > 0) {
+    const bookToClose = received > 0 ? (won / received) * 100 : 0;
+    if (bookToClose < 20 && bookToClose > 0) {
+      diagnostics.push({
+        id: `diag-${++diagId}`,
+        domain: "closers",
+        bottleneck: "Baixa taxa de fechamento",
+        impact: `Apenas ${bookToClose.toFixed(1)}% das reuniões resultam em venda.`,
+        recommendation: "Treinar closers em técnicas de fechamento e revisar a qualificação dos leads.",
+        evidenceLink: "/closers",
+        severity: bookToClose < 10 ? "high" : "medium",
+      });
+    }
+  }
+
+  return diagnostics;
 }
 
 // ---------------------------------------------------------------------------
@@ -676,12 +798,12 @@ export async function fetchCollaborators() {
     id: p.id,
     name: p.name,
     email: p.email,
-    role: p.role as "admin" | "viewer",
+    role: p.role as "owner" | "admin" | "manager" | "viewer",
     active: p.active,
   }));
 }
 
-export async function insertCollaborator(collab: { name: string; email: string; role: "admin" | "viewer" }) {
+export async function insertCollaborator(collab: { name: string; email: string; role: "owner" | "admin" | "manager" | "viewer" }) {
   const res = await fetch("/api/auth/invite", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -703,7 +825,7 @@ export async function insertCollaborator(collab: { name: string; email: string; 
   };
 }
 
-export async function updateCollaborator(id: string, fields: { active?: boolean; role?: "admin" | "viewer" }) {
+export async function updateCollaborator(id: string, fields: { active?: boolean; role?: "owner" | "admin" | "manager" | "viewer" }) {
   const { error } = await supabase.from("profiles").update(fields).eq("id", id);
   if (error) throw error;
 }
@@ -757,31 +879,17 @@ export async function upsertIndividualGoal(params: {
   periodStart: string;
   periodEnd: string;
 }) {
-  const { data: existing } = await supabase
-    .from("goals")
-    .select("id")
-    .eq("person_id", params.personId)
-    .eq("type", params.type)
-    .eq("period_start", params.periodStart)
-    .eq("period_end", params.periodEnd)
-    .maybeSingle();
-
-  if (existing) {
-    const { error } = await supabase
-      .from("goals")
-      .update({ target: params.target })
-      .eq("id", existing.id);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase.from("goals").insert({
+  const { error } = await supabase.from("goals").upsert(
+    {
       person_id: params.personId,
       type: params.type as "revenue" | "booked" | "leads" | "received" | "won",
       target: params.target,
       period_start: params.periodStart,
       period_end: params.periodEnd,
-    });
-    if (error) throw error;
-  }
+    },
+    { onConflict: "person_id,type,period_start,period_end" },
+  );
+  if (error) throw error;
 }
 
 // ---------------------------------------------------------------------------
@@ -961,4 +1069,218 @@ export async function fetchFinancialData(): Promise<FinancialSummary> {
     totalGap: signatureGap + paymentGap,
     contracts,
   };
+}
+
+// ---------------------------------------------------------------------------
+// fetchSquads
+// ---------------------------------------------------------------------------
+
+export async function fetchSquads() {
+  const { data, error } = await supabase
+    .from("squads")
+    .select("id, name")
+    .order("name");
+  if (error) throw error;
+  return data ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// CRUD — People (SDRs / Closers)
+// ---------------------------------------------------------------------------
+
+async function getCurrentOrgId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const orgId = user.user_metadata?.organization_id as string | undefined;
+  if (orgId) return orgId;
+  const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+  if (!profile?.organization_id) throw new Error("Usuário sem organização vinculada");
+  return profile.organization_id;
+}
+
+export async function fetchAllPeople(role?: "sdr" | "closer") {
+  let query = supabase.from("people").select("*, squads(name)").order("name");
+  if (role) query = query.eq("role", role);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createPerson(fields: {
+  name: string;
+  role: "sdr" | "closer";
+  squad_id?: string | null;
+  avatar_url?: string | null;
+}) {
+  const organization_id = await getCurrentOrgId();
+  const { data, error } = await supabase
+    .from("people")
+    .insert({ ...fields, active: true, organization_id })
+    .select("*, squads(name)")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updatePerson(id: string, fields: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from("people")
+    .update(fields)
+    .eq("id", id)
+    .select("*, squads(name)")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deletePerson(id: string) {
+  const { error } = await supabase
+    .from("people")
+    .update({ active: false })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// CRUD — Contracts
+// ---------------------------------------------------------------------------
+
+export async function createContract(fields: {
+  client_name: string;
+  value: number;
+  status: string;
+  sdr_id?: string | null;
+  closer_id?: string | null;
+  squad_id?: string | null;
+  evidence_id?: string | null;
+  signed_at?: string | null;
+  paid_at?: string | null;
+}) {
+  const organization_id = await getCurrentOrgId();
+  const { data, error } = await supabase
+    .from("contracts")
+    .insert({ ...fields, organization_id })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateContract(id: string, fields: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from("contracts")
+    .update(fields)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteContract(id: string) {
+  const { error } = await supabase.from("contracts").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// CRUD — Campaigns
+// ---------------------------------------------------------------------------
+
+export async function createCampaign(fields: {
+  name: string;
+  source?: string;
+  medium?: string;
+  investment?: number;
+  impressions?: number;
+  clicks?: number;
+  leads?: number;
+  booked?: number;
+  received?: number;
+  won?: number;
+  revenue?: number;
+  period_start: string;
+  period_end: string;
+}) {
+  const organization_id = await getCurrentOrgId();
+  const { data, error } = await supabase
+    .from("campaigns")
+    .insert({
+      ...fields,
+      organization_id,
+      source: fields.source || "",
+      medium: fields.medium || "",
+      investment: fields.investment || 0,
+      impressions: fields.impressions || 0,
+      clicks: fields.clicks || 0,
+      leads: fields.leads || 0,
+      booked: fields.booked || 0,
+      received: fields.received || 0,
+      won: fields.won || 0,
+      revenue: fields.revenue || 0,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateCampaign(id: string, fields: Record<string, unknown>) {
+  const { data, error } = await supabase
+    .from("campaigns")
+    .update(fields)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteCampaign(id: string) {
+  const { error } = await supabase.from("campaigns").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Change Password
+// ---------------------------------------------------------------------------
+
+export async function changePassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Settings — Profile & Organization
+// ---------------------------------------------------------------------------
+
+export async function fetchProfileSettings(): Promise<Record<string, unknown>> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return {};
+  const { data } = await supabase.from("profiles").select("settings").eq("id", user.id).single();
+  return (data?.settings as Record<string, unknown>) ?? {};
+}
+
+export async function saveProfileSettings(settings: Record<string, unknown>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const { error } = await supabase.from("profiles").update({ settings }).eq("id", user.id);
+  if (error) throw error;
+}
+
+export async function fetchOrgSettings(): Promise<Record<string, unknown>> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return {};
+  const orgId = user.user_metadata?.organization_id;
+  if (!orgId) return {};
+  const { data } = await supabase.from("organizations").select("settings").eq("id", orgId).single();
+  return (data?.settings as Record<string, unknown>) ?? {};
+}
+
+export async function saveOrgSettings(settings: Record<string, unknown>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const orgId = user.user_metadata?.organization_id;
+  if (!orgId) throw new Error("Sem organização");
+  const { error } = await supabase.from("organizations").update({ settings }).eq("id", orgId);
+  if (error) throw error;
 }

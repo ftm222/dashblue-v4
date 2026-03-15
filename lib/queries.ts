@@ -56,6 +56,22 @@ import {
   fetchLogs,
   signIn,
   signOut,
+  fetchSquads,
+  fetchAllPeople,
+  createPerson,
+  updatePerson,
+  deletePerson,
+  createContract,
+  updateContract,
+  deleteContract,
+  createCampaign,
+  updateCampaign,
+  deleteCampaign,
+  changePassword,
+  fetchProfileSettings,
+  saveProfileSettings,
+  fetchOrgSettings,
+  saveOrgSettings,
 } from "@/lib/api";
 
 function periodKey(period: PeriodRange) {
@@ -390,4 +406,184 @@ export function useSignIn() {
 
 export function useSignOut() {
   return useMutation({ mutationFn: () => signOut() });
+}
+
+// ---------------------------------------------------------------------------
+// Squads
+// ---------------------------------------------------------------------------
+
+export function useSquads() {
+  return useQuery({ queryKey: ["squads"], queryFn: fetchSquads });
+}
+
+// ---------------------------------------------------------------------------
+// People CRUD (admin)
+// ---------------------------------------------------------------------------
+
+export function useAllPeople(role?: "sdr" | "closer") {
+  return useQuery({
+    queryKey: ["all-people", role ?? "all"],
+    queryFn: () => fetchAllPeople(role),
+  });
+}
+
+export function useCreatePerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; role: "sdr" | "closer"; squad_id?: string | null; avatar_url?: string | null }) =>
+      createPerson(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["all-people"] });
+      qc.invalidateQueries({ queryKey: ["people"] });
+    },
+  });
+}
+
+export function useUpdatePerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: Record<string, unknown> }) =>
+      updatePerson(id, fields),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["all-people"] });
+      qc.invalidateQueries({ queryKey: ["people"] });
+    },
+  });
+}
+
+export function useDeletePerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deletePerson(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["all-people"] });
+      qc.invalidateQueries({ queryKey: ["people"] });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Contract CRUD
+// ---------------------------------------------------------------------------
+
+export function useCreateContract() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      client_name: string;
+      value: number;
+      status: string;
+      sdr_id?: string | null;
+      closer_id?: string | null;
+      squad_id?: string | null;
+      evidence_id?: string | null;
+      signed_at?: string | null;
+      paid_at?: string | null;
+    }) => createContract(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["financial"] }),
+  });
+}
+
+export function useUpdateContract() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: Record<string, unknown> }) =>
+      updateContract(id, fields),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["financial"] }),
+  });
+}
+
+export function useDeleteContract() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteContract(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["financial"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Campaign CRUD
+// ---------------------------------------------------------------------------
+
+export function useCreateCampaign() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      name: string;
+      source?: string;
+      medium?: string;
+      investment?: number;
+      impressions?: number;
+      clicks?: number;
+      leads?: number;
+      booked?: number;
+      received?: number;
+      won?: number;
+      revenue?: number;
+      period_start: string;
+      period_end: string;
+    }) => createCampaign(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["campaigns"] }),
+  });
+}
+
+export function useUpdateCampaign() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: Record<string, unknown> }) =>
+      updateCampaign(id, fields),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["campaigns"] }),
+  });
+}
+
+export function useDeleteCampaign() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteCampaign(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["campaigns"] }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Change Password
+// ---------------------------------------------------------------------------
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (newPassword: string) => changePassword(newPassword),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------
+
+export function useProfileSettings() {
+  return useQuery({
+    queryKey: ["profile-settings"],
+    queryFn: fetchProfileSettings,
+  });
+}
+
+export function useSaveProfileSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (settings: Record<string, unknown>) => saveProfileSettings(settings),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile-settings"] }),
+  });
+}
+
+export function useOrgSettings() {
+  return useQuery({
+    queryKey: ["org-settings"],
+    queryFn: fetchOrgSettings,
+  });
+}
+
+export function useSaveOrgSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (settings: Record<string, unknown>) => saveOrgSettings(settings),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["org-settings"] }),
+  });
 }

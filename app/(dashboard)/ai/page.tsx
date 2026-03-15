@@ -5,7 +5,7 @@ import { DiagnosticsList } from "@/features/ai-diagnosis/DiagnosticsList";
 
 export default function AIDiagnosisPage() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-6 space-y-6">
+    <div className="mx-auto max-w-6xl px-6 py-8 space-y-6">
       <div className="rounded-lg bg-slate-50/80 dark:bg-slate-900/40 p-6 space-y-6">
         <div>
           <div className="flex items-center gap-2.5">

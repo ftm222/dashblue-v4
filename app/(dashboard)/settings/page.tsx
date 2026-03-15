@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Bell,
   Globe,
@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTheme } from "@/providers/ThemeProvider";
+import { useProfileSettings, useSaveProfileSettings } from "@/lib/queries";
 
 const NOTIFICATION_SETTINGS = [
   {
@@ -46,25 +47,39 @@ const NOTIFICATION_SETTINGS = [
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { data: savedSettings } = useProfileSettings();
+  const saveMut = useSaveProfileSettings();
+
   const [language, setLanguage] = useState("pt-BR");
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const [notifications, setNotifications] = useState<Record<string, boolean>>(
     Object.fromEntries(NOTIFICATION_SETTINGS.map((s) => [s.id, s.defaultValue]))
   );
 
+  useEffect(() => {
+    if (savedSettings) {
+      if (savedSettings.language) setLanguage(savedSettings.language as string);
+      if (savedSettings.notifications) {
+        setNotifications((prev) => ({ ...prev, ...(savedSettings.notifications as Record<string, boolean>) }));
+      }
+    }
+  }, [savedSettings]);
+
   function toggleNotification(id: string) {
     setNotifications((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   function handleSave() {
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }, 800);
+    saveMut.mutate(
+      { language, notifications },
+      {
+        onSuccess: () => {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 2000);
+        },
+      },
+    );
   }
 
   const themeOptions = [
@@ -185,8 +200,8 @@ export default function SettingsPage() {
           </p>
         )}
         {!saved && <span />}
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Salvando..." : "Salvar configurações"}
+        <Button onClick={handleSave} disabled={saveMut.isPending}>
+          {saveMut.isPending ? "Salvando..." : "Salvar configurações"}
         </Button>
       </div>
     </div>

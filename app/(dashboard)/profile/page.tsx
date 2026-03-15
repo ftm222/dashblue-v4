@@ -10,7 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUpdateProfile } from "@/lib/queries";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useUpdateProfile, useChangePassword } from "@/lib/queries";
 import { getCurrentProfile } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -21,6 +28,39 @@ export default function ProfilePage() {
   });
 
   const updateMut = useUpdateProfile();
+  const passwordMut = useChangePassword();
+
+  const [passwordDialog, setPasswordDialog] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  function handlePasswordSubmit() {
+    setPasswordError("");
+    if (newPassword.length < 8) {
+      setPasswordError("A senha deve ter no mínimo 8 caracteres.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("As senhas não coincidem.");
+      return;
+    }
+    passwordMut.mutate(newPassword, {
+      onSuccess: () => {
+        setPasswordSuccess(true);
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => {
+          setPasswordDialog(false);
+          setPasswordSuccess(false);
+        }, 1500);
+      },
+      onError: (err) => {
+        setPasswordError(err instanceof Error ? err.message : "Erro ao alterar senha.");
+      },
+    });
+  }
 
   const [form, setForm] = useState({
     name: "",
@@ -174,7 +214,7 @@ export default function ProfilePage() {
                 Atualize sua senha de acesso
               </p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setPasswordDialog(true)}>
               Alterar
             </Button>
           </div>
@@ -186,12 +226,63 @@ export default function ProfilePage() {
                 1 sessão ativa neste dispositivo
               </p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled>
               Gerenciar
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={passwordDialog} onOpenChange={setPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Alterar Senha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Nova senha</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 8 caracteres"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirmar senha</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repita a nova senha"
+              />
+            </div>
+            {passwordError && (
+              <p className="text-sm text-red-500">{passwordError}</p>
+            )}
+            {passwordSuccess && (
+              <p className="text-sm text-emerald-600 font-medium">Senha alterada com sucesso!</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPasswordDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handlePasswordSubmit} disabled={passwordMut.isPending}>
+              {passwordMut.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Alterando...
+                </>
+              ) : (
+                "Alterar Senha"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

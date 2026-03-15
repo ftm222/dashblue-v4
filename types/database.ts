@@ -9,6 +9,157 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      organizations: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          logo_url: string | null;
+          plan: "free" | "starter" | "pro" | "enterprise";
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          subscription_status: "trialing" | "active" | "past_due" | "canceled" | "unpaid";
+          trial_ends_at: string | null;
+          max_members: number;
+          max_integrations: number;
+          settings: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          logo_url?: string | null;
+          plan?: "free" | "starter" | "pro" | "enterprise";
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          subscription_status?: "trialing" | "active" | "past_due" | "canceled" | "unpaid";
+          trial_ends_at?: string | null;
+          max_members?: number;
+          max_integrations?: number;
+          settings?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          slug?: string;
+          logo_url?: string | null;
+          plan?: "free" | "starter" | "pro" | "enterprise";
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          subscription_status?: "trialing" | "active" | "past_due" | "canceled" | "unpaid";
+          trial_ends_at?: string | null;
+          max_members?: number;
+          max_integrations?: number;
+          settings?: Json;
+        };
+      };
+      org_members: {
+        Row: {
+          id: string;
+          organization_id: string;
+          user_id: string;
+          role: "owner" | "admin" | "manager" | "viewer";
+          invited_at: string;
+          accepted_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          user_id: string;
+          role?: "owner" | "admin" | "manager" | "viewer";
+          invited_at?: string;
+          accepted_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          role?: "owner" | "admin" | "manager" | "viewer";
+          accepted_at?: string | null;
+        };
+      };
+      plans: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          price_monthly: number;
+          price_yearly: number;
+          stripe_price_monthly_id: string | null;
+          stripe_price_yearly_id: string | null;
+          max_members: number;
+          max_integrations: number;
+          features: Json;
+          active: boolean;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          name: string;
+          description?: string | null;
+          price_monthly?: number;
+          price_yearly?: number;
+          stripe_price_monthly_id?: string | null;
+          stripe_price_yearly_id?: string | null;
+          max_members?: number;
+          max_integrations?: number;
+          features?: Json;
+          active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          price_monthly?: number;
+          price_yearly?: number;
+          stripe_price_monthly_id?: string | null;
+          stripe_price_yearly_id?: string | null;
+          max_members?: number;
+          max_integrations?: number;
+          features?: Json;
+          active?: boolean;
+          sort_order?: number;
+        };
+      };
+      invoices: {
+        Row: {
+          id: string;
+          organization_id: string;
+          stripe_invoice_id: string | null;
+          amount: number;
+          currency: string;
+          status: "draft" | "open" | "paid" | "void" | "uncollectible";
+          invoice_url: string | null;
+          period_start: string | null;
+          period_end: string | null;
+          paid_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          stripe_invoice_id?: string | null;
+          amount: number;
+          currency?: string;
+          status?: "draft" | "open" | "paid" | "void" | "uncollectible";
+          invoice_url?: string | null;
+          period_start?: string | null;
+          period_end?: string | null;
+          paid_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          stripe_invoice_id?: string | null;
+          amount?: number;
+          status?: "draft" | "open" | "paid" | "void" | "uncollectible";
+          invoice_url?: string | null;
+          paid_at?: string | null;
+        };
+      };
       profiles: {
         Row: {
           id: string;
@@ -16,7 +167,8 @@ export interface Database {
           email: string;
           phone: string | null;
           avatar_url: string | null;
-          role: "admin" | "viewer";
+          role: "owner" | "admin" | "manager" | "viewer";
+          organization_id: string | null;
           active: boolean;
           created_at: string;
           updated_at: string;
@@ -27,7 +179,8 @@ export interface Database {
           email: string;
           phone?: string | null;
           avatar_url?: string | null;
-          role?: "admin" | "viewer";
+          role?: "owner" | "admin" | "manager" | "viewer";
+          organization_id?: string | null;
           active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -38,7 +191,8 @@ export interface Database {
           email?: string;
           phone?: string | null;
           avatar_url?: string | null;
-          role?: "admin" | "viewer";
+          role?: "owner" | "admin" | "manager" | "viewer";
+          organization_id?: string | null;
           active?: boolean;
           updated_at?: string;
         };
@@ -47,15 +201,18 @@ export interface Database {
         Row: {
           id: string;
           name: string;
+          organization_id: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           name: string;
+          organization_id: string;
           created_at?: string;
         };
         Update: {
           name?: string;
+          organization_id?: string;
         };
       };
       people: {
@@ -65,6 +222,7 @@ export interface Database {
           avatar_url: string | null;
           role: "sdr" | "closer";
           squad_id: string | null;
+          organization_id: string;
           active: boolean;
           created_at: string;
           updated_at: string;
@@ -75,6 +233,7 @@ export interface Database {
           avatar_url?: string | null;
           role: "sdr" | "closer";
           squad_id?: string | null;
+          organization_id: string;
           active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -84,6 +243,7 @@ export interface Database {
           avatar_url?: string | null;
           role?: "sdr" | "closer";
           squad_id?: string | null;
+          organization_id?: string;
           active?: boolean;
         };
       };
@@ -95,6 +255,7 @@ export interface Database {
           status: "connected" | "syncing" | "error" | "disconnected";
           last_sync: string | null;
           config: Json;
+          organization_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -105,6 +266,7 @@ export interface Database {
           status?: "connected" | "syncing" | "error" | "disconnected";
           last_sync?: string | null;
           config?: Json;
+          organization_id: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -114,6 +276,7 @@ export interface Database {
           status?: "connected" | "syncing" | "error" | "disconnected";
           last_sync?: string | null;
           config?: Json;
+          organization_id?: string;
         };
       };
       funnel_mappings: {
@@ -124,6 +287,7 @@ export interface Database {
           crm_field: string | null;
           crm_value: string | null;
           sort_order: number;
+          organization_id: string;
         };
         Insert: {
           id?: string;
@@ -132,6 +296,7 @@ export interface Database {
           crm_field?: string | null;
           crm_value?: string | null;
           sort_order?: number;
+          organization_id: string;
         };
         Update: {
           step_key?: string;
@@ -139,6 +304,7 @@ export interface Database {
           crm_field?: string | null;
           crm_value?: string | null;
           sort_order?: number;
+          organization_id?: string;
         };
       };
       tags: {
@@ -146,17 +312,20 @@ export interface Database {
           id: string;
           original: string;
           alias: string;
+          organization_id: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           original: string;
           alias: string;
+          organization_id: string;
           created_at?: string;
         };
         Update: {
           original?: string;
           alias?: string;
+          organization_id?: string;
         };
       };
       goals: {
@@ -167,6 +336,7 @@ export interface Database {
           target: number;
           period_start: string;
           period_end: string;
+          organization_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -177,6 +347,7 @@ export interface Database {
           target: number;
           period_start: string;
           period_end: string;
+          organization_id: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -186,6 +357,7 @@ export interface Database {
           target?: number;
           period_start?: string;
           period_end?: string;
+          organization_id?: string;
         };
       };
       setup_checklist: {
@@ -195,6 +367,7 @@ export interface Database {
           label: string;
           completed: boolean;
           route: string;
+          organization_id: string;
         };
         Insert: {
           id?: string;
@@ -202,11 +375,13 @@ export interface Database {
           label: string;
           completed?: boolean;
           route: string;
+          organization_id: string;
         };
         Update: {
           label?: string;
           completed?: boolean;
           route?: string;
+          organization_id?: string;
         };
       };
       evidence: {
@@ -226,6 +401,7 @@ export interface Database {
           value: number;
           tags: string[];
           badges: string[];
+          organization_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -245,6 +421,7 @@ export interface Database {
           value?: number;
           tags?: string[];
           badges?: string[];
+          organization_id: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -263,6 +440,7 @@ export interface Database {
           value?: number;
           tags?: string[];
           badges?: string[];
+          organization_id?: string;
         };
       };
       contracts: {
@@ -277,6 +455,7 @@ export interface Database {
           status: "signed_paid" | "signed_unpaid" | "unsigned";
           signed_at: string | null;
           paid_at: string | null;
+          organization_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -291,6 +470,7 @@ export interface Database {
           status?: "signed_paid" | "signed_unpaid" | "unsigned";
           signed_at?: string | null;
           paid_at?: string | null;
+          organization_id: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -304,6 +484,7 @@ export interface Database {
           status?: "signed_paid" | "signed_unpaid" | "unsigned";
           signed_at?: string | null;
           paid_at?: string | null;
+          organization_id?: string;
         };
       };
       campaigns: {
@@ -324,6 +505,7 @@ export interface Database {
           revenue: number;
           period_start: string;
           period_end: string;
+          organization_id: string;
           synced_at: string;
           created_at: string;
         };
@@ -344,6 +526,7 @@ export interface Database {
           revenue?: number;
           period_start: string;
           period_end: string;
+          organization_id: string;
           synced_at?: string;
           created_at?: string;
         };
@@ -363,6 +546,7 @@ export interface Database {
           revenue?: number;
           period_start?: string;
           period_end?: string;
+          organization_id?: string;
           synced_at?: string;
         };
       };
@@ -375,6 +559,7 @@ export interface Database {
           answered: boolean;
           duration_seconds: number;
           called_at: string;
+          organization_id: string;
           created_at: string;
         };
         Insert: {
@@ -385,6 +570,7 @@ export interface Database {
           answered?: boolean;
           duration_seconds?: number;
           called_at: string;
+          organization_id: string;
           created_at?: string;
         };
         Update: {
@@ -394,6 +580,7 @@ export interface Database {
           answered?: boolean;
           duration_seconds?: number;
           called_at?: string;
+          organization_id?: string;
         };
       };
       alerts: {
@@ -405,6 +592,7 @@ export interface Database {
           dismissible: boolean;
           dismissed_by: string[];
           expires_at: string | null;
+          organization_id: string;
           created_at: string;
         };
         Insert: {
@@ -415,6 +603,7 @@ export interface Database {
           dismissible?: boolean;
           dismissed_by?: string[];
           expires_at?: string | null;
+          organization_id: string;
           created_at?: string;
         };
         Update: {
@@ -424,6 +613,7 @@ export interface Database {
           dismissible?: boolean;
           dismissed_by?: string[];
           expires_at?: string | null;
+          organization_id?: string;
         };
       };
       logs: {
@@ -434,6 +624,7 @@ export interface Database {
           entity_type: string | null;
           entity_id: string | null;
           details: Json | null;
+          organization_id: string;
           created_at: string;
         };
         Insert: {
@@ -443,6 +634,7 @@ export interface Database {
           entity_type?: string | null;
           entity_id?: string | null;
           details?: Json | null;
+          organization_id: string;
           created_at?: string;
         };
         Update: {
@@ -450,12 +642,14 @@ export interface Database {
           entity_type?: string | null;
           entity_id?: string | null;
           details?: Json | null;
+          organization_id?: string;
         };
       };
     };
     Views: {
       v_funnel_summary: {
         Row: {
+          organization_id: string;
           funnel_step: string;
           step_label: string;
           sort_order: number;
@@ -467,6 +661,7 @@ export interface Database {
       };
       v_person_metrics: {
         Row: {
+          organization_id: string;
           person_id: string;
           name: string;
           role: "sdr" | "closer";
@@ -487,6 +682,7 @@ export interface Database {
       };
       v_call_metrics: {
         Row: {
+          organization_id: string;
           person_id: string;
           person_name: string;
           person_role: "sdr" | "closer";
@@ -502,6 +698,7 @@ export interface Database {
       };
       v_squad_metrics: {
         Row: {
+          organization_id: string;
           squad_id: string;
           squad_name: string;
           revenue: number;
@@ -518,6 +715,7 @@ export interface Database {
       };
       v_financial_summary: {
         Row: {
+          organization_id: string;
           total_contracts: number;
           total_revenue: number;
           signed_contracts: number;
@@ -534,6 +732,7 @@ export interface Database {
       };
       v_campaign_kpis: {
         Row: {
+          organization_id: string;
           total_investment: number;
           total_leads: number;
           total_booked: number;

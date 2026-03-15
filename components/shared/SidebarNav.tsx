@@ -22,6 +22,7 @@ import {
   Table2,
   Tag,
   Target,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Funil", href: "/admin/funnel-mapping", icon: GitBranch },
   { label: "Tags", href: "/admin/tags-aliases", icon: Tag },
   { label: "Ticket", href: "/admin/ticket", icon: Receipt },
+  { label: "Equipe", href: "/admin/people", icon: UserPlus },
   { label: "Colaboradores", href: "/admin/collaborators", icon: Users },
   { label: "Metas", href: "/admin/goals", icon: Target },
   { label: "Metas Individuais", href: "/admin/individual-goals", icon: Crosshair },

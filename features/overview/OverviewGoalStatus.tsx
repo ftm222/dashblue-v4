@@ -130,7 +130,15 @@ export function OverviewGoalStatus() {
     );
   }
 
-  if (!revenueGoal) return null;
+  if (!revenueGoal) {
+    return (
+      <div className="rounded-xl border bg-card p-8 text-center">
+        <p className="text-sm font-medium text-muted-foreground">
+          Defina metas em Admin &gt; Metas para acompanhar o progresso
+        </p>
+      </div>
+    );
+  }
 
   const monthlyTarget = revenueGoal.target;
   const monthlyCurrent = revenueGoal.current;

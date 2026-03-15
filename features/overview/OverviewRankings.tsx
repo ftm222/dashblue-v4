@@ -67,6 +67,16 @@ export function OverviewRankings() {
     drillDown.openEvidence(id, { personId: id });
   };
 
+  if (!isLoading && sdrItems.length === 0 && closerItems.length === 0) {
+    return (
+      <div className="rounded-xl border bg-card p-8 text-center">
+        <p className="text-sm font-medium text-muted-foreground">
+          Cadastre SDRs e Closers para ver os rankings
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <div className="space-y-3">

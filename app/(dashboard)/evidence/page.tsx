@@ -7,7 +7,7 @@ import { PageSkeleton } from "@/components/shared/DrawerSkeleton";
 
 export default function EvidencePage() {
   return (
-    <div className="w-full px-6 py-6 space-y-4">
+    <div className="mx-auto max-w-6xl px-6 py-8 space-y-4">
       <div>
         <div className="flex items-center gap-2.5">
           <Table2 className="h-5 w-5 text-primary" />

@@ -6,6 +6,7 @@ import { usePeriodFilter } from "@/providers/PeriodFilterProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { CloserOverviewKPIs } from "@/features/closers/CloserOverviewKPIs";
 import { CloserPodium } from "@/features/closers/CloserPodium";
 import { CloserCharts } from "@/features/closers/CloserCharts";
@@ -34,6 +35,22 @@ function ClosersContent() {
           ))}
         </div>
         <Skeleton className="h-72 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (closers.length === 0) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">Performance Closers</h1>
+          <p className="text-sm text-muted-foreground/80">Análise detalhada da equipe de fechamento</p>
+        </div>
+        <EmptyState
+          title="Nenhum Closer cadastrado"
+          description="Cadastre Closers em Admin > Equipe para visualizar métricas de fechamento."
+          action={{ label: "Cadastrar Closers", onClick: () => window.location.href = "/admin/people" }}
+        />
       </div>
     );
   }

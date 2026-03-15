@@ -33,3 +33,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# sentry
+.sentryclirc
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+
+# vitest
+/html/

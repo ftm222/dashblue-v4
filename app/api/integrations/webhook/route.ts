@@ -3,6 +3,7 @@ import { adminClient } from "@/lib/supabase-admin";
 import { syncIntegration } from "@/lib/crm/sync";
 import { isCRMConfig } from "@/lib/crm/types";
 import type { CRMConfig } from "@/lib/crm/types";
+import { rateLimit, getClientIP } from "@/lib/rate-limit";
 import crypto from "crypto";
 
 function verifyHMAC(payload: string, signature: string, secret: string): boolean {
@@ -23,6 +24,10 @@ function verifyHMAC(payload: string, signature: string, secret: string): boolean
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIP(request);
+    const rl = await rateLimit(ip, "webhook");
+    if (!rl.success) return rl.response!;
+
     const { searchParams } = new URL(request.url);
     const integrationId = searchParams.get("id");
 

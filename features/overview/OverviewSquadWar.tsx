@@ -203,7 +203,15 @@ export function OverviewSquadWar() {
     );
   }
 
-  if (squads.length === 0) return null;
+  if (squads.length === 0) {
+    return (
+      <div className="rounded-xl border bg-card p-8 text-center">
+        <p className="text-sm font-medium text-muted-foreground">
+          Cadastre SDRs e Closers para ver a Guerra de Squads
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-0">
