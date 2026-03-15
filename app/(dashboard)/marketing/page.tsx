@@ -1,19 +1,35 @@
 "use client";
 
+import { useState } from "react";
+import { Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { MarketingKPIs } from "@/features/marketing/MarketingKPIs";
 import { AttributionAlerts } from "@/features/marketing/AttributionAlerts";
 import { CampaignTable } from "@/features/marketing/CampaignTable";
 import { TrafficGoals } from "@/features/marketing/TrafficGoals";
 import { ChannelBreakdown } from "@/features/marketing/ChannelBreakdown";
 import { DailyPerformance } from "@/features/marketing/DailyPerformance";
+import { CampaignFormDialog } from "@/features/marketing/CampaignFormDialog";
 import { useTVMode } from "@/providers/TVModeProvider";
 
 export default function MarketingPage() {
   const { enabled: tvMode } = useTVMode();
+  const [campaignDialogOpen, setCampaignDialogOpen] = useState(false);
 
   return (
-    <div className="w-full space-y-6 px-6 py-6">
+    <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">Tráfego & Marketing</h1>
+          <p className="text-sm text-muted-foreground/80">Análise de campanhas e ROI</p>
+        </div>
+        <Button size="sm" className="gap-1.5" onClick={() => setCampaignDialogOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Campanha
+        </Button>
+      </div>
+
       <MarketingKPIs />
       <AttributionAlerts />
 
@@ -38,6 +54,8 @@ export default function MarketingPage() {
           <CampaignTable view="full" />
         </TabsContent>
       </Tabs>
+
+      <CampaignFormDialog open={campaignDialogOpen} onOpenChange={setCampaignDialogOpen} />
     </div>
   );
 }

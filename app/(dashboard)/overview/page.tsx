@@ -1,5 +1,6 @@
 "use client";
 
+import { SetupChecklist } from "@/features/admin/SetupChecklist";
 import { OverviewGoalStatus } from "@/features/overview/OverviewGoalStatus";
 import { OverviewKPIGrid } from "@/features/overview/OverviewKPIGrid";
 import { OverviewVerticalFunnel } from "@/features/overview/OverviewVerticalFunnel";
@@ -13,6 +14,7 @@ export default function OverviewPage() {
         <h1 className="text-xl font-semibold tracking-tight">Visão Geral</h1>
         <p className="text-sm text-muted-foreground/80">Resumo executivo do período</p>
       </div>
+      <SetupChecklist />
       <OverviewGoalStatus />
       <OverviewKPIGrid />
       <OverviewVerticalFunnel />

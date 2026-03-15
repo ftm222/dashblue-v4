@@ -1,73 +1,130 @@
-# Welcome to your Lovable project
+# Dashblue v4 — B2B Analytics Control Tower
 
-## Project info
+Dashboard SaaS para analytics de vendas B2B com integração a CRMs, gestão de funil, squads e financeiro.
 
-**URL**: https://lovable.dev/projects/61dd678e-d716-49c9-866c-b7e08011ed75
+## Tech Stack
 
-## How can I edit this code?
+| Camada | Tecnologia |
+|--------|-----------|
+| **Framework** | Next.js 15, React 19, TypeScript |
+| **UI** | shadcn/ui, Radix UI, Tailwind CSS |
+| **Charts** | Recharts |
+| **Database** | Supabase (PostgreSQL + Auth + RLS) |
+| **State** | TanStack React Query + Context |
+| **Billing** | Stripe |
+| **Email** | Resend |
+| **Monitoring** | Sentry |
+| **Analytics** | PostHog |
+| **Rate Limiting** | Upstash Redis |
+| **Validation** | Zod |
+| **Testes** | Vitest + Playwright |
+| **CI/CD** | GitHub Actions |
 
-There are several ways of editing your application.
+## Arquitetura
 
-**Use Lovable**
+```
+├── app/                    # Next.js App Router
+│   ├── (auth)/             # Rotas públicas de autenticação
+│   ├── (dashboard)/        # Rotas protegidas do dashboard
+│   └── api/                # API Routes
+│       ├── auth/           # Register, Invite
+│       ├── billing/        # Checkout, Portal, Webhook (Stripe)
+│       ├── health/         # Health check endpoint
+│       └── integrations/   # CRM connect, callback, sync, webhook
+├── components/
+│   ├── ui/                 # Componentes base (shadcn)
+│   └── shared/             # Componentes de negócio
+├── features/               # Módulos por domínio (overview, sdrs, closers, etc.)
+├── lib/                    # Utilitários e serviços
+│   ├── crm/                # Adapters CRM (Kommo, HubSpot, Pipedrive)
+│   ├── analytics.ts        # PostHog analytics
+│   ├── email.ts            # Resend email service
+│   ├── jobs.ts             # Background job runner
+│   ├── rate-limit.ts       # Upstash rate limiting
+│   ├── stripe.ts           # Stripe billing
+│   └── validations.ts      # Zod schemas
+├── providers/              # Context providers
+├── supabase/
+│   └── migrations/         # SQL migrations versionadas
+├── tests/                  # Testes unitários e E2E
+└── types/                  # TypeScript type definitions
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/61dd678e-d716-49c9-866c-b7e08011ed75) and start prompting.
+## Setup Local
 
-Changes made via Lovable will be committed automatically to this repo.
+### Pré-requisitos
 
-**Use your preferred IDE**
+- Node.js 20+
+- npm
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Instalação
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+git clone https://github.com/ftm222/dashblue-v4.git
+cd dashblue-v4
+npm install
+cp .env.example .env.local
+```
 
-Follow these steps:
+### Variáveis de Ambiente
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Edite `.env.local` com as credenciais do Supabase (obrigatório) e os demais serviços conforme necessário. Veja `.env.example` para a lista completa.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Banco de Dados
 
-# Step 3: Install the necessary dependencies.
-npm i
+Execute as migrations no SQL Editor do Supabase na ordem:
+1. `supabase/migrations/001_initial_schema.sql`
+2. `supabase/migrations/002_multi_tenancy_rbac_billing.sql`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Desenvolvimento
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Testes
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run test          # Testes unitários
+npm run test:watch    # Watch mode
+npm run test:e2e      # Testes E2E (precisa do app rodando)
+```
 
-**Use GitHub Codespaces**
+### Build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm run build
+npm start
+```
 
-## What technologies are used for this project?
+## Multi-tenancy
 
-This project is built with:
+Cada organização (tenant) possui seus próprios dados isolados via `organization_id` em todas as tabelas + RLS no Supabase.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Billing
 
-## How can I deploy this project?
+Integração com Stripe para planos Free, Starter, Pro e Enterprise. Webhooks processam eventos de assinatura automaticamente.
 
-Simply open [Lovable](https://lovable.dev/projects/61dd678e-d716-49c9-866c-b7e08011ed75) and click on Share -> Publish.
+## Segurança
 
-## Can I connect a custom domain to my Lovable project?
+- Autenticação via Supabase Auth
+- RBAC: Owner > Admin > Manager > Viewer
+- RLS em todas as tabelas com isolamento por tenant
+- Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- Rate limiting em rotas sensíveis
+- Validação de input com Zod
+- HMAC verification em webhooks
 
-Yes, you can!
+## CI/CD
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Pipeline automático no GitHub Actions:
+1. **Lint** — ESLint
+2. **Type Check** — TypeScript
+3. **Test** — Vitest
+4. **Build** — Next.js
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Monitoramento
+
+- **Sentry** — Error tracking e performance
+- **PostHog** — Analytics de uso e feature flags
+- **Health Check** — `GET /api/health`

@@ -55,7 +55,7 @@ function SectionSkeleton({ cols = 6, h = 32 }: { cols?: number; h?: number }) {
 
 export default function FinanceiroPage() {
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8 px-6 py-8">
       <header className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/40">
           <DollarSign className="h-5 w-5 text-emerald-600" />

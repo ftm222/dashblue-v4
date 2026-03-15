@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     const { data: checkItem } = await adminClient
       .from("setup_checklist")
       .select("id")
-      .eq("key", "connect_crm")
+      .eq("key", "connect-crm")
       .maybeSingle();
 
     if (checkItem) {

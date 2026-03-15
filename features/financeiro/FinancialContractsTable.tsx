@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -14,7 +15,8 @@ import {
 } from "@/components/ui/table";
 import { useFinancialData } from "@/lib/queries";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, FileText, ArrowUpDown } from "lucide-react";
+import { Search, FileText, ArrowUpDown, Plus } from "lucide-react";
+import { ContractFormDialog } from "./ContractFormDialog";
 import type { FinancialContract } from "@/types";
 
 function fmtCurrency(v: number) {
@@ -50,6 +52,7 @@ export function FinancialContractsTable() {
   const [statusFilter, setStatusFilter] = useState<"all" | FinancialContract["status"]>("all");
   const [sortKey, setSortKey] = useState<SortKey>("value");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -127,9 +130,15 @@ export function FinancialContractsTable() {
             <FileText className="h-4.5 w-4.5 text-blue-400" />
             Contratos Detalhados
           </CardTitle>
-          <span className="text-xs text-muted-foreground">
-            {filtered.length} de {data.contracts.length} contratos
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {filtered.length} de {data.contracts.length} contratos
+            </span>
+            <Button size="sm" className="gap-1.5 h-7 text-xs" onClick={() => setDialogOpen(true)}>
+              <Plus className="h-3.5 w-3.5" />
+              Adicionar
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -246,6 +255,8 @@ export function FinancialContractsTable() {
           </Table>
         </div>
       </CardContent>
+
+      <ContractFormDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </Card>
   );
 }

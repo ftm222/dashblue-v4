@@ -11,7 +11,7 @@ interface AdminPageWrapperProps {
 
 export function AdminPageWrapper({ children, title, description }: AdminPageWrapperProps) {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8 space-y-8">
+    <div className="mx-auto max-w-6xl px-6 py-8 space-y-8">
       <SetupChecklist />
 
       <div className="space-y-1">

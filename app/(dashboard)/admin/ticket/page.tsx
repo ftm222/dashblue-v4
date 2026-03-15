@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
-import { useLocalStorage } from "@/lib/use-local-storage";
+import { useOrgSettings, useSaveOrgSettings } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -22,8 +23,29 @@ const CRM_FIELDS = [
 ];
 
 export default function TicketPage() {
-  const [field, setField] = useLocalStorage("dashblue:ticket-field", "sale_value");
+  const { data: orgSettings } = useOrgSettings();
+  const saveMut = useSaveOrgSettings();
+
+  const [field, setField] = useState("sale_value");
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (orgSettings?.ticket_field) {
+      setField(orgSettings.ticket_field as string);
+    }
+  }, [orgSettings]);
+
+  function handleSave() {
+    saveMut.mutate(
+      { ...orgSettings, ticket_field: field },
+      {
+        onSuccess: () => {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 2000);
+        },
+      },
+    );
+  }
 
   return (
     <AdminPageWrapper title="Campo de Ticket" description="Configure qual campo do CRM representa o valor de ticket">
@@ -49,8 +71,15 @@ export default function TicketPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button size="sm" onClick={() => setSaved(true)}>
-              Salvar
+            <Button size="sm" onClick={handleSave} disabled={saveMut.isPending}>
+              {saveMut.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar"
+              )}
             </Button>
             {saved && (
               <span className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">

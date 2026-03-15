@@ -6,6 +6,7 @@ import { usePeriodFilter } from "@/providers/PeriodFilterProvider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { SDROverviewKPIs } from "@/features/sdrs/SDROverviewKPIs";
 import { SDRPodium } from "@/features/sdrs/SDRPodium";
 import { SDRComparisonCards } from "@/features/sdrs/SDRComparisonCards";
@@ -32,6 +33,22 @@ function SDRsContent() {
           ))}
         </div>
         <Skeleton className="h-72 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (sdrs.length === 0) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">Performance SDR</h1>
+          <p className="text-sm text-muted-foreground/80">Análise detalhada da equipe de prospecção</p>
+        </div>
+        <EmptyState
+          title="Nenhum SDR cadastrado"
+          description="Cadastre SDRs em Admin > Equipe para visualizar métricas de prospecção."
+          action={{ label: "Cadastrar SDRs", onClick: () => window.location.href = "/admin/people" }}
+        />
       </div>
     );
   }

@@ -52,6 +52,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
     throw new Error("Integração não configurada (sem tokens)");
   }
   const config: CRMConfig = integration.config;
+  const orgId: string = integration.organization_id;
 
   await adminClient
     .from("integrations")
@@ -67,9 +68,31 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
     const { data: mappings } = await adminClient
       .from("funnel_mappings")
       .select("step_key, crm_value")
+      .eq("organization_id", orgId)
       .order("sort_order");
 
     const funnelMappings = mappings ?? [];
+
+    const { data: orgPeople } = await adminClient
+      .from("people")
+      .select("id, name, role")
+      .eq("organization_id", orgId)
+      .eq("active", true);
+
+    const peopleList = orgPeople ?? [];
+
+    function resolvePersonId(
+      responsibleName: string | undefined,
+    ): { sdr_id: string | null; closer_id: string | null } {
+      if (!responsibleName) return { sdr_id: null, closer_id: null };
+      const normalized = responsibleName.toLowerCase().trim();
+      const match = peopleList.find((p) => p.name.toLowerCase().trim() === normalized);
+      if (!match) return { sdr_id: null, closer_id: null };
+      return match.role === "sdr"
+        ? { sdr_id: match.id, closer_id: null }
+        : { sdr_id: null, closer_id: match.id };
+    }
+
     let created = 0;
     let updated = 0;
     let errors = 0;
@@ -83,6 +106,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
       const { data: existingRows } = await adminClient
         .from("evidence")
         .select("id, crm_lead_id")
+        .eq("organization_id", orgId)
         .in("crm_lead_id", externalIds);
 
       const existingMap = new Map(
@@ -94,7 +118,9 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
 
       for (const contact of batch) {
         const funnelStep = mapContactToFunnelStep(contact.pipeline_stage, funnelMappings);
+        const personIds = resolvePersonId(contact.responsible_name);
         const record = {
+          organization_id: orgId,
           contact_name: contact.name,
           email: contact.email || null,
           phone: contact.phone || null,
@@ -106,6 +132,8 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
           utm_medium: contact.utm_medium || null,
           utm_campaign: contact.utm_campaign || null,
           tags: contact.tags,
+          sdr_id: personIds.sdr_id,
+          closer_id: personIds.closer_id,
           updated_at: new Date().toISOString(),
         };
 
