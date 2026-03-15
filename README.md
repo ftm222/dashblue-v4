@@ -75,6 +75,8 @@ Edite `.env.local` com as credenciais do Supabase (obrigatório) e os demais ser
 Execute as migrations no SQL Editor do Supabase na ordem:
 1. `supabase/migrations/001_initial_schema.sql`
 2. `supabase/migrations/002_multi_tenancy_rbac_billing.sql`
+3. `supabase/migrations/003_fix_modeling.sql`
+4. `supabase/migrations/004_settings_columns.sql`
 
 ### Desenvolvimento
 
