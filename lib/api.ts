@@ -1088,6 +1088,16 @@ export async function fetchSquads() {
 // CRUD — People (SDRs / Closers)
 // ---------------------------------------------------------------------------
 
+async function getCurrentOrgId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const orgId = user.user_metadata?.organization_id as string | undefined;
+  if (orgId) return orgId;
+  const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+  if (!profile?.organization_id) throw new Error("Usuário sem organização vinculada");
+  return profile.organization_id;
+}
+
 export async function fetchAllPeople(role?: "sdr" | "closer") {
   let query = supabase.from("people").select("*, squads(name)").order("name");
   if (role) query = query.eq("role", role);
@@ -1102,9 +1112,10 @@ export async function createPerson(fields: {
   squad_id?: string | null;
   avatar_url?: string | null;
 }) {
+  const organization_id = await getCurrentOrgId();
   const { data, error } = await supabase
     .from("people")
-    .insert({ ...fields, active: true })
+    .insert({ ...fields, active: true, organization_id })
     .select("*, squads(name)")
     .single();
   if (error) throw error;
@@ -1145,9 +1156,10 @@ export async function createContract(fields: {
   signed_at?: string | null;
   paid_at?: string | null;
 }) {
+  const organization_id = await getCurrentOrgId();
   const { data, error } = await supabase
     .from("contracts")
-    .insert(fields)
+    .insert({ ...fields, organization_id })
     .select("*")
     .single();
   if (error) throw error;
@@ -1189,10 +1201,12 @@ export async function createCampaign(fields: {
   period_start: string;
   period_end: string;
 }) {
+  const organization_id = await getCurrentOrgId();
   const { data, error } = await supabase
     .from("campaigns")
     .insert({
       ...fields,
+      organization_id,
       source: fields.source || "",
       medium: fields.medium || "",
       investment: fields.investment || 0,
