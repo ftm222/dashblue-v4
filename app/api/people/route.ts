@@ -1,30 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { adminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-async function getAuthUser(request: Request) {
-  const token = request.headers.get("authorization")?.replace("Bearer ", "");
-  if (!token) throw new ApiError("UNAUTHORIZED", "Token ausente.", 401);
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { persistSession: false },
-  });
-  const { data } = await supabase.auth.getUser(token);
-  if (!data?.user) throw new ApiError("UNAUTHORIZED", "Token inválido.", 401);
-
-  const orgId = data.user.user_metadata?.organization_id as string | undefined;
-  if (!orgId) throw new ApiError("FORBIDDEN", "Usuário sem organização.", 403);
-
-  return { user: data.user, orgId };
-}
+import { getAuthUserWithOrg } from "@/lib/api-auth";
 
 export async function GET(request: Request) {
   try {
-    const { orgId } = await getAuthUser(request);
+    const { orgId } = await getAuthUserWithOrg(request);
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role");
 
@@ -49,7 +30,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { orgId } = await getAuthUser(request);
+    const { orgId } = await getAuthUserWithOrg(request);
     const body = await request.json();
 
     const { name, role, squad_id, avatar_url } = body;

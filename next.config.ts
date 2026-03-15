@@ -56,11 +56,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-});
+const sentryConfigured =
+  process.env.NEXT_PUBLIC_SENTRY_DSN &&
+  process.env.SENTRY_ORG &&
+  process.env.SENTRY_PROJECT;
+
+export default sentryConfigured
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      hideSourceMaps: true,
+      disableLogger: true,
+    })
+  : nextConfig;

@@ -4,13 +4,13 @@ import type { Database } from "@/types/database";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseConfigured = Boolean(supabaseUrl?.trim() && supabaseAnonKey?.trim());
 
 let _client: SupabaseClient<Database> | null = null;
 
 export function getSupabaseClient(): SupabaseClient<Database> {
   if (_client) return _client;
-  if (!isSupabaseConfigured) {
+  if (!supabaseUrl?.trim() || !supabaseAnonKey?.trim()) {
     throw new Error(
       "Supabase não configurado. Defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local",
     );
@@ -26,7 +26,7 @@ export function getSupabaseClient(): SupabaseClient<Database> {
  */
 export const supabase = new Proxy({} as SupabaseClient<Database>, {
   get(_target, prop: string) {
-    if (!isSupabaseConfigured) {
+    if (!supabaseUrl?.trim() || !supabaseAnonKey?.trim()) {
       return getStubProperty(prop);
     }
     const client = getSupabaseClient();

@@ -4,6 +4,7 @@ export interface CRMTokens {
   access_token: string;
   refresh_token: string;
   expires_at: number;
+  company_domain?: string; // Pipedrive: extraído de api_domain no OAuth
 }
 
 export interface CRMConfig {
@@ -51,7 +52,7 @@ export interface CRMAdapter {
   getAuthUrl(state: string): string;
   exchangeCode(code: string): Promise<CRMTokens>;
   refreshTokens(tokens: CRMTokens): Promise<CRMTokens>;
-  fetchContacts(tokens: CRMTokens, since?: string): Promise<CRMContact[]>;
+  fetchContacts(tokens: CRMTokens, since?: string, config?: CRMConfig): Promise<CRMContact[]>;
   fetchPipelineStages(tokens: CRMTokens): Promise<{ id: string; name: string; order: number }[]>;
   buildContactUrl(externalId: string, config: CRMConfig): string;
   testConnection(tokens: CRMTokens): Promise<boolean>;
