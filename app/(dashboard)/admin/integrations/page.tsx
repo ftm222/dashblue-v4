@@ -15,8 +15,9 @@ import {
   Key,
   Plus,
   HelpCircle,
+  Trash2,
 } from "lucide-react";
-import { useIntegrations, useUpdateIntegrationStatus, useCreateIntegration } from "@/lib/queries";
+import { useIntegrations, useUpdateIntegrationStatus, useResetIntegrationSync, useCreateIntegration, useDeleteIntegration } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Integration } from "@/types";
@@ -46,7 +48,7 @@ type CRMProvider = "kommo" | "hubspot" | "pipedrive" | "generic" | "asaas";
 
 type TokenDialogState = {
   integration: Integration;
-  provider: CRMProvider;
+  provider: CRMProvider | "meta";
 } | null;
 
 const STATUS_CONFIG = {
@@ -62,6 +64,8 @@ const PROVIDER_MAP: Record<string, { provider: string; logo: string }> = {
   "HubSpot": { provider: "hubspot", logo: "H" },
   "Pipedrive": { provider: "pipedrive", logo: "P" },
   "Asaas": { provider: "asaas", logo: "A" },
+  "Meta Ads": { provider: "meta", logo: "M" },
+  "Meta": { provider: "meta", logo: "M" },
 };
 
 const PROVIDER_COLORS: Record<string, string> = {
@@ -69,6 +73,7 @@ const PROVIDER_COLORS: Record<string, string> = {
   hubspot: "bg-orange-500",
   pipedrive: "bg-green-600",
   asaas: "bg-emerald-600",
+  meta: "bg-indigo-600",
   generic: "bg-slate-600",
   default: "bg-slate-600",
 };
@@ -80,6 +85,7 @@ function getProvider(name: string) {
     }
   }
   if (name.toLowerCase().includes("asaas")) return { provider: "asaas", logo: "A" };
+  if (name.toLowerCase().includes("meta") || name.toLowerCase().includes("facebook")) return { provider: "meta", logo: "M" };
   return null;
 }
 
@@ -91,10 +97,16 @@ const CRM_OPTIONS: { name: string; provider: CRMProvider }[] = [
   { name: "Outro CRM", provider: "generic" },
 ];
 
+const ADS_OPTIONS: { name: string; type: "ads"; provider: "meta" }[] = [
+  { name: "Meta Ads", type: "ads", provider: "meta" },
+];
+
 export default function IntegrationsPage() {
   const { data, isLoading, isError, refetch } = useIntegrations();
   const updateMut = useUpdateIntegrationStatus();
+  const resetSyncMut = useResetIntegrationSync();
   const createMut = useCreateIntegration();
+  const deleteMut = useDeleteIntegration();
   const searchParams = useSearchParams();
 
   const [connecting, setConnecting] = useState<string | null>(null);
@@ -102,6 +114,7 @@ export default function IntegrationsPage() {
   const [syncResult, setSyncResult] = useState<{ id: string; message: string } | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [disconnectDialog, setDisconnectDialog] = useState<Integration | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<Integration | null>(null);
   const [webhookDialog, setWebhookDialog] = useState<Integration | null>(null);
   const [tokenDialog, setTokenDialog] = useState<TokenDialogState>(null);
   const [tokenInput, setTokenInput] = useState("");
@@ -143,9 +156,10 @@ export default function IntegrationsPage() {
 
     setConnecting(integration.id);
     try {
+      const headers = await getAuthHeaders();
       const res = await fetch("/api/integrations/connect", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ provider: providerInfo.provider, integrationId: integration.id }),
       });
       const body = await res.json();
@@ -158,6 +172,51 @@ export default function IntegrationsPage() {
     } catch {
       setToast({ type: "error", message: "Erro de conexão. Tente novamente." });
       setConnecting(null);
+    }
+  }
+
+  async function handleConnectMeta(integration: Integration) {
+    setConnecting(integration.id);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch("/api/integrations/meta/connect", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ integrationId: integration.id }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setToast({ type: "error", message: body.message || body.error || "Erro ao iniciar conexão com Meta." });
+        setConnecting(null);
+        return;
+      }
+      window.location.href = body.authUrl;
+    } catch {
+      setToast({ type: "error", message: "Erro de conexão. Tente novamente." });
+      setConnecting(null);
+    }
+  }
+
+  async function handleAddMetaAds() {
+    const existing = data?.find((i) => i.name.toLowerCase().includes("meta") && i.type === "ads");
+    if (existing) {
+      if (existing.status !== "connected") {
+        openTokenDialog(existing, "meta");
+      } else {
+        setToast({ type: "success", message: "Meta Ads já está conectado." });
+      }
+      return;
+    }
+    try {
+      const created = await createMut.mutateAsync({ name: "Meta Ads", type: "ads" });
+      refetch();
+      openTokenDialog(
+        { id: created.id, name: created.name, type: created.type, status: created.status, lastSync: undefined },
+        "meta",
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao adicionar Meta Ads.";
+      setToast({ type: "error", message: msg });
     }
   }
 
@@ -178,6 +237,24 @@ export default function IntegrationsPage() {
     );
   }
 
+  function handleDelete(integration: Integration) {
+    setDeleteDialog(integration);
+  }
+
+  function confirmDelete() {
+    if (!deleteDialog) return;
+    deleteMut.mutate(deleteDialog.id, {
+      onSuccess: () => {
+        const name = deleteDialog.name;
+        setDeleteDialog(null);
+        setToast({ type: "success", message: `${name} excluído com sucesso.` });
+      },
+      onError: (err) => {
+        setToast({ type: "error", message: err instanceof Error ? err.message : "Erro ao excluir integração." });
+      },
+    });
+  }
+
   async function handleSync(integration: Integration) {
     setSyncing(integration.id);
     setSyncResult(null);
@@ -188,16 +265,18 @@ export default function IntegrationsPage() {
         headers,
         body: JSON.stringify({ integrationId: integration.id }),
       });
-      const body = await res.json();
+      const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setToast({ type: "error", message: body.error || "Erro na sincronização." });
+        setToast({ type: "error", message: (body as { message?: string }).message || (body as { error?: string }).error || "Erro na sincronização." });
+        refetch();
       } else {
         setSyncResult({ id: integration.id, message: body.result.message });
         setToast({ type: "success", message: `Sincronização concluída: ${body.result.message}` });
         refetch();
       }
-    } catch {
-      setToast({ type: "error", message: "Erro de conexão ao sincronizar." });
+    } catch (err) {
+      setToast({ type: "error", message: err instanceof Error ? err.message : "Erro de conexão ao sincronizar." });
+      refetch();
     } finally {
       setSyncing(null);
     }
@@ -214,17 +293,17 @@ export default function IntegrationsPage() {
     setWebhookDialog(null);
   }
 
-  function openTokenDialog(integration: Integration, provider?: CRMProvider) {
+  function openTokenDialog(integration: Integration, provider?: CRMProvider | "meta") {
     const providerInfo = getProvider(integration.name);
-    const p = (provider ?? providerInfo?.provider ?? "generic") as CRMProvider;
-    const supported = ["kommo", "hubspot", "pipedrive", "asaas", "generic"];
-    if (supported.includes(p) || providerInfo || integration.name.toLowerCase().match(/kommo|hubspot|pipedrive|asaas/)) {
+    const p = (provider ?? providerInfo?.provider ?? "generic") as CRMProvider | "meta";
+    const supported = ["kommo", "hubspot", "pipedrive", "asaas", "generic", "meta"];
+    if (supported.includes(p) || providerInfo || integration.name.toLowerCase().match(/kommo|hubspot|pipedrive|asaas|meta/)) {
       setTokenDialog({ integration, provider: p });
       setTokenInput("");
       setCompanyDomainInput("");
       setApiUrlInput("");
     } else {
-      setToast({ type: "error", message: "Selecione um CRM suportado." });
+      setToast({ type: "error", message: "Selecione uma integração suportada." });
     }
   }
 
@@ -263,6 +342,27 @@ export default function IntegrationsPage() {
     setConnecting(tokenDialog.integration.id);
     try {
       const headers = await getAuthHeaders();
+
+      if (tokenDialog.provider === "meta") {
+        const res = await fetch("/api/integrations/meta/manual-connect", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            integrationId: tokenDialog.integration.id,
+            access_token: accessToken.trim(),
+          }),
+        });
+        const resData = await res.json();
+        if (!res.ok) {
+          setToast({ type: "error", message: resData.message || resData.error || "Erro ao conectar Meta." });
+        } else {
+          setTokenDialog(null);
+          setToast({ type: "success", message: "Meta Ads conectado com sucesso!" });
+          refetch();
+        }
+        return;
+      }
+
       const body: Record<string, unknown> = {
         integrationId: tokenDialog.integration.id,
         provider: tokenDialog.provider,
@@ -319,11 +419,11 @@ export default function IntegrationsPage() {
           <div className="flex gap-3">
             <HelpCircle className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
             <div>
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100">Como conectar seu CRM</h3>
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100">Como conectar suas integrações</h3>
               <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-blue-800 dark:text-blue-200">
-                <li>Clique em <strong>&quot;Adicionar CRM&quot;</strong> e escolha seu sistema (Kommo, HubSpot, Pipedrive, Asaas ou Outro).</li>
-                <li>Escolha <strong>OAuth</strong> (login automático) ou <strong>Token/API Key</strong> (chave manual).</li>
-                <li>Para Token: gere a chave no painel do seu CRM e cole aqui. Em Pipedrive, informe o domínio se necessário.</li>
+                <li>Clique em <strong>&quot;Adicionar CRM&quot;</strong> e escolha o sistema (Kommo, HubSpot, Pipedrive, Asaas, Meta Ads ou Outro).</li>
+                <li>Escolha <strong>OAuth</strong> (login automático) ou <strong>Token/API Key</strong> (chave manual — recomendado para Meta Ads).</li>
+                <li>Para Token: gere a chave no painel do sistema e cole aqui. Meta Ads: use o Graph API Explorer para gerar o token.</li>
                 <li>Para Asaas e outros: informe a URL da API se for diferente do padrão.</li>
               </ol>
             </div>
@@ -366,6 +466,12 @@ export default function IntegrationsPage() {
                     </DropdownMenuItem>
                   ),
                 )}
+                <DropdownMenuSeparator />
+                {ADS_OPTIONS.map((opt) => (
+                  <DropdownMenuItem key={opt.provider} onClick={() => handleAddMetaAds()}>
+                    {opt.name}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
             <p className="text-xs text-muted-foreground">
@@ -400,6 +506,7 @@ export default function IntegrationsPage() {
                 const providerInfo = getProvider(integration.name);
                 const providerColor = providerInfo ? (PROVIDER_COLORS[providerInfo.provider] ?? PROVIDER_COLORS.default) : PROVIDER_COLORS.default;
                 const isCRM = integration.type === "crm";
+                const isMetaAds = integration.type === "ads" && providerInfo?.provider === "meta";
                 const supportsToken = isCRM && (providerInfo || ["kommo", "hubspot", "pipedrive", "asaas", "generic"].some((p) => integration.name.toLowerCase().includes(p)));
 
                 return (
@@ -436,11 +543,34 @@ export default function IntegrationsPage() {
                         <div className="flex flex-col gap-2">
                           {isConnected ? (
                             <>
+                              {integration.status === "syncing" && (
+                                <p className="text-xs text-amber-600 dark:text-amber-500">
+                                  Se a sincronização travou, use o botão abaixo para resetar.
+                                </p>
+                              )}
                               <div className="flex gap-2">
                                 <Button variant="default" size="sm" className="flex-1 gap-1.5" disabled={isSyncing} onClick={() => handleSync(integration)}>
                                   <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
                                   {isSyncing ? "Sincronizando..." : "Sincronizar"}
                                 </Button>
+                              </div>
+                              {integration.status === "syncing" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/20"
+                                  disabled={resetSyncMut.isPending}
+                                  onClick={() =>
+                                    resetSyncMut.mutate(integration.id, {
+                                      onSuccess: () => setToast({ type: "success", message: "Status resetado. Tente sincronizar novamente." }),
+                                      onError: (err) => setToast({ type: "error", message: err instanceof Error ? err.message : "Erro ao resetar." }),
+                                    })
+                                  }
+                                >
+                                  {resetSyncMut.isPending ? "Resetando…" : "Resetar se travado"}
+                                </Button>
+                              )}
+                              <div className="flex gap-2">
                                 {isCRM && (
                                   <Button variant="outline" size="sm" onClick={() => setWebhookDialog(integration)} title="Configurar Webhook">
                                     <ExternalLink className="h-3.5 w-3.5" />
@@ -451,25 +581,49 @@ export default function IntegrationsPage() {
                                 <Unlink className="h-3.5 w-3.5" />
                                 Desconectar
                               </Button>
+                              <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/20" onClick={() => setDeleteDialog(integration)}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Excluir
+                              </Button>
                             </>
-                          ) : supportsToken ? (
+                          ) : isMetaAds || supportsToken ? (
                             <div className="flex flex-col gap-2">
-                              {providerInfo && ["kommo", "hubspot", "pipedrive"].includes(providerInfo.provider) && (
+                              {(providerInfo && ["kommo", "hubspot", "pipedrive"].includes(providerInfo.provider) && (
                                 <Button variant="default" size="sm" className="w-full gap-1.5" disabled={connecting === integration.id} onClick={() => handleConnect(integration)}>
                                   {connecting === integration.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
                                   {connecting === integration.id ? "Redirecionando..." : "Conectar via OAuth"}
                                 </Button>
-                              )}
-                              <Button variant="outline" size="sm" className="w-full gap-1.5" disabled={connecting === integration.id} onClick={() => openTokenDialog(integration)}>
+                              )) || (isMetaAds && (
+                                <Button variant="default" size="sm" className="w-full gap-1.5" disabled={connecting === integration.id} onClick={() => handleConnectMeta(integration)}>
+                                  {connecting === integration.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                                  {connecting === integration.id ? "Redirecionando..." : "Conectar via OAuth"}
+                                </Button>
+                              ))}
+                              <Button variant="outline" size="sm" className="w-full gap-1.5" disabled={connecting === integration.id} onClick={() => openTokenDialog(integration, isMetaAds ? "meta" : undefined)}>
                                 <Key className="h-3.5 w-3.5" />
                                 Inserir Token / API Key
                               </Button>
+                              {isMetaAds && (
+                                <p className="text-xs text-muted-foreground">
+                                  Ou gere um token no Graph API Explorer (Meta for Developers) com ads_management e ads_read.
+                                </p>
+                              )}
+                              <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/20" onClick={() => setDeleteDialog(integration)}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Excluir
+                              </Button>
                             </div>
                           ) : (
-                            <Button variant="outline" size="sm" className="w-full gap-1.5" disabled={connecting === integration.id} onClick={() => openTokenDialog(integration)}>
-                              <Key className="h-3.5 w-3.5" />
-                              Conectar com Token
-                            </Button>
+                            <>
+                              <Button variant="outline" size="sm" className="w-full gap-1.5" disabled={connecting === integration.id} onClick={() => openTokenDialog(integration)}>
+                                <Key className="h-3.5 w-3.5" />
+                                Conectar com Token
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/20" onClick={() => setDeleteDialog(integration)}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Excluir
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -518,6 +672,25 @@ export default function IntegrationsPage() {
             <Button variant="destructive" onClick={confirmDisconnect} disabled={updateMut.isPending}>
               {updateMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Desconectar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Excluir */}
+      <Dialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir {deleteDialog?.name}</DialogTitle>
+            <DialogDescription>
+              Esta ação não pode ser desfeita. A integração será removida permanentemente. Os dados já sincronizados permanecem no sistema.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleteMut.isPending}>
+              {deleteMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Excluir
             </Button>
           </DialogFooter>
         </DialogContent>

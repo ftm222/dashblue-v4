@@ -53,6 +53,8 @@ import {
   updateProfile,
   createIntegration,
   updateIntegrationStatus,
+  resetIntegrationSyncStatus,
+  deleteIntegration,
   disconnectCRM,
   fetchLogs,
   signIn,
@@ -372,6 +374,22 @@ export function useUpdateIntegrationStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: "connected" | "disconnected" }) =>
       updateIntegrationStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
+  });
+}
+
+export function useResetIntegrationSync() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => resetIntegrationSyncStatus(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
+  });
+}
+
+export function useDeleteIntegration() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteIntegration(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
   });
 }

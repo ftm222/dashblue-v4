@@ -508,6 +508,8 @@ export interface Database {
           organization_id: string;
           synced_at: string;
           created_at: string;
+          level: "campaign" | "ad_set" | "ad" | null;
+          parent_external_id: string | null;
         };
         Insert: {
           id?: string;
@@ -529,6 +531,8 @@ export interface Database {
           organization_id: string;
           synced_at?: string;
           created_at?: string;
+          level?: "campaign" | "ad_set" | "ad" | null;
+          parent_external_id?: string | null;
         };
         Update: {
           integration_id?: string | null;
@@ -548,6 +552,8 @@ export interface Database {
           period_end?: string;
           organization_id?: string;
           synced_at?: string;
+          level?: "campaign" | "ad_set" | "ad" | null;
+          parent_external_id?: string | null;
         };
       };
       call_logs: {

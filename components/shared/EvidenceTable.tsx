@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { cn } from "@/lib/utils";
 import type { EvidenceRecord } from "@/types";
 
@@ -26,6 +27,7 @@ interface EvidenceTableProps {
   loading?: boolean;
   onOpenCRM?: (url: string) => void;
   onCopyContact?: (text: string) => void;
+  emptyMessage?: string;
 }
 
 const BADGE_STYLES: Record<string, string> = {
@@ -51,6 +53,7 @@ export function EvidenceTable({
   loading,
   onOpenCRM,
   onCopyContact,
+  emptyMessage,
 }: EvidenceTableProps) {
   if (loading) {
     return (
@@ -59,6 +62,18 @@ export function EvidenceTable({
           <Skeleton key={i} className="h-12 w-full rounded" />
         ))}
       </div>
+    );
+  }
+
+  if (records.length === 0) {
+    return (
+      <EmptyState
+        title="Nenhuma evidência encontrada"
+        description={
+          emptyMessage ??
+          "Ajuste os filtros ou verifique se há leads no CRM com os UTMs correspondentes."
+        }
+      />
     );
   }
 

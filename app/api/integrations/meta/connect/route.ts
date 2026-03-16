@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase-admin";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
-import { getCRMAdapter, isValidProvider } from "@/lib/crm/registry";
-import { getProviderEnvConfig } from "@/lib/crm/types";
+import { getMetaEnvConfig } from "@/lib/meta/oauth";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import crypto from "crypto";
 
+/**
+ * POST /api/integrations/meta/connect
+ * Inicia o fluxo OAuth do Meta (Facebook Ads / Marketing API).
+ */
 export async function POST(request: Request) {
   try {
     const { orgId } = await getAuthUserWithOrg(request);
-    const { provider, integrationId } = await request.json();
-
-    if (!provider || !isValidProvider(provider)) {
-      throw new ApiError("INVALID_PROVIDER", "Provider inválido.", 400);
-    }
+    const { integrationId } = await request.json();
 
     if (!integrationId) {
       throw new ApiError("MISSING_PARAM", "integrationId é obrigatório.", 400);
@@ -29,21 +28,27 @@ export async function POST(request: Request) {
       throw new ApiError("FORBIDDEN", "Integração não pertence à sua organização.", 403);
     }
 
-    const envConfig = getProviderEnvConfig(provider);
-    if (!envConfig.client_id || !envConfig.client_secret) {
+    const config = getMetaEnvConfig();
+    if (!config.app_id || !config.app_secret) {
       throw new ApiError(
         "MISSING_CREDENTIALS",
-        `Credenciais do ${provider} não configuradas. Adicione ${provider.toUpperCase()}_CLIENT_ID e ${provider.toUpperCase()}_CLIENT_SECRET no .env.local`,
+        "Credenciais Meta não configuradas. Adicione META_APP_ID e META_APP_SECRET no .env.local",
         400,
       );
     }
 
     const state = Buffer.from(
-      JSON.stringify({ integrationId, provider, nonce: crypto.randomUUID() }),
+      JSON.stringify({ integrationId, provider: "meta", nonce: crypto.randomUUID() }),
     ).toString("base64url");
 
-    const adapter = getCRMAdapter(provider);
-    const authUrl = adapter.getAuthUrl(state);
+    const scope = "ads_management,ads_read,business_management";
+    const authUrl = `https://www.facebook.com/v21.0/dialog/oauth?${new URLSearchParams({
+      client_id: config.app_id,
+      redirect_uri: config.redirect_uri,
+      state,
+      scope,
+      response_type: "code",
+    })}`;
 
     return NextResponse.json({ authUrl, state });
   } catch (err) {

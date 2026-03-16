@@ -87,11 +87,13 @@ async function aggregateEvidence(period: PeriodRange): Promise<EvidenceAgg> {
 }
 
 async function aggregateCampaigns(period: PeriodRange) {
+  const fromStr = period.from.toISOString().slice(0, 10);
+  const toStr = period.to.toISOString().slice(0, 10);
   const { data } = await supabase
     .from("campaigns")
     .select("investment, leads, booked, received, won, revenue")
-    .gte("period_start", period.from.toISOString().slice(0, 10))
-    .lte("period_end", period.to.toISOString().slice(0, 10));
+    .lte("period_start", toStr)
+    .gte("period_end", fromStr);
 
   const rows = data ?? [];
   return {
@@ -404,15 +406,19 @@ export async function fetchPeople(
 export async function fetchCampaigns(
   period: PeriodRange,
 ): Promise<Campaign[]> {
+  const fromStr = period.from.toISOString().slice(0, 10);
+  const toStr = period.to.toISOString().slice(0, 10);
+  // Overlap: campanhas cujo período intersecta a seleção do usuário
   const { data } = await supabase
     .from("campaigns")
     .select("*")
-    .gte("period_start", period.from.toISOString().slice(0, 10))
-    .lte("period_end", period.to.toISOString().slice(0, 10))
+    .lte("period_start", toStr)
+    .gte("period_end", fromStr)
     .order("created_at", { ascending: false });
 
   return (data ?? []).map((c) => ({
     id: c.id,
+    externalId: (c as { external_id?: string }).external_id ?? null,
     name: c.name,
     source: c.source ?? "",
     medium: c.medium ?? "",
@@ -427,6 +433,8 @@ export async function fetchCampaigns(
     received: c.received,
     won: c.won,
     revenue: c.revenue,
+    level: (c as { level?: string }).level ?? "campaign",
+    parentExternalId: (c as { parent_external_id?: string }).parent_external_id ?? null,
   }));
 }
 
@@ -451,7 +459,21 @@ export async function fetchEvidence(
   if (filters.funnelStep) query = query.eq("funnel_step", filters.funnelStep);
   if (filters.utmSource) query = query.eq("utm_source", filters.utmSource);
   if (filters.utmMedium) query = query.eq("utm_medium", filters.utmMedium);
-  if (filters.utmCampaign) query = query.eq("utm_campaign", filters.utmCampaign);
+  if (filters.utmCampaign) {
+    const campaignName = filters.utmCampaign.trim();
+    const sanitize = (s: string) => s.replace(/[%_\\]/g, "\\$&");
+    // Nomes Meta costumam ser "Parte1 | Parte2 | Parte3" — match se utm_campaign contém
+    // o nome inteiro OU qualquer parte significativa (ex: "Teste Criativo")
+    const parts = campaignName
+      .split(/[|–-]/)
+      .map((p) => p.trim())
+      .filter((p) => p.length >= 2);
+    const terms = [campaignName, ...parts];
+    const orClause = terms
+      .map((t) => `utm_campaign.ilike.%${sanitize(t)}%`)
+      .join(",");
+    query = query.or(orClause);
+  }
   if (filters.search) {
     const sanitized = filters.search.replace(/[%_\\]/g, "\\$&");
     query = query.ilike("contact_name", `%${sanitized}%`);
@@ -559,11 +581,13 @@ export async function fetchDiagnostics(
     });
   }
 
+  const fromStr = period.from.toISOString().slice(0, 10);
+  const toStr = period.to.toISOString().slice(0, 10);
   const { data: campaigns } = await supabase
     .from("campaigns")
     .select("investment, leads")
-    .gte("period_start", period.from.toISOString().slice(0, 10))
-    .lte("period_end", period.to.toISOString().slice(0, 10));
+    .lte("period_start", toStr)
+    .gte("period_end", fromStr);
 
   const totalInvestment = (campaigns ?? []).reduce((s, c) => s + (c.investment ?? 0), 0);
   const totalCampaignLeads = (campaigns ?? []).reduce((s, c) => s + (c.leads ?? 0), 0);
@@ -946,25 +970,60 @@ export async function updateIntegrationStatus(id: string, status: "connected" | 
   if (!res.ok) throw new Error(json.message || "Erro ao atualizar integração.");
 }
 
+/** Reseta status da integração travada em "syncing" para "connected" */
+export async function resetIntegrationSyncStatus(id: string) {
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ force_reset_sync: true }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || "Erro ao resetar sincronização.");
+}
+
+/** Exclui integração via API */
+export async function deleteIntegration(id: string) {
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || "Erro ao excluir integração.");
+}
+
 // ---------------------------------------------------------------------------
 // MUTATIONS — Setup (reset checklist + disconnect CRM)
 // ---------------------------------------------------------------------------
 
-export async function resetSetupChecklist() {
-  const { error } = await supabase
-    .from("setup_checklist")
-    .update({ completed: false })
-    .neq("key", "");
-  if (error) throw error;
-}
-
+/** Troca de CRM: desconecta todas as integrações CRM e reseta checklist. Via API (back-end). */
 export async function disconnectCRM() {
-  const { error } = await supabase
-    .from("integrations")
-    .update({ status: "disconnected", last_sync: null })
-    .eq("type", "crm");
-  if (error) throw error;
-  await resetSetupChecklist();
+  const { data: sess } = await supabase.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/disconnect-crm`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || "Erro ao desconectar CRM.");
 }
 
 // ---------------------------------------------------------------------------

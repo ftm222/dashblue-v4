@@ -54,8 +54,11 @@ export interface Person {
   contractsOriginated?: number;
 }
 
+export type CampaignLevel = "campaign" | "ad_set" | "ad";
+
 export interface Campaign {
   id: string;
+  externalId?: string | null;
   name: string;
   source: string;
   medium: string;
@@ -70,6 +73,8 @@ export interface Campaign {
   received: number;
   won: number;
   revenue: number;
+  level?: CampaignLevel | null;
+  parentExternalId?: string | null;
 }
 
 export interface EvidenceRecord {
