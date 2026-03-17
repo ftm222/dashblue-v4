@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       { key: "connect-crm",  label: "Conectar CRM",                     completed: false, route: "/admin/integrations",  organization_id: org.id },
       { key: "connect-ads",  label: "Conectar plataforma de Ads",       completed: false, route: "/admin/integrations",  organization_id: org.id },
       { key: "map-funnel",   label: "Mapear etapas do funil",           completed: false, route: "/admin/funnel-mapping", organization_id: org.id },
-      { key: "add-team",     label: "Cadastrar equipe (SDRs e Closers)", completed: false, route: "/admin/people",        organization_id: org.id },
+      { key: "add-team",     label: "Cadastrar equipe (SDRs e Closers)", completed: false, route: "/admin/collaborators", organization_id: org.id },
       { key: "set-goals",    label: "Definir metas do período",         completed: false, route: "/admin/goals",          organization_id: org.id },
       { key: "first-sync",   label: "Realizar primeira sincronização",  completed: false, route: "/admin/integrations",  organization_id: org.id },
     ]);

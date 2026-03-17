@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { syncIntegration } from "@/lib/crm/sync";
 import { isCRMConfig } from "@/lib/crm/types";
 import type { CRMConfig } from "@/lib/crm/types";
@@ -35,20 +35,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing integration id" }, { status: 400 });
     }
 
-    const { data: integration } = await adminClient
+    const admin = getAdminClient();
+    const { data: integration } = await admin
       .from("integrations")
       .select("id, config")
       .eq("id", integrationId)
       .single();
 
-    if (!integration) {
+    const int = integration as { id: string; config?: unknown } | null;
+    if (!int) {
       return NextResponse.json({ error: "Integration not found" }, { status: 404 });
     }
 
-    if (!isCRMConfig(integration.config)) {
+    if (!isCRMConfig(int.config)) {
       return NextResponse.json({ error: "Integration not configured" }, { status: 400 });
     }
-    const config: CRMConfig = integration.config as CRMConfig;
+    const config: CRMConfig = int.config as CRMConfig;
 
     const rawBody = await request.text();
 
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
       body = {};
     }
 
-    await adminClient.from("logs").insert({
+    await (admin.from("logs") as any).insert({
       action: "webhook_received",
       entity_type: "integration",
       entity_id: integrationId,

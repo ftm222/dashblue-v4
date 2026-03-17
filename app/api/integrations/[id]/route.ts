@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { adminClient, getAdminClient } from "@/lib/supabase-admin";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 
@@ -28,7 +28,8 @@ export async function PATCH(
       .eq("id", id)
       .single();
 
-    if (!integration || integration.organization_id !== orgId) {
+    const int = integration as { organization_id?: string } | null;
+    if (!int || int.organization_id !== orgId) {
       throw new ApiError("FORBIDDEN", "Integração não pertence à sua organização.", 403);
     }
 
@@ -37,10 +38,8 @@ export async function PATCH(
       update.last_sync = null;
     }
 
-    const { error } = await adminClient
-      .from("integrations")
-      .update(update)
-      .eq("id", id);
+    const admin = getAdminClient();
+    const { error } = await (admin.from("integrations") as any).update(update).eq("id", id);
 
     if (error) throw error;
 

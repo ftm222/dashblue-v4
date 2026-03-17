@@ -19,7 +19,8 @@ export async function GET(request: Request) {
 
     if (error) throw error;
 
-    const items = (data ?? []).map((i) => ({
+    const rows = (data ?? []) as { id: string; name: string; type: string; status: string; last_sync: string | null }[];
+    const items = rows.map((i) => ({
       id: i.id,
       name: i.name,
       type: i.type,

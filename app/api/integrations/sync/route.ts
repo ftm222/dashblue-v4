@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       .eq("id", integrationId)
       .single();
 
-    if (!integration || integration.organization_id !== orgId) {
+    const int = integration as { organization_id?: string } | null;
+    if (!int || int.organization_id !== orgId) {
       throw new ApiError("FORBIDDEN", "Integração não pertence à sua organização.", 403);
     }
 

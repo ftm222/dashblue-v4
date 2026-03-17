@@ -47,7 +47,7 @@ function SDRsContent() {
         <EmptyState
           title="Nenhum SDR cadastrado"
           description="Cadastre SDRs em Admin > Equipe para visualizar métricas de prospecção."
-          action={{ label: "Cadastrar SDRs", onClick: () => window.location.href = "/admin/people" }}
+          action={{ label: "Cadastrar SDRs", onClick: () => window.location.href = "/admin/collaborators?tab=equipe" }}
         />
       </div>
     );

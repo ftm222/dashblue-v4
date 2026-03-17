@@ -764,9 +764,10 @@ export async function fetchTags() {
 }
 
 export async function insertTag(tag: { name: string; alias: string }) {
+  const organization_id = await getCurrentOrgId();
   const { data, error } = await supabase
     .from("tags")
-    .insert({ original: tag.name, alias: tag.alias })
+    .insert({ original: tag.name, alias: tag.alias, organization_id })
     .select()
     .single();
   if (error) throw error;
@@ -854,12 +855,14 @@ export async function fetchFunnelMappings() {
 export async function upsertFunnelMappings(
   mappings: { id: string; stepKey: string; stepLabel: string; crmField: string; crmValue: string }[],
 ) {
+  const organization_id = await getCurrentOrgId();
   const rows = mappings.map((m) => ({
     id: m.id,
     step_key: m.stepKey,
     step_label: m.stepLabel,
     crm_field: m.crmField,
     crm_value: m.crmValue,
+    organization_id,
   }));
   const { error } = await supabase.from("funnel_mappings").upsert(rows, { onConflict: "id" });
   if (error) throw error;
@@ -874,13 +877,47 @@ export async function updateGoalTarget(goalId: string, target: number) {
   if (error) throw error;
 }
 
+/** Cria meta da equipe (person_id null) para o período */
+export async function insertTeamGoal(params: {
+  type: "revenue" | "booked";
+  target: number;
+  periodStart: string;
+  periodEnd: string;
+  description?: string | null;
+  role?: "sdr" | "closer" | null;
+  squadId?: string | null;
+}) {
+  const organization_id = await getCurrentOrgId();
+  const { data, error } = await supabase
+    .from("goals")
+    .insert({
+      person_id: null,
+      type: params.type,
+      target: params.target,
+      period_start: params.periodStart,
+      period_end: params.periodEnd,
+      organization_id,
+      description: params.description ?? null,
+      role: params.role ?? null,
+      squad_id: params.squadId ?? null,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return { id: data.id };
+}
+
 export async function upsertIndividualGoal(params: {
   personId: string;
   type: string;
   target: number;
   periodStart: string;
   periodEnd: string;
+  description?: string | null;
+  role?: "sdr" | "closer" | null;
+  squadId?: string | null;
 }) {
+  const organization_id = await getCurrentOrgId();
   const { error } = await supabase.from("goals").upsert(
     {
       person_id: params.personId,
@@ -888,6 +925,10 @@ export async function upsertIndividualGoal(params: {
       target: params.target,
       period_start: params.periodStart,
       period_end: params.periodEnd,
+      organization_id,
+      description: params.description ?? null,
+      role: params.role ?? null,
+      squad_id: params.squadId ?? null,
     },
     { onConflict: "person_id,type,period_start,period_end" },
   );
@@ -1013,7 +1054,17 @@ export async function signOut() {
   if (error) throw error;
 }
 
-export async function getCurrentProfile() {
+export type ProfileData = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role: string;
+  organization_id?: string | null;
+  [key: string]: unknown;
+};
+
+export async function getCurrentProfile(): Promise<ProfileData | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
@@ -1023,7 +1074,7 @@ export async function getCurrentProfile() {
     .eq("id", user.id)
     .single();
 
-  return data;
+  return data as ProfileData | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -1302,7 +1353,11 @@ export async function saveProfileSettings(settings: Record<string, unknown>) {
 export async function fetchOrgSettings(): Promise<Record<string, unknown>> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return {};
-  const orgId = user.user_metadata?.organization_id;
+  let orgId = user.user_metadata?.organization_id;
+  if (!orgId) {
+    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+    orgId = profile?.organization_id ?? undefined;
+  }
   if (!orgId) return {};
   const { data } = await supabase.from("organizations").select("settings").eq("id", orgId).single();
   return (data?.settings as Record<string, unknown>) ?? {};
@@ -1311,7 +1366,11 @@ export async function fetchOrgSettings(): Promise<Record<string, unknown>> {
 export async function saveOrgSettings(settings: Record<string, unknown>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
-  const orgId = user.user_metadata?.organization_id;
+  let orgId = user.user_metadata?.organization_id;
+  if (!orgId) {
+    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+    orgId = profile?.organization_id ?? undefined;
+  }
   if (!orgId) throw new Error("Sem organização");
   const { error } = await supabase.from("organizations").update({ settings }).eq("id", orgId);
   if (error) throw error;

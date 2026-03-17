@@ -15,6 +15,9 @@ import {
   Key,
   Plus,
   HelpCircle,
+  CreditCard,
+  Save,
+  Settings,
 } from "lucide-react";
 import { useIntegrations, useUpdateIntegrationStatus, useCreateIntegration } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
@@ -109,6 +112,12 @@ export default function IntegrationsPage() {
   const [apiUrlInput, setApiUrlInput] = useState("");
   const [outroCrmDialog, setOutroCrmDialog] = useState(false);
   const [outroCrmName, setOutroCrmName] = useState("");
+  const [stripeLoading, setStripeLoading] = useState(true);
+  const [stripeSaving, setStripeSaving] = useState(false);
+  const [stripeConfig, setStripeConfig] = useState<Record<string, string>>({});
+  const [stripeForm, setStripeForm] = useState<Record<string, string>>({});
+  const [stripeConfigDialog, setStripeConfigDialog] = useState(false);
+  const [stripeDisconnectDialog, setStripeDisconnectDialog] = useState(false);
 
   const getAuthHeaders = async () => {
     const { data: sess } = await supabase.auth.getSession();
@@ -133,6 +142,77 @@ export default function IntegrationsPage() {
       return () => clearTimeout(timer);
     }
   }, [searchParams, refetch, toast]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch("/api/settings/stripe", { headers });
+        if (cancelled) return;
+        if (res.ok) {
+          const json = await res.json();
+          setStripeConfig(json);
+          setStripeForm(json);
+        }
+      } finally {
+        if (!cancelled) setStripeLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleSaveStripeConfig() {
+    setStripeSaving(true);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch("/api/settings/stripe", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(stripeForm),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ type: "error", message: data.message || "Erro ao salvar configurações." });
+      } else {
+        setStripeConfig(stripeForm);
+        setStripeConfigDialog(false);
+        setToast({ type: "success", message: "Configurações do Stripe salvas com sucesso!" });
+        const refetchRes = await fetch("/api/settings/stripe", { headers });
+        if (refetchRes.ok) setStripeConfig(await refetchRes.json());
+      }
+    } catch {
+      setToast({ type: "error", message: "Erro de conexão ao salvar." });
+    } finally {
+      setStripeSaving(false);
+    }
+  }
+
+  async function handleStripeDisconnect() {
+    setStripeSaving(true);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch("/api/settings/stripe", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ clear: true }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setToast({ type: "error", message: data.message || "Erro ao desconectar." });
+      } else {
+        setStripeConfig({});
+        setStripeForm({});
+        setStripeDisconnectDialog(false);
+        setToast({ type: "success", message: "Stripe desconectado." });
+      }
+    } catch {
+      setToast({ type: "error", message: "Erro de conexão ao desconectar." });
+    } finally {
+      setStripeSaving(false);
+    }
+  }
 
   async function handleConnect(integration: Integration) {
     const providerInfo = getProvider(integration.name);
@@ -313,8 +393,9 @@ export default function IntegrationsPage() {
         </div>
       )}
 
+      <div className="space-y-8">
       {/* Guia explicativo */}
-      <Card className="mb-6 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+      <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
         <CardContent className="p-4">
           <div className="flex gap-3">
             <HelpCircle className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
@@ -341,9 +422,11 @@ export default function IntegrationsPage() {
 
       {isError && <ErrorState onRetry={() => refetch()} />}
 
+      {/* Integrações de CRM — única seção */}
       {data && (
-        <>
+        <section className="mb-8" aria-label="Integrações de CRM">
           <div className="mb-4 flex flex-wrap items-center gap-3">
+            <h3 className="font-semibold">Integrações de CRM</h3>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="default" size="sm" className="gap-1.5" disabled={createMut.isPending}>
@@ -479,8 +562,188 @@ export default function IntegrationsPage() {
               })}
             </div>
           )}
-        </>
+        </section>
       )}
+
+      {/* Gateway de Pagamento */}
+      <div className="mb-6">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <h3 className="font-semibold">Gateway de Pagamento</h3>
+          <p className="text-xs text-muted-foreground">Configure o Stripe para cobrança e assinaturas.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center gap-3 border-b p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">Stripe</p>
+                  <p className="text-xs capitalize text-muted-foreground">Pagamento</p>
+                </div>
+                <Badge
+                  className={`shrink-0 gap-1 ${
+                    stripeConfig?.secret_key
+                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-transparent"
+                      : "bg-gray-500/15 text-gray-600 dark:text-gray-400 border-transparent"
+                  }`}
+                >
+                  {stripeConfig?.secret_key ? (
+                    <><CheckCircle2 className="h-3 w-3" /> Configurado</>
+                  ) : (
+                    <><Unlink className="h-3 w-3" /> Desconectado</>
+                  )}
+                </Badge>
+              </div>
+              <div className="space-y-3 p-4">
+                {stripeLoading ? (
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                ) : stripeConfig?.secret_key ? (
+                  <>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="flex-1 gap-1.5"
+                        onClick={() => { setStripeForm({ ...stripeConfig }); setStripeConfigDialog(true); }}
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                        Editar configurações
+                      </Button>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/20"
+                      onClick={() => setStripeDisconnectDialog(true)}
+                    >
+                      <Unlink className="h-3.5 w-3.5" />
+                      Desconectar
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full gap-1.5"
+                    onClick={() => { setStripeForm({ ...stripeConfig }); setStripeConfigDialog(true); }}
+                  >
+                    <Key className="h-3.5 w-3.5" />
+                    Configurar
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Dialog: Configuração Stripe */}
+      <Dialog open={stripeConfigDialog} onOpenChange={(open) => { setStripeConfigDialog(open); if (!open) setStripeForm({ ...stripeConfig }); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Configurar Stripe</DialogTitle>
+            <DialogDescription>
+              Informe as chaves e Price IDs do seu painel Stripe para habilitar cobrança e assinaturas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 sm:grid-cols-2 py-4">
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="stripe_secret_key">Secret Key (sk_...)</Label>
+              <Input
+                id="stripe_secret_key"
+                type="password"
+                placeholder="sk_live_... ou sk_test_..."
+                value={stripeForm.secret_key ?? ""}
+                onChange={(e) => setStripeForm((p) => ({ ...p, secret_key: e.target.value }))}
+                disabled={stripeSaving}
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="stripe_webhook_secret">Webhook Secret (whsec_...)</Label>
+              <Input
+                id="stripe_webhook_secret"
+                type="password"
+                placeholder="whsec_..."
+                value={stripeForm.webhook_secret ?? ""}
+                onChange={(e) => setStripeForm((p) => ({ ...p, webhook_secret: e.target.value }))}
+                disabled={stripeSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stripe_price_starter_monthly">Price ID Starter (mensal)</Label>
+              <Input
+                id="stripe_price_starter_monthly"
+                placeholder="price_..."
+                value={stripeForm.price_starter_monthly ?? ""}
+                onChange={(e) => setStripeForm((p) => ({ ...p, price_starter_monthly: e.target.value }))}
+                disabled={stripeSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stripe_price_starter_yearly">Price ID Starter (anual)</Label>
+              <Input
+                id="stripe_price_starter_yearly"
+                placeholder="price_..."
+                value={stripeForm.price_starter_yearly ?? ""}
+                onChange={(e) => setStripeForm((p) => ({ ...p, price_starter_yearly: e.target.value }))}
+                disabled={stripeSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stripe_price_pro_monthly">Price ID Pro (mensal)</Label>
+              <Input
+                id="stripe_price_pro_monthly"
+                placeholder="price_..."
+                value={stripeForm.price_pro_monthly ?? ""}
+                onChange={(e) => setStripeForm((p) => ({ ...p, price_pro_monthly: e.target.value }))}
+                disabled={stripeSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stripe_price_pro_yearly">Price ID Pro (anual)</Label>
+              <Input
+                id="stripe_price_pro_yearly"
+                placeholder="price_..."
+                value={stripeForm.price_pro_yearly ?? ""}
+                onChange={(e) => setStripeForm((p) => ({ ...p, price_pro_yearly: e.target.value }))}
+                disabled={stripeSaving}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStripeConfigDialog(false)}>Cancelar</Button>
+            <Button onClick={handleSaveStripeConfig} disabled={stripeSaving} className="gap-2">
+              {stripeSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {stripeSaving ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Desconectar Stripe */}
+      <Dialog open={stripeDisconnectDialog} onOpenChange={setStripeDisconnectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Desconectar Stripe</DialogTitle>
+            <DialogDescription>
+              As configurações do Stripe serão removidas. O cobrança via Stripe deixará de funcionar até uma nova configuração.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStripeDisconnectDialog(false)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={handleStripeDisconnect}
+              disabled={stripeSaving}
+            >
+              {stripeSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Desconectar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog: Outro CRM - nome personalizado */}
       <Dialog open={outroCrmDialog} onOpenChange={setOutroCrmDialog}>
@@ -632,6 +895,7 @@ export default function IntegrationsPage() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </AdminPageWrapper>
   );
 }

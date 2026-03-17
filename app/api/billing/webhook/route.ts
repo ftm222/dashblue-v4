@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStripe, handleSubscriptionUpdate } from "@/lib/stripe";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { supabaseAdmin, getAdminClient } from "@/lib/supabase-admin";
 import type Stripe from "stripe";
 
 export async function POST(request: Request) {
@@ -33,7 +33,8 @@ export async function POST(request: Request) {
         const subscriptionId = session.subscription as string;
 
         if (orgId && customerId) {
-          await supabaseAdmin.from("organizations").update({
+          const admin = getAdminClient();
+          await (admin.from("organizations") as any).update({
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             subscription_status: "active",
@@ -54,11 +55,13 @@ export async function POST(request: Request) {
           .eq("stripe_subscription_id", subscription.id)
           .single();
 
-        if (org) {
-          await supabaseAdmin.from("organizations").update({
+        const orgTyped = org as { id: string } | null;
+        if (orgTyped) {
+          const admin = getAdminClient();
+          await (admin.from("organizations") as any).update({
             subscription_status: status,
             plan: event.type === "customer.subscription.deleted" ? "free" : planId,
-          }).eq("id", org.id);
+          }).eq("id", orgTyped.id);
         }
         break;
       }
@@ -73,9 +76,11 @@ export async function POST(request: Request) {
           .eq("stripe_customer_id", customerId)
           .single();
 
-        if (org) {
-          await supabaseAdmin.from("invoices").insert({
-            organization_id: org.id,
+        const orgTyped2 = org as { id: string } | null;
+        if (orgTyped2) {
+          const admin = getAdminClient();
+          await (admin.from("invoices") as any).insert({
+            organization_id: orgTyped2.id,
             stripe_invoice_id: invoice.id,
             amount: (invoice.amount_paid || 0) / 100,
             currency: invoice.currency,

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 
@@ -22,8 +22,8 @@ export async function PUT(
       if (body[key] !== undefined) fields[key] = body[key];
     }
 
-    const { data, error } = await adminClient
-      .from("campaigns")
+    const admin = getAdminClient();
+    const { data, error } = await (admin.from("campaigns") as any)
       .update(fields)
       .eq("id", id)
       .eq("organization_id", orgId)
@@ -46,7 +46,8 @@ export async function DELETE(
     const { orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
 
-    const { error } = await adminClient
+    const admin = getAdminClient();
+    const { error } = await admin
       .from("campaigns")
       .delete()
       .eq("id", id)

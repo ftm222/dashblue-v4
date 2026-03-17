@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createBillingPortalSession } from "@/lib/stripe";
+import { adminClient } from "@/lib/supabase-admin";
 import { apiErrorResponse, ApiError } from "@/lib/api-error";
 
 export async function POST(request: Request) {
@@ -33,21 +34,24 @@ export async function POST(request: Request) {
       throw new ApiError("FORBIDDEN", "Apenas owner/admin podem acessar billing", 403);
     }
 
-    const { data: org } = await supabase
+    const { data: org } = await adminClient
       .from("organizations")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, settings")
       .eq("id", profile.organization_id)
       .single();
 
-    if (!org?.stripe_customer_id) {
+    const orgTyped = org as { stripe_customer_id?: string | null; settings?: Record<string, unknown> } | null;
+    if (!orgTyped?.stripe_customer_id) {
       throw new ApiError("NO_SUBSCRIPTION", "Nenhuma assinatura ativa encontrada", 404);
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const stripeConfig = (orgTyped?.settings as Record<string, unknown>)?.stripe;
 
     const portalUrl = await createBillingPortalSession({
-      stripeCustomerId: org.stripe_customer_id,
-      returnUrl: `${appUrl}/settings`,
+      stripeCustomerId: orgTyped.stripe_customer_id,
+      returnUrl: `${appUrl}/admin/billing`,
+      stripeConfig: stripeConfig as Record<string, string> | undefined,
     });
 
     if (!portalUrl) {

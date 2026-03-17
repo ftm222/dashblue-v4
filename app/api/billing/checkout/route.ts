@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createCheckoutSession } from "@/lib/stripe";
+import { adminClient } from "@/lib/supabase-admin";
 import { z } from "zod";
 import { apiErrorResponse, ApiError } from "@/lib/api-error";
 
@@ -47,6 +48,14 @@ export async function POST(request: Request) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+    const { data: orgData } = await adminClient
+      .from("organizations")
+      .select("settings")
+      .eq("id", profile.organization_id)
+      .single();
+    const orgTyped = orgData as { settings?: Record<string, unknown> } | null;
+    const stripeConfig = orgTyped?.settings?.stripe;
+
     const checkoutUrl = await createCheckoutSession({
       organizationId: profile.organization_id,
       planId: parsed.data.planId,
@@ -54,6 +63,7 @@ export async function POST(request: Request) {
       customerEmail: profile.email,
       successUrl: `${appUrl}/admin/setup?billing=success`,
       cancelUrl: `${appUrl}/admin/setup?billing=canceled`,
+      stripeConfig: stripeConfig as Record<string, string> | undefined,
     });
 
     if (!checkoutUrl) {

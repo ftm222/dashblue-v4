@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { supabaseAdmin, getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { inviteSchema, validateBody } from "@/lib/validations";
 import { rateLimit, getClientIP } from "@/lib/rate-limit";
@@ -39,11 +39,12 @@ export async function POST(request: Request) {
       .eq("id", inviter.id)
       .single();
 
-    if (!inviterProfile?.organization_id) {
+    const profile = inviterProfile as { organization_id?: string; role?: string } | null;
+    if (!profile?.organization_id) {
       throw new ApiError("NO_ORG", "Organização não encontrada", 404);
     }
 
-    if (!["owner", "admin"].includes(inviterProfile.role)) {
+    if (!["owner", "admin"].includes(profile.role ?? "")) {
       throw new ApiError("FORBIDDEN", "Apenas owner/admin podem convidar membros", 403);
     }
 
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       data: {
         name,
         role: role ?? "viewer",
-        organization_id: inviterProfile.organization_id,
+        organization_id: profile.organization_id,
       },
       redirectTo: `${appUrl}/reset-password`,
     });
@@ -78,19 +79,20 @@ export async function POST(request: Request) {
     const userId = data.user.id;
 
     // Profile é criado pelo trigger handle_new_user com org_id
-    // Mas fazemos upsert para garantir dados corretos
-    await supabaseAdmin.from("profiles").upsert({
+    // Mas fazemos upsert para garantir dados corretos (getAdminClient evita problemas de tipo do Proxy)
+    const admin = getAdminClient();
+    await (admin.from("profiles") as any).upsert({
       id: userId,
       name,
       email,
       role: role ?? "viewer",
-      organization_id: inviterProfile.organization_id,
+      organization_id: profile.organization_id,
       active: true,
     });
 
-    // Criar membership
-    await supabaseAdmin.from("org_members").insert({
-      organization_id: inviterProfile.organization_id,
+    // Criar membership (as any contorna bug de tipo do Supabase)
+    await (admin.from("org_members") as any).insert({
+      organization_id: profile.organization_id,
       user_id: userId,
       role: role ?? "viewer",
     });

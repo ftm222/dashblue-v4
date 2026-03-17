@@ -34,12 +34,15 @@ const PAGE_TITLES: Record<string, string> = {
   "/profile": "Perfil",
   "/settings": "Configurações",
   "/admin/setup": "Setup",
+  "/admin/billing": "Billing",
   "/admin/integrations": "Integrações",
   "/admin/funnel-mapping": "Funil",
   "/admin/tags-aliases": "Tags & Aliases",
   "/admin/ticket": "Ticket",
   "/admin/collaborators": "Colaboradores",
+  "/admin/people": "Colaboradores",
   "/admin/goals": "Metas",
+  "/admin/individual-goals": "Metas",
   "/admin/logs": "Logs",
 };
 

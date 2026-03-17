@@ -49,6 +49,7 @@ import {
   fetchFunnelMappings,
   upsertFunnelMappings,
   updateGoalTarget,
+  insertTeamGoal,
   upsertIndividualGoal,
   updateProfile,
   createIntegration,
@@ -333,12 +334,39 @@ export function useUpdateGoalTarget() {
   });
 }
 
+export function useInsertTeamGoal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (params: {
+      type: "revenue" | "booked";
+      target: number;
+      periodStart: string;
+      periodEnd: string;
+      description?: string;
+      role?: "sdr" | "closer" | null;
+      squadId?: string | null;
+    }) => insertTeamGoal(params),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["goals"] }),
+  });
+}
+
 export function useUpsertIndividualGoal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (params: { personId: string; type: string; target: number; periodStart: string; periodEnd: string }) =>
-      upsertIndividualGoal(params),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["goals"] }),
+    mutationFn: (params: {
+      personId: string;
+      type: string;
+      target: number;
+      periodStart: string;
+      periodEnd: string;
+      description?: string;
+      role?: "sdr" | "closer" | null;
+      squadId?: string | null;
+    }) => upsertIndividualGoal(params),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["people"] });
+    },
   });
 }
 

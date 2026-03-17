@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 
@@ -7,7 +7,8 @@ export async function GET(request: Request) {
   try {
     const { orgId } = await getAuthUserWithOrg(request);
 
-    const { data, error } = await adminClient
+    const admin = getAdminClient();
+    const { data, error } = await admin
       .from("contracts")
       .select("*")
       .eq("organization_id", orgId)
@@ -32,8 +33,8 @@ export async function POST(request: Request) {
       throw new ApiError("VALIDATION", "client_name, value e status são obrigatórios.", 400);
     }
 
-    const { data, error } = await adminClient
-      .from("contracts")
+    const admin = getAdminClient();
+    const { data, error } = await (admin.from("contracts") as any)
       .insert({
         client_name,
         value,

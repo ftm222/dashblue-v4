@@ -7,7 +7,7 @@ import {
   Brain,
   ChevronsLeft,
   ChevronsRight,
-  Crosshair,
+  CreditCard,
   DollarSign,
   FileText,
   GitBranch,
@@ -58,14 +58,13 @@ const MAIN_NAV: NavItem[] = [
 
 const ADMIN_NAV: NavItem[] = [
   { label: "Setup", href: "/admin/setup", icon: Settings },
+  { label: "Billing", href: "/admin/billing", icon: CreditCard },
   { label: "Integrações", href: "/admin/integrations", icon: Plug },
   { label: "Funil", href: "/admin/funnel-mapping", icon: GitBranch },
   { label: "Tags", href: "/admin/tags-aliases", icon: Tag },
   { label: "Ticket", href: "/admin/ticket", icon: Receipt },
-  { label: "Equipe", href: "/admin/people", icon: UserPlus },
   { label: "Colaboradores", href: "/admin/collaborators", icon: Users },
   { label: "Metas", href: "/admin/goals", icon: Target },
-  { label: "Metas Individuais", href: "/admin/individual-goals", icon: Crosshair },
   { label: "Logs", href: "/admin/logs", icon: FileText },
 ];
 

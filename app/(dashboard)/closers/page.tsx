@@ -49,7 +49,7 @@ function ClosersContent() {
         <EmptyState
           title="Nenhum Closer cadastrado"
           description="Cadastre Closers em Admin > Equipe para visualizar métricas de fechamento."
-          action={{ label: "Cadastrar Closers", onClick: () => window.location.href = "/admin/people" }}
+          action={{ label: "Cadastrar Closers", onClick: () => window.location.href = "/admin/collaborators?tab=equipe" }}
         />
       </div>
     );

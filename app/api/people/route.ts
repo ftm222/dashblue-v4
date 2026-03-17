@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 
@@ -9,7 +9,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role");
 
-    let query = adminClient
+    const admin = getAdminClient();
+    let query = admin
       .from("people")
       .select("*, squads(name)")
       .eq("organization_id", orgId)
@@ -41,8 +42,8 @@ export async function POST(request: Request) {
       throw new ApiError("VALIDATION", "role deve ser sdr ou closer.", 400);
     }
 
-    const { data, error } = await adminClient
-      .from("people")
+    const admin = getAdminClient();
+    const { data, error } = await (admin.from("people") as any)
       .insert({
         name,
         role,

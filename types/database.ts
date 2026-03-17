@@ -337,6 +337,9 @@ export interface Database {
           period_start: string;
           period_end: string;
           organization_id: string;
+          description: string | null;
+          role: "sdr" | "closer" | null;
+          squad_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -348,6 +351,9 @@ export interface Database {
           period_start: string;
           period_end: string;
           organization_id: string;
+          description?: string | null;
+          role?: "sdr" | "closer" | null;
+          squad_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -358,6 +364,9 @@ export interface Database {
           period_start?: string;
           period_end?: string;
           organization_id?: string;
+          description?: string | null;
+          role?: "sdr" | "closer" | null;
+          squad_id?: string | null;
         };
       };
       setup_checklist: {

@@ -34,7 +34,7 @@ export async function GET(request: Request) {
         .select("organization_id")
         .eq("id", data.user.id)
         .single();
-      orgId = profile?.organization_id ?? undefined;
+      orgId = (profile as { organization_id?: string } | null)?.organization_id ?? undefined;
       source = orgId ? "profile" : "none";
     }
 

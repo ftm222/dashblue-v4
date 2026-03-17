@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       throw new ApiError("VALIDATION", "Tipo deve ser 'crm' ou 'ads'.", 400);
     }
 
-    const { data: integration, error } = await adminClient
-      .from("integrations")
+    const admin = getAdminClient();
+    const { data: integration, error } = await (admin.from("integrations") as any)
       .insert({
         name: name.trim(),
         type,
@@ -35,11 +35,12 @@ export async function POST(request: Request) {
       throw new ApiError("CREATE_FAILED", error.message || "Falha ao criar integração.", 500);
     }
 
+    const int = integration as { id: string; name: string; type: string; status: string };
     return NextResponse.json({
-      id: integration.id,
-      name: integration.name,
-      type: integration.type,
-      status: integration.status,
+      id: int.id,
+      name: int.name,
+      type: int.type,
+      status: int.status,
     });
   } catch (err) {
     return apiErrorResponse(err);

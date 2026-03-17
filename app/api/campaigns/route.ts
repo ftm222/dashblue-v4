@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 
 export async function GET(request: Request) {
   try {
     const { orgId } = await getAuthUserWithOrg(request);
+    const admin = getAdminClient();
 
-    const { data, error } = await adminClient
+    const { data, error } = await admin
       .from("campaigns")
       .select("*")
       .eq("organization_id", orgId)
@@ -32,8 +33,8 @@ export async function POST(request: Request) {
       throw new ApiError("VALIDATION", "name, period_start e period_end são obrigatórios.", 400);
     }
 
-    const { data, error } = await adminClient
-      .from("campaigns")
+    const admin = getAdminClient();
+    const { data, error } = await (admin.from("campaigns") as any)
       .insert({
         name,
         source: source || "",

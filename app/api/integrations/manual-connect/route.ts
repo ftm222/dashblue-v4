@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase-admin";
+import { getAdminClient, adminClient } from "@/lib/supabase-admin";
 import { getCRMAdapter } from "@/lib/crm/registry";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
@@ -34,11 +34,12 @@ export async function POST(request: Request) {
       .eq("id", integrationId)
       .single();
 
-    if (!integration || integration.organization_id !== orgId) {
+    const int = integration as { organization_id?: string; type?: string } | null;
+    if (!int || int.organization_id !== orgId) {
       throw new ApiError("FORBIDDEN", "Integração não pertence à sua organização.", 403);
     }
 
-    if (integration.type !== "crm") {
+    if (int.type !== "crm") {
       throw new ApiError("INVALID_TYPE", "Apenas integrações CRM podem ser conectadas manualmente.", 400);
     }
 
@@ -66,12 +67,12 @@ export async function POST(request: Request) {
       api_url: api_url || undefined,
     } as CRMConfig & { api_url?: string };
 
-    await adminClient
-      .from("integrations")
+    const admin = getAdminClient();
+    await (admin.from("integrations") as any)
       .update({ status: "connected", config, last_sync: null })
       .eq("id", integrationId);
 
-    await adminClient.from("logs").insert({
+    await (admin.from("logs") as any).insert({
       action: "crm_connected",
       entity_type: "integration",
       entity_id: integrationId,
@@ -86,10 +87,9 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (checkItem) {
-      await adminClient
-        .from("setup_checklist")
+      await (admin.from("setup_checklist") as any)
         .update({ completed: true })
-        .eq("id", checkItem.id);
+        .eq("id", (checkItem as { id: string }).id);
     }
 
     return NextResponse.json({ success: true, message: "CRM conectado com sucesso!" });

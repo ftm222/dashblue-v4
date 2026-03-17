@@ -1,13 +1,51 @@
 import Stripe from "stripe";
 
+export interface StripeOrgConfig {
+  secret_key?: string;
+  webhook_secret?: string;
+  price_starter_monthly?: string;
+  price_starter_yearly?: string;
+  price_pro_monthly?: string;
+  price_pro_yearly?: string;
+}
+
 let stripeClient: Stripe | null = null;
 
-export function getStripe(): Stripe | null {
+/** Retorna cliente Stripe. Se config for passado e tiver secret_key, usa-a; senão usa env. */
+export function getStripe(config?: StripeOrgConfig): Stripe | null {
+  const key = config?.secret_key || process.env.STRIPE_SECRET_KEY;
+  if (!key) return config ? null : stripeClient;
+  if (config?.secret_key) {
+    return new Stripe(config.secret_key, { apiVersion: "2024-12-18.acacia" as Stripe.LatestApiVersion });
+  }
   if (stripeClient) return stripeClient;
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return null;
   stripeClient = new Stripe(key, { apiVersion: "2024-12-18.acacia" as Stripe.LatestApiVersion });
   return stripeClient;
+}
+
+function getPricesForConfig(config?: StripeOrgConfig | null): Record<string, { monthly: string; yearly: string }> {
+  if (config?.price_starter_monthly || config?.price_pro_monthly) {
+    return {
+      starter: {
+        monthly: config.price_starter_monthly || "",
+        yearly: config.price_starter_yearly || "",
+      },
+      pro: {
+        monthly: config.price_pro_monthly || "",
+        yearly: config.price_pro_yearly || "",
+      },
+    };
+  }
+  return {
+    starter: {
+      monthly: process.env.STRIPE_PRICE_STARTER_MONTHLY || "",
+      yearly: process.env.STRIPE_PRICE_STARTER_YEARLY || "",
+    },
+    pro: {
+      monthly: process.env.STRIPE_PRICE_PRO_MONTHLY || "",
+      yearly: process.env.STRIPE_PRICE_PRO_YEARLY || "",
+    },
+  };
 }
 
 export const PLAN_PRICES: Record<string, { monthly: string; yearly: string }> = {
@@ -28,14 +66,16 @@ export async function createCheckoutSession(params: {
   customerEmail: string;
   successUrl: string;
   cancelUrl: string;
+  stripeConfig?: StripeOrgConfig;
 }): Promise<string | null> {
-  const stripe = getStripe();
+  const prices = getPricesForConfig(params.stripeConfig);
+  const stripe = getStripe(params.stripeConfig);
   if (!stripe) return null;
 
-  const prices = PLAN_PRICES[params.planId];
-  if (!prices) return null;
+  const planPrices = prices[params.planId];
+  if (!planPrices) return null;
 
-  const priceId = params.interval === "month" ? prices.monthly : prices.yearly;
+  const priceId = params.interval === "month" ? planPrices.monthly : planPrices.yearly;
   if (!priceId) return null;
 
   const session = await stripe.checkout.sessions.create({
@@ -57,8 +97,9 @@ export async function createCheckoutSession(params: {
 export async function createBillingPortalSession(params: {
   stripeCustomerId: string;
   returnUrl: string;
+  stripeConfig?: StripeOrgConfig;
 }): Promise<string | null> {
-  const stripe = getStripe();
+  const stripe = getStripe(params.stripeConfig);
   if (!stripe) return null;
 
   const session = await stripe.billingPortal.sessions.create({
@@ -69,7 +110,10 @@ export async function createBillingPortalSession(params: {
   return session.url;
 }
 
-export async function handleSubscriptionUpdate(subscription: Stripe.Subscription): Promise<{
+export async function handleSubscriptionUpdate(
+  subscription: Stripe.Subscription,
+  orgConfig?: StripeOrgConfig | null,
+): Promise<{
   status: string;
   planId: string;
   currentPeriodEnd: Date;
@@ -78,9 +122,10 @@ export async function handleSubscriptionUpdate(subscription: Stripe.Subscription
   const item = subscription.items.data[0];
   const priceId = item?.price?.id || "";
 
+  const prices = getPricesForConfig(orgConfig);
   let planId = "free";
-  for (const [plan, prices] of Object.entries(PLAN_PRICES)) {
-    if (prices.monthly === priceId || prices.yearly === priceId) {
+  for (const [plan, p] of Object.entries(prices)) {
+    if (p.monthly === priceId || p.yearly === priceId) {
       planId = plan;
       break;
     }
