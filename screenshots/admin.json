@@ -1,0 +1,183 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/admin",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Central de Controle",
+      "className": "text-2xl md:text-3xl font-bold text-white font-outfit"
+    },
+    {
+      "tag": "H3",
+      "text": "META",
+      "className": "tracking-tight text-sm font-medium text-muted-foreground flex items-center gap-2"
+    },
+    {
+      "tag": "H3",
+      "text": "% DA META",
+      "className": "tracking-tight text-sm font-medium text-muted-foreground flex items-center gap-2"
+    },
+    {
+      "tag": "H3",
+      "text": "TOP SDR",
+      "className": "tracking-tight text-sm font-medium text-muted-foreground flex items-center gap-2"
+    },
+    {
+      "tag": "H3",
+      "text": "TOP CLOSER",
+      "className": "tracking-tight text-sm font-medium text-muted-foreground flex items-center gap-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Performance SDRs",
+      "className": "text-2xl font-semibold leading-none tracking-tight text-white"
+    },
+    {
+      "tag": "H3",
+      "text": "Performance Closers",
+      "className": "text-2xl font-semibold leading-none tracking-tight text-white"
+    }
+  ],
+  "metrics": [
+    {
+      "text": "Resumo",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Colaboradores",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Metas",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Vendas",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Agendamentos",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "METAR$ 325.000,00",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#1A1F2E] border-white/10"
+    },
+    {
+      "text": "% DA META0.00%",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#1A1F2E] border-white/10"
+    },
+    {
+      "text": "TOP SDR-",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#1A1F2E] border-white/10"
+    },
+    {
+      "text": "TOP CLOSER-",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#1A1F2E] border-white/10"
+    },
+    {
+      "text": "Performance SDRsSDRValor em vendas% das vendasCalls agendadasCalls qualificadasNo-showTx. No-showTx. ComparecimentoTOTALR$ 0,00-0000.00%100.00%",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#1A1F2E] border-white/10"
+    },
+    {
+      "text": "SDRValor em vendas% das vendasCalls agendadasCalls qualificadasNo-showTx. No-showTx. Comparecimento",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "TOTALR$ 0,00-0000.00%100.00%",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10 bg-[#0066FF]/10 font-semibold"
+    },
+    {
+      "text": "Performance ClosersCLOSERValor em vendas% das vendasTicket médioCalls realizadasCalls QualificadasN. contratosTx. conversãoTOTALR$ 0,00-R$ 0,000000.00%",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#1A1F2E] border-white/10"
+    },
+    {
+      "text": "CLOSERValor em vendas% das vendasTicket médioCalls realizadasCalls QualificadasN. contratosTx. conversão",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "TOTALR$ 0,00-R$ 0,000000.00%",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10 bg-[#0066FF]/10 font-semibold"
+    }
+  ],
+  "tables": [
+    {
+      "headers": [
+        "SDR",
+        "Valor em vendas",
+        "% das vendas",
+        "Calls agendadas",
+        "Calls qualificadas",
+        "No-show",
+        "Tx. No-show",
+        "Tx. Comparecimento"
+      ],
+      "rows": [
+        [
+          "TOTAL",
+          "R$ 0,00",
+          "-",
+          "0",
+          "0",
+          "0",
+          "0.00%",
+          "100.00%"
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "CLOSER",
+        "Valor em vendas",
+        "% das vendas",
+        "Ticket médio",
+        "Calls realizadas",
+        "Calls Qualificadas",
+        "N. contratos",
+        "Tx. conversão"
+      ],
+      "rows": [
+        [
+          "TOTAL",
+          "R$ 0,00",
+          "-",
+          "R$ 0,00",
+          "0",
+          "0",
+          "0",
+          "0.00%"
+        ]
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "text": "Marco 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-48 bg-[#1A1F2E] border-white/10 text-white"
+    },
+    {
+      "text": "Resumo",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Colaboradores",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Metas",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Vendas",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    },
+    {
+      "text": "Agendamentos",
+      "className": "justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white flex items-center gap-2"
+    }
+  ],
+  "inputs": [],
+  "bodyText": "Visão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\nCentral de Controle\n\nGerencie colaboradores, metas, vendas e agendamentos\n\nMarco 2026\nResumo\nColaboradores\nMetas\nVendas\nAgendamentos\nMETA\n\nR$ 325.000,00\n\n% DA META\n\n0.00%\n\nTOP SDR\n\n-\n\nTOP CLOSER\n\n-\n\nPerformance SDRs\nSDR\tValor em vendas\t% das vendas\tCalls agendadas\tCalls qualificadas\tNo-show\tTx. No-show\tTx. Comparecimento\nTOTAL\tR$ 0,00\t-\t0\t0\t0\t0.00%\t100.00%\nPerformance Closers\nCLOSER\tValor em vendas\t% das vendas\tTicket médio\tCalls realizadas\tCalls Qualificadas\tN. contratos\tTx. conversão\nTOTAL\tR$ 0,00\t-\tR$ 0,00\t0\t0\t0\t0.00%\n\nTodos os direitos reservados por Blue Ocean®️",
+  "hasCharts": true,
+  "chartCount": 1
+}

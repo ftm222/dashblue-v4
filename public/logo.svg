@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+  <!-- Atlas Sync - Geometric A: dark navy + vibrant blue accent -->
+  <!-- Right leg + outer left (navy) -->
+  <path fill="#0f172a" d="M24 4 L6 44 L14 44 L24 24 L34 44 L42 44 Z"/>
+  <!-- Inner facet left leg (vibrant blue) -->
+  <path fill="#0ea5e9" d="M24 4 L14 44 L20 30 Z"/>
+</svg>

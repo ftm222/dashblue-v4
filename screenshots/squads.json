@@ -1,0 +1,413 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/squads",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Guerra de Squads",
+      "className": "text-white font-outfit font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Guerra de Squads",
+      "className": "text-white font-black text-center mb-8 md:mb-12 text-2xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "HOT DOGS",
+      "className": "text-white font-black mb-4 md:mb-6 break-words text-xl md:text-3xl lg:text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "CORVO AZUL",
+      "className": "text-white font-black mb-4 md:mb-6 break-words text-xl md:text-3xl lg:text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "KI KARNES",
+      "className": "text-white font-black mb-4 md:mb-6 break-words text-xl md:text-3xl lg:text-4xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Meta Individual por Squad",
+      "className": "text-[#0B1120] font-outfit font-bold tracking-tight text-5xl mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "Hot Dogs",
+      "className": "font-black text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Corvo Azul",
+      "className": "font-black text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Ki Karnes",
+      "className": "font-black text-4xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Comparação de Métricas",
+      "className": "text-[#0B1120] font-black text-center mb-8 text-2xl sm:text-3xl md:text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Receita Total",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Contratos",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Ticket Médio",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Taxa Conversão",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Calls Realizadas",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Calls Qualificadas",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Taxa Qualificação",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Taxa Show",
+      "className": "text-gray-700 font-bold text-lg mb-4 text-center"
+    },
+    {
+      "tag": "H2",
+      "text": "Desempenho Individual dos Guerreiros",
+      "className": "text-white font-black text-center mb-12 text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Hot Dogs",
+      "className": "font-black text-white mb-2 text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Corvo Azul",
+      "className": "font-black text-white mb-2 text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Ki Karnes",
+      "className": "font-black text-white mb-2 text-2xl"
+    },
+    {
+      "tag": "H2",
+      "text": "📊 Projeções para Fim do Mês",
+      "className": "text-[#0B1120] font-black text-center mb-12 text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Hot Dogs",
+      "className": "font-bold text-xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Corvo Azul",
+      "className": "font-bold text-xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Ki Karnes",
+      "className": "font-bold text-xl"
+    },
+    {
+      "tag": "H3",
+      "text": "📊 Análise Comparativa dos Cenários",
+      "className": "text-white font-bold text-center mb-8 text-2xl"
+    },
+    {
+      "tag": "H4",
+      "text": "🎯 Insights Estratégicos:",
+      "className": "text-[#00E5CC] font-bold mb-4 text-lg"
+    },
+    {
+      "tag": "H2",
+      "text": "🏆 Hot Dogs na Liderança!",
+      "className": "font-black text-white mb-4 text-4xl md:text-6xl"
+    }
+  ],
+  "metrics": [
+    {
+      "text": "Métrica🔴HOT DOGS🔵CORVO AZUL🟠KI KARNES",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-50 hover:to-gray-100"
+    },
+    {
+      "text": "Receita TotalR$ 31.333,33🟢R$ 27.560,00R$ 17.000,00",
+      "className": "border-b data-[state=selected]:bg-muted bg-white hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Contratos10🟢75",
+      "className": "border-b data-[state=selected]:bg-muted bg-gray-50/50 hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Ticket MédioR$ 3.133,33R$ 3.937,14🟢R$ 3.400,00",
+      "className": "border-b data-[state=selected]:bg-muted bg-white hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Taxa Conversão13.2%🟢6.7%5.1%",
+      "className": "border-b data-[state=selected]:bg-muted bg-gray-50/50 hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Calls Realizadas76105🟢98",
+      "className": "border-b data-[state=selected]:bg-muted bg-white hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Calls Qualificadas42🟢3937",
+      "className": "border-b data-[state=selected]:bg-muted bg-gray-50/50 hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Taxa Qualificação55.3%🟢37.1%37.8%",
+      "className": "border-b data-[state=selected]:bg-muted bg-white hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "Taxa Show0.0%0.0%0.0%",
+      "className": "border-b data-[state=selected]:bg-muted bg-gray-50/50 hover:bg-gray-100/50 transition-colors"
+    },
+    {
+      "text": "🔴Hot Dogs🏆 Líder em ReceitaPosiçãoMembroFunçãoReceitaContratosStatus🥇ViníciusSDRR$ 28.333,339👑🥈CauãCloserR$ 22.000,007🥉BrunoCloserR$ 9.333,333Total do SquadR$ 31.333,33Média por MembroR$ 10.444,",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#151E35] border-l-8 p-6 md:p-8"
+    },
+    {
+      "text": "PosiçãoMembroFunçãoReceitaContratosStatus",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🥇ViníciusSDRR$ 28.333,339👑",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🥈CauãCloserR$ 22.000,007",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🥉BrunoCloserR$ 9.333,333",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🔵Corvo AzulPosiçãoMembroFunçãoReceitaContratosStatus🥇AndreySDRR$ 27.560,007👑🥈MarcosCloserR$ 14.300,003🥉Gabriel FranklinCloserR$ 13.260,004Total do SquadR$ 27.560,00Média por MembroR$ 9.186,67",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#151E35] border-l-8 p-6 md:p-8"
+    },
+    {
+      "text": "PosiçãoMembroFunçãoReceitaContratosStatus",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🥇AndreySDRR$ 27.560,007👑",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🥈MarcosCloserR$ 14.300,003",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🥉Gabriel FranklinCloserR$ 13.260,004",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50 border-white/10"
+    },
+    {
+      "text": "🟠Ki KarnesPosiçãoMembroFunçãoReceitaContratosStatus🥇Gabriel FernandesCloserR$ 15.000,004👑🥈Brunno VazSDRR$ 14.000,004🥉DaviCloserR$ 2.000,001Total do SquadR$ 17.000,00Média por MembroR$ 5.666,67",
+      "className": "rounded-lg border text-card-foreground shadow-sm bg-[#151E35] border-l-8 p-6 md:p-8"
+    }
+  ],
+  "tables": [
+    {
+      "headers": [
+        "Métrica",
+        "🔴HOT DOGS",
+        "🔵CORVO AZUL",
+        "🟠KI KARNES"
+      ],
+      "rows": [
+        [
+          "Receita Total",
+          "R$ 31.333,33🟢",
+          "R$ 27.560,00",
+          "R$ 17.000,00"
+        ],
+        [
+          "Contratos",
+          "10🟢",
+          "7",
+          "5"
+        ],
+        [
+          "Ticket Médio",
+          "R$ 3.133,33",
+          "R$ 3.937,14🟢",
+          "R$ 3.400,00"
+        ],
+        [
+          "Taxa Conversão",
+          "13.2%🟢",
+          "6.7%",
+          "5.1%"
+        ],
+        [
+          "Calls Realizadas",
+          "76",
+          "105🟢",
+          "98"
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "Posição",
+        "Membro",
+        "Função",
+        "Receita",
+        "Contratos",
+        "Status"
+      ],
+      "rows": [
+        [
+          "🥇",
+          "Vinícius",
+          "SDR",
+          "R$ 28.333,33",
+          "9",
+          "👑"
+        ],
+        [
+          "🥈",
+          "Cauã",
+          "Closer",
+          "R$ 22.000,00",
+          "7",
+          ""
+        ],
+        [
+          "🥉",
+          "Bruno",
+          "Closer",
+          "R$ 9.333,33",
+          "3",
+          ""
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "Posição",
+        "Membro",
+        "Função",
+        "Receita",
+        "Contratos",
+        "Status"
+      ],
+      "rows": [
+        [
+          "🥇",
+          "Andrey",
+          "SDR",
+          "R$ 27.560,00",
+          "7",
+          "👑"
+        ],
+        [
+          "🥈",
+          "Marcos",
+          "Closer",
+          "R$ 14.300,00",
+          "3",
+          ""
+        ],
+        [
+          "🥉",
+          "Gabriel Franklin",
+          "Closer",
+          "R$ 13.260,00",
+          "4",
+          ""
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "Posição",
+        "Membro",
+        "Função",
+        "Receita",
+        "Contratos",
+        "Status"
+      ],
+      "rows": [
+        [
+          "🥇",
+          "Gabriel Fernandes",
+          "Closer",
+          "R$ 15.000,00",
+          "4",
+          "👑"
+        ],
+        [
+          "🥈",
+          "Brunno Vaz",
+          "SDR",
+          "R$ 14.000,00",
+          "4",
+          ""
+        ],
+        [
+          "🥉",
+          "Davi",
+          "Closer",
+          "R$ 2.000,00",
+          "1",
+          ""
+        ]
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "text": "Modo TV",
+      "className": "items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 hidden md:flex bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-6 py-3 text-lg"
+    },
+    {
+      "text": "Atualizar",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-3 py-2 md:px-6 md:py-3 text-sm md:text-lg"
+    },
+    {
+      "text": "Março 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[200px] bg-[#151E35] border-white/20 text-white hover:bg-white/5"
+    },
+    {
+      "text": "Esta Semana",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium px-4 py-2 text-base bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Este Mês",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 font-outfit font-medium px-4 py-2 text-base bg-[#0066FF] text-white hover:bg-[#0066FF]/90"
+    },
+    {
+      "text": "Período Personalizado",
+      "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium justify-start px-4 py-2 text-base min-w-[240px] bg-transparent border-white/20 text-white hover:bg-white/10"
+    }
+  ],
+  "inputs": [],
+  "bodyText": "Guerra de Squads\n\nHot Dogs 🔴 vs Corvo Azul 🔵 vs Ki Karnes 🟠\n\nModo TV\nAtualizar\n\n14 De Março De 2026\n\nAtualizado: 00:52:27\n\nVisão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\n\nFiltrar Período:\n\nMês:\nMarço 2026\nEsta Semana\nEste Mês\nPeríodo Personalizado\n\nPeríodo:\n\n01/03/2026 - 31/03/2026\n\nGuerra de Squads\n🔴\nHOT DOGS\n\nR$ 31.333,33\n\n10 contratos\n\n41.3%\n🏆\n🔵\nCORVO AZUL\n\nR$ 27.560,00\n\n7 contratos\n\n36.3%\n🟠\nKI KARNES\n\nR$ 17.000,00\n\n5 contratos\n\n22.4%\n\n🏆 Hot Dogs lidera com +R$ 3.773,33 de vantagem\n\nMeta Individual por Squad\n\nMarco 2026 • Modelo MRR\n\n🔴\nHot Dogs\nProgresso da Meta\n27%\nRealizado\nR$ 31.333,33\nMeta do Squad\nR$ 116.667,00\nFaltam R$ 85.333,67\n🔵\nCorvo Azul\nProgresso da Meta\n24%\nRealizado\nR$ 27.560,00\nMeta do Squad\nR$ 116.667,00\nFaltam R$ 89.107,00\n🟠\nKi Karnes\nProgresso da Meta\n15%\nRealizado\nR$ 17.000,00\nMeta do Squad\nR$ 116.667,00\nFaltam R$ 99.667,00\nComparação de Métricas\nMÉTRICA\t\n🔴\nHOT DOGS\n\t\n🔵\nCORVO AZUL\n\t\n🟠\nKI KARNES\n\nReceita Total\t\nR$ 31.333,33\n🟢\n\t\nR$ 27.560,00\n\t\nR$ 17.000,00\n\nContratos\t\n10\n🟢\n\t\n7\n\t\n5\n\nTicket Médio\t\nR$ 3.133,33\n\t\nR$ 3.937,14\n🟢\n\t\nR$ 3.400,00\n\nTaxa Conversão\t\n13.2%\n🟢\n\t\n6.7%\n\t\n5.1%\n\nCalls Realizadas\t\n76\n\t\n105\n🟢\n\t\n98\n\nCalls Qualificadas\t\n42\n🟢\n\t\n39\n\t\n37\n\nTaxa Qualificação\t\n55.3%\n🟢\n\t\n37.1%\n\t\n37.8%\n\nTaxa Show\t\n0.0%\n\t\n0.0%\n\t\n0.0%\nDesempenho Individual dos Guerreiros\n🔴\nHot Dogs\n🏆 Líder em Receita\nPosição\tMembro\tFunção\tReceita\tContratos\tStatus\n🥇\tVinícius\tSDR\tR$ 28.333,33\t9\t\n👑\n\n🥈\tCauã\tCloser\tR$ 22.000,00\t7\t\n\n🥉\tBruno\tCloser\tR$ 9.333,33\t3\t\n\nTotal do Squad\n\nR$ 31.333,33\n\nMédia por Membro\n\nR$ 10.444,44\n\n🔵\nCorvo Azul\nPosição\tMembro\tFunção\tReceita\tContratos\tStatus\n🥇\tAndrey\tSDR\tR$ 27.560,00\t7\t\n👑\n\n🥈\tMarcos\tCloser\tR$ 14.300,00\t3\t\n\n🥉\tGabriel Franklin\tCloser\tR$ 13.260,00\t4\t\n\nTotal do Squad\n\nR$ 27.560,00\n\nMédia por Membro\n\nR$ 9.186,67\n\n🟠\nKi Karnes\nPosição\tMembro\tFunção\tReceita\tContratos\tStatus\n🥇\tGabriel Fernandes\tCloser\tR$ 15.000,00\t4\t\n👑\n\n🥈\tBrunno Vaz\tSDR\tR$ 14.000,00\t4\t\n\n🥉\tDavi\tCloser\tR$ 2.000,00\t1\t\n\nTotal do Squad\n\nR$ 17.000,00\n\nMédia por Membro\n\nR$ 5.666,67\n\n📊 Projeções para Fim do Mês\n🔴\nHot Dogs\n\nRange de Projeção\n\nR$ 31.333,33 - R$ 31.333,33\n\nMeta R$ 116.667,00\n😰\n\nPESSIMISTA\n\nR$ 31.333,33\n\n30%\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 10.5% • Ticket 3k\n\n😐\n\nREALISTA\n\nR$ 31.333,33\n\n50% ⭐\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 13.2% • Ticket 3k\n\n🤩\n\nOTIMISTA\n\nR$ 31.333,33\n\n20%\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 15.8% • Ticket 4k\n\n🔵\nCorvo Azul\n\nRange de Projeção\n\nR$ 27.560,00 - R$ 27.560,00\n\nMeta R$ 116.667,00\n😰\n\nPESSIMISTA\n\nR$ 27.560,00\n\n30%\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 5.3% • Ticket 3k\n\n😐\n\nREALISTA\n\nR$ 27.560,00\n\n50% ⭐\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 6.7% • Ticket 4k\n\n🤩\n\nOTIMISTA\n\nR$ 27.560,00\n\n20%\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 8.0% • Ticket 5k\n\n🟠\nKi Karnes\n\nRange de Projeção\n\nR$ 17.000,00 - R$ 17.000,00\n\nMeta R$ 116.667,00\n😰\n\nPESSIMISTA\n\nR$ 17.000,00\n\n30%\n\n⚠️ Abaixo da meta\n\nShow 0.0% • Conv 4.1% • Ticket 3k\n\n😐\n\nREALISTA\n\nR$ 17.000,00\n\n50% ⭐\n\n⚠️ Abaixo da meta\n\nShow 0.0% • ",
+  "hasCharts": false,
+  "chartCount": 0
+}

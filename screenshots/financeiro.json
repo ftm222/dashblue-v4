@@ -1,0 +1,393 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/financeiro",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Financeiro",
+      "className": "text-white font-outfit font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Resumo Financeiro",
+      "className": "text-white font-black mb-8 text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "RECEITA TOTAL",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-sm mb-4"
+    },
+    {
+      "tag": "H3",
+      "text": "RECEITA ASSINADA",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-sm mb-4"
+    },
+    {
+      "tag": "H3",
+      "text": "RECEITA PAGA",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-sm mb-4"
+    },
+    {
+      "tag": "H3",
+      "text": "GAP DE ASSINATURA",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-sm mb-4"
+    },
+    {
+      "tag": "H3",
+      "text": "GAP DE PAGAMENTO",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-sm mb-4"
+    },
+    {
+      "tag": "H3",
+      "text": "GAP FINANCEIRO TOTAL",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-sm mb-4"
+    },
+    {
+      "tag": "H2",
+      "text": "Funil Financeiro",
+      "className": "text-[#0B1120] font-black mb-8 text-5xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Análise por Squad",
+      "className": "text-white font-black mb-8 text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "🔴 Hot Dogs",
+      "className": "text-white font-black mb-6 text-3xl"
+    },
+    {
+      "tag": "H3",
+      "text": "🔵 Corvo Azul",
+      "className": "text-white font-black mb-6 text-3xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Análise por Colaborador",
+      "className": "text-[#0B1120] font-black mb-8 text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Top SDRs por Receita Paga",
+      "className": "text-[#0B1120] font-black mb-6 text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Top Closers por Receita Paga",
+      "className": "text-[#0B1120] font-black mb-6 text-2xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Contratos Detalhados",
+      "className": "text-white font-black mb-8 text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Contratos Detalhados",
+      "className": "text-xl font-bold text-white"
+    },
+    {
+      "tag": "H2",
+      "text": "Análise Gráfica",
+      "className": "text-[#0B1120] font-black text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Distribuição de Status",
+      "className": "text-[#0B1120] font-black text-xl mb-6"
+    },
+    {
+      "tag": "H3",
+      "text": "Receita por Squad",
+      "className": "text-[#0B1120] font-black text-xl mb-6"
+    },
+    {
+      "tag": "H3",
+      "text": "Previsão de Recebimento",
+      "className": "text-[#0B1120] font-black text-xl mb-6"
+    }
+  ],
+  "metrics": [
+    {
+      "text": "Nome da CallDataSDRCloserValorAssinaturaPagamentoStatus GeralSquad",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-transparent"
+    },
+    {
+      "text": "Blue Ocean | Odonty7/3/2026ANDREYMARCOSR$ 8.000,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Aprovaleges - Presencial 09/03/2026BRUNNO VAZG. FERNANDESR$ 5.000,00AssinadoLink EnviadoParcial🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "R2 🐋:Blue Ocean | Arch Software13/3/2026VINICIUSCAUÃR$ 4.500,00AssinadoLink EnviadoParcial🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Momentos Tecnologia05/03/2026ANDREYG. FRANKLINR$ 4.160,00AssinadoPagoCompleto🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Rufi02/03/2026BRUNNO VAZG. FERNANDESR$ 4.000,00AssinadoPagoCompleto🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Ask Leo12/3/2026ANDREYMARCOSR$ 3.800,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "R2🥇: Blue Ocean | Safyra03/03/2026ANDREYG. FRANKLINR$ 3.600,00AssinadoLink EnviadoParcial🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Vetdesk03/03/2026VINICIUSCAUÃR$ 3.500,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Lei.ai02/03/2026VINICIUSBRUNOR$ 3.333,33AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | StoryPet02/03/2026VINICIUSCAUÃR$ 3.000,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Akifretes02/03/2026VINICIUSBRUNOR$ 3.000,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Leven Tecnologia03/03/2026BRUNNO VAZG. FERNANDESR$ 3.000,00AssinadoPagoCompleto🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Ebookr.ai03/03/2026VINICIUSCAUÃR$ 3.000,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | UaizyChat03/03/2026OutroG. FERNANDESR$ 3.000,00AssinadoPagoCompleto🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Autozen04/03/2026VINICIUSBRUNOR$ 3.000,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Simulado AI05/03/2026OutroCAUÃR$ 3.000,00AssinadoPagoCompleto🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Asd9/3/2026ANDREYG. FRANKLINR$ 3.000,00AssinadoLink EnviadoParcial🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | Vendai13/3/2026VINICIUSCAUÃR$ 3.000,00AssinadoLink EnviadoParcial🔴 Hot Dogs",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    },
+    {
+      "text": "Blue Ocean | WeSales02/03/2026ANDREYG. FRANKLINR$ 2.500,00AssinadoLink EnviadoParcial🔵 Corvo Azul",
+      "className": "border-b transition-colors data-[state=selected]:bg-muted border-white/10 hover:bg-white/5"
+    }
+  ],
+  "tables": [
+    {
+      "headers": [
+        "SDR",
+        "Total",
+        "Pago",
+        "Taxa"
+      ],
+      "rows": [
+        [
+          "🥇🔵VINICIUS",
+          "R$ 28.333,33",
+          "R$ 18.833,33",
+          "66.5%"
+        ],
+        [
+          "🥈⚪ANDREY",
+          "R$ 27.560,00",
+          "R$ 18.460,00",
+          "67.0%"
+        ],
+        [
+          "🥉⚪BRUNNO VAZ",
+          "R$ 14.000,00",
+          "R$ 9.000,00",
+          "64.3%"
+        ],
+        [
+          "⚪Outro",
+          "R$ 6.000,00",
+          "R$ 6.000,00",
+          "100.0%"
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "Closer",
+        "Total",
+        "Pago",
+        "Taxa"
+      ],
+      "rows": [
+        [
+          "🥇🔴MARCOS",
+          "R$ 14.300,00",
+          "R$ 14.300,00",
+          "100.0%"
+        ],
+        [
+          "🥈🔴CAUÃ",
+          "R$ 22.000,00",
+          "R$ 12.500,00",
+          "56.8%"
+        ],
+        [
+          "🥉🔵G. FERNANDES",
+          "R$ 15.000,00",
+          "R$ 10.000,00",
+          "66.7%"
+        ],
+        [
+          "🔴BRUNO",
+          "R$ 9.333,33",
+          "R$ 9.333,33",
+          "100.0%"
+        ],
+        [
+          "🔵G. FRANKLIN",
+          "R$ 13.260,00",
+          "R$ 4.160,00",
+          "31.4%"
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "Nome da Call",
+        "Data",
+        "SDR",
+        "Closer",
+        "Valor",
+        "Assinatura",
+        "Pagamento",
+        "Status Geral",
+        "Squad"
+      ],
+      "rows": [
+        [
+          "Blue Ocean | Odonty",
+          "7/3/2026",
+          "ANDREY",
+          "MARCOS",
+          "R$ 8.000,00",
+          "Assinado",
+          "Pago",
+          "Completo",
+          "🔴 Hot Dogs"
+        ],
+        [
+          "Blue Ocean | Aprovaleges - Presencial",
+          "09/03/2026",
+          "BRUNNO VAZ",
+          "G. FERNANDES",
+          "R$ 5.000,00",
+          "Assinado",
+          "Link Enviado",
+          "Parcial",
+          "🔵 Corvo Azul"
+        ],
+        [
+          "R2 🐋:Blue Ocean | Arch Software",
+          "13/3/2026",
+          "VINICIUS",
+          "CAUÃ",
+          "R$ 4.500,00",
+          "Assinado",
+          "Link Enviado",
+          "Parcial",
+          "🔴 Hot Dogs"
+        ],
+        [
+          "Blue Ocean | Momentos Tecnologia",
+          "05/03/2026",
+          "ANDREY",
+          "G. FRANKLIN",
+          "R$ 4.160,00",
+          "Assinado",
+          "Pago",
+          "Completo",
+          "🔵 Corvo Azul"
+        ],
+        [
+          "Blue Ocean | Rufi",
+          "02/03/2026",
+          "BRUNNO VAZ",
+          "G. FERNANDES",
+          "R$ 4.000,00",
+          "Assinado",
+          "Pago",
+          "Completo",
+          "🔵 Corvo Azul"
+        ]
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "text": "Modo TV",
+      "className": "items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 hidden md:flex bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-6 py-3 text-lg"
+    },
+    {
+      "text": "Atualizar",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-3 py-2 md:px-6 md:py-3 text-sm md:text-lg"
+    },
+    {
+      "text": "Março 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[200px] bg-[#151E35] border-white/20 text-white hover:bg-white/5"
+    },
+    {
+      "text": "Esta Semana",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium px-4 py-2 text-base bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Este Mês",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 font-outfit font-medium px-4 py-2 text-base bg-[#0066FF] text-white hover:bg-[#0066FF]/90"
+    },
+    {
+      "text": "Período Personalizado",
+      "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium justify-start px-4 py-2 text-base min-w-[240px] bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Exportar CSV",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+    },
+    {
+      "text": "Todos",
+      "className": "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 bg-[#0B1120] border-white/10 text-white"
+    },
+    {
+      "text": "Todos",
+      "className": "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 bg-[#0B1120] border-white/10 text-white"
+    },
+    {
+      "text": "Todos Squads",
+      "className": "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 bg-[#0B1120] border-white/10 text-white"
+    }
+  ],
+  "inputs": [
+    {
+      "type": "text",
+      "name": "",
+      "id": "",
+      "placeholder": "Buscar por nome, SDR ou Closer...",
+      "value": ""
+    }
+  ],
+  "bodyText": "Financeiro\n\nAnálise detalhada da saúde financeira\n\nModo TV\nAtualizar\n\nSábado, 14 De Mar. De 2026\n\nAtualizado: 00:52\n\nVisão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\n\nFiltrar Período:\n\nMês:\nMarço 2026\nEsta Semana\nEste Mês\nPeríodo Personalizado\n\nPeríodo:\n\n01/03/2026 - 31/03/2026\n\nResumo Financeiro\nRECEITA TOTAL\n\nR$ 75.893,33\n\n23 contratos fechados\n\nRECEITA ASSINADA\n\nR$ 75.893,33\n\n23 contratos assinados\n\n100.0% do total\n\nRECEITA PAGA\n\nR$ 52.293,33\n\n16 contratos pagos\n\n68.9% recebido\n\nGAP DE ASSINATURA\n\nR$ 0,00\n\n0 contratos pendentes\n\nGAP DE PAGAMENTO\n\nR$ 23.600,00\n\n7 aguardando pagamento\n\n⚠️ Atenção\nGAP FINANCEIRO TOTAL\n\nR$ 23.600,00\n\nTotal ainda não recebido\n\nFunil Financeiro\n\nRECEITA TOTAL\n\nR$ 75.893,33\n\n100%\n\n23 contratos\n\n100.0% assinados\n\nGap: R$ 0,00\n\nRECEITA ASSINADA\n\nR$ 75.893,33\n\n100.0%\n\n23 contratos\n\n68.9% pagos\n\nGap: R$ 23.600,00\n\nRECEITA PAGA\n\nR$ 52.293,33\n\n68.9%\n\n16 contratos\n\n⚠️ Meta: 90%\nAnálise por Squad\n🔴 Hot Dogs\n\nRECEITA TOTAL\n\nR$ 47.633,33\n\nRECEITA PAGA\n\nR$ 38.133,33\n\nGAP FINANCEIRO\n\nR$ 9.500,00\n\nTAXA DE RECEBIMENTO\n\n80.1%\n\n12 de 15 contratos pagos\n\n🔵 Corvo Azul\n\nRECEITA TOTAL\n\nR$ 28.260,00\n\nRECEITA PAGA\n\nR$ 14.160,00\n\nGAP FINANCEIRO\n\nR$ 14.100,00\n\nTAXA DE RECEBIMENTO\n\n50.1%\n\n4 de 8 contratos pagos\n\nAnálise por Colaborador\nTop SDRs por Receita Paga\nSDR\tTOTAL\tPAGO\tTAXA\n\n🥇\n🔵\nVINICIUS\n\tR$ 28.333,33\tR$ 18.833,33\t\n66.5%\n\n\n🥈\n⚪\nANDREY\n\tR$ 27.560,00\tR$ 18.460,00\t\n67.0%\n\n\n🥉\n⚪\nBRUNNO VAZ\n\tR$ 14.000,00\tR$ 9.000,00\t\n64.3%\n\n\n⚪\nOutro\n\tR$ 6.000,00\tR$ 6.000,00\t\n100.0%\nTop Closers por Receita Paga\nCLOSER\tTOTAL\tPAGO\tTAXA\n\n🥇\n🔴\nMARCOS\n\tR$ 14.300,00\tR$ 14.300,00\t\n100.0%\n\n\n🥈\n🔴\nCAUÃ\n\tR$ 22.000,00\tR$ 12.500,00\t\n56.8%\n\n\n🥉\n🔵\nG. FERNANDES\n\tR$ 15.000,00\tR$ 10.000,00\t\n66.7%\n\n\n🔴\nBRUNO\n\tR$ 9.333,33\tR$ 9.333,33\t\n100.0%\n\n\n🔵\nG. FRANKLIN\n\tR$ 13.260,00\tR$ 4.160,00\t\n31.4%\n\n\n🔴\nDAVI\n\tR$ 2.000,00\tR$ 2.000,00\t\n100.0%\n\n\n🔴\nANTÔNIO\n\tR$ 0,00\tR$ 0,00\t\n0.0%\nContratos Detalhados\nContratos Detalhados\nExportar CSV\nTodos\nTodos\nTodos Squads\nNome da Call\tData\tSDR\tCloser\t\nValor\n\tAssinatura\tPagamento\tStatus Geral\tSquad\nBlue Ocean | Odonty\t7/3/2026\tANDREY\tMARCOS\tR$ 8.000,00\tAssinado\tPago\tCompleto\t🔴 Hot Dogs\nBlue Ocean | Aprovaleges - Presencial\t09/03/2026\tBRUNNO VAZ\tG. FERNANDES\tR$ 5.000,00\tAssinado\tLink Enviado\tParcial\t🔵 Corvo Azul\nR2 🐋:Blue Ocean | Arch Software\t13/3/2026\tVINICIUS\tCAUÃ\tR$ 4.500,00\tAssinado\tLink Enviado\tParcial\t🔴 Hot Dogs\nBlue Ocean | Momentos Tecnologia\t05/03/2026\tANDREY\tG. FRANKLIN\tR$ 4.160,00\tAssinado\tPago\tCompleto\t🔵 Corvo Azul\nBlue Ocean | Rufi\t02/03/2026\tBRUNNO VAZ\tG. FERNANDES\tR$ 4.000,00\tAssinado\tPago\tCompleto\t🔵 Corvo Azul\nBlue Ocean | Ask Leo\t12/3/2026\tANDREY\tMARCOS\tR$ 3.800,00\tAssinado\tPago\tCompleto\t🔴 Hot Dogs\nR2🥇: Blue Ocean | Safyra\t03/03/2026\tANDREY\tG. FRANKLIN\tR$ 3.600,00\tAssinado\tLink Enviado\tParcial\t🔵 Corvo Azul\nBlue Ocean | Vetdesk\t03/03/2026\tVINICIUS\tCAUÃ\tR$ 3.500,00\tAssinado\tPago\tCompleto\t🔴 Hot Dogs\nBlue Ocean | Lei.ai\t02/03/2026\tVINICIUS\tBRUNO\tR$ 3.333,33\tAssinado\tPago\tCompleto\t🔴 Hot Dogs\nBlue Ocean | StoryPe",
+  "hasCharts": true,
+  "chartCount": 152
+}

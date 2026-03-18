@@ -1,0 +1,342 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/trafego",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "🎯 Tráfego Pago",
+      "className": "text-white font-outfit font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H2",
+      "text": "📊 Metas de Tráfego - março de 2026",
+      "className": "text-white font-black mb-8 capitalize text-3xl md:text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "💰 Meta de Investimento - R$ 220.000",
+      "className": "text-white font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "📊 Meta de Leads - 1.100 leads",
+      "className": "text-white font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "💵 Meta de CAC - Máx. R$ 2.500",
+      "className": "text-white font-bold text-lg"
+    },
+    {
+      "tag": "H2",
+      "text": "💰 Métricas Principais",
+      "className": "text-white font-black mb-8 text-3xl md:text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "INVESTIMENTO TOTAL",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-xs mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "LEADS GERADOS",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-xs mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "LEADS QUALIFICADOS",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-xs mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "FECHAMENTOS",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-xs mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "ROAS",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-xs mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "CAC (Custo de Aquisição)",
+      "className": "text-[#94A3B8] uppercase tracking-wider font-semibold text-xs mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "💎 ROI (Return on Investment) - INVESTIMENTO vs FATURAMENTO",
+      "className": "text-white font-bold text-xl sm:text-2xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Funil de Tráfego - Jornada Completa do Lead",
+      "className": "text-white font-black mb-8 text-3xl md:text-4xl"
+    },
+    {
+      "tag": "H2",
+      "text": "📋 Tabela Detalhada de Campanhas",
+      "className": "text-white font-black mb-8 text-3xl md:text-4xl"
+    },
+    {
+      "tag": "H2",
+      "text": "📢 Análise por Canal",
+      "className": "text-white font-black mb-8 text-3xl md:text-4xl"
+    },
+    {
+      "tag": "H3",
+      "text": "META ADS ADS",
+      "className": "text-white font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "🏆 TOP 3 CAMPANHAS DO MÊS",
+      "className": "text-white font-black text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Teste - FORM SaaS Padrão + Site | Teste Criativo | FULL ADV",
+      "className": "text-white font-black text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "B2B | Leads | Formulário | Instagram | 04/12",
+      "className": "text-white font-black text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "MVP | FORM NATIVO | AQUSIÇÃO (PÚBLICO FRIO)",
+      "className": "text-white font-black text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "🤖 Agente de IA - Tráfego Pago",
+      "className": "text-white font-black text-xl md:text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "🔗 Conexão: Tráfego → Comercial",
+      "className": "text-white font-black text-2xl"
+    },
+    {
+      "tag": "H4",
+      "text": "Hot Dogs 🌭",
+      "className": "text-white font-bold mb-4 text-xl"
+    },
+    {
+      "tag": "H4",
+      "text": "Corvo Azul 🦅",
+      "className": "text-white font-bold mb-4 text-xl"
+    },
+    {
+      "tag": "H4",
+      "text": "📊 Leads por Campanha → SDR → Closer",
+      "className": "text-white font-bold mb-6 text-xl"
+    },
+    {
+      "tag": "H3",
+      "text": "📊 Comparação: Marco vs Fevereiro",
+      "className": "text-white font-black text-2xl"
+    }
+  ],
+  "metrics": [],
+  "tables": [
+    {
+      "headers": [
+        "Campanha",
+        "Canal",
+        "Objetivo",
+        "Invest.",
+        "Leads",
+        "Qualif.",
+        "Fecha.",
+        "ROAS",
+        "ROI",
+        "CAC",
+        "Status"
+      ],
+      "rows": [
+        [
+          "B2B | Leads | Formulário | Instagram | 04/12",
+          "Meta Ads",
+          "Formulário",
+          "R$ 4.7k",
+          "54",
+          "32(59.3%)",
+          "6",
+          "4.1x",
+          "310%",
+          "R$ 788",
+          "Bom"
+        ],
+        [
+          "Teste - FORM SaaS Padrão + Site | Teste Criativo | FULL ADV",
+          "Meta Ads",
+          "Outros",
+          "R$ 4.6k",
+          "8",
+          "5(62.5%)",
+          "6",
+          "4.1x",
+          "310%",
+          "R$ 759",
+          "Bom"
+        ],
+        [
+          "FORM NATIVO | CRIATIVOS MATHEUS | AQUSIÇÃO (PÚBLICO FRIO) — 2.0",
+          "Meta Ads",
+          "Formulário",
+          "R$ 2.5k",
+          "9",
+          "5(55.6%)",
+          "3",
+          "4.1x",
+          "310%",
+          "R$ 821",
+          "Bom"
+        ],
+        [
+          "FORM NATIVO | CRIATIVOS ANTONIO | AQUSIÇÃO (PÚBLICO FRIO) — Cópia — Cópia",
+          "Meta Ads",
+          "Formulário",
+          "R$ 2.4k",
+          "5",
+          "3(60.0%)",
+          "3",
+          "4.1x",
+          "310%",
+          "R$ 816",
+          "Bom"
+        ],
+        [
+          "FORM NATIVO | CRIATIVOS MATHEUS | AQUSIÇÃO (PÚBLICO FRIO)",
+          "Meta Ads",
+          "Formulário",
+          "R$ 2.2k",
+          "9",
+          "5(55.6%)",
+          "3",
+          "4.1x",
+          "310%",
+          "R$ 733",
+          "Bom"
+        ]
+      ]
+    },
+    {
+      "headers": [
+        "Campanha",
+        "Leads",
+        "SDR",
+        "Qualificou",
+        "Closer",
+        "Contratos",
+        "Valor"
+      ],
+      "rows": [
+        [
+          "Google Search",
+          "98",
+          "Vinícius",
+          "45",
+          "G. Fernandes",
+          "4",
+          "R$ 52.0k"
+        ],
+        [
+          "Google Search",
+          "98",
+          "Marcos",
+          "23",
+          "Bruno",
+          "4",
+          "R$ 36.0k"
+        ],
+        [
+          "Campanha Webinar",
+          "142",
+          "Vinícius",
+          "58",
+          "G. Franklin",
+          "3",
+          "R$ 42.0k"
+        ],
+        [
+          "LinkedIn B2B",
+          "76",
+          "Tiago",
+          "34",
+          "G. Fernandes",
+          "3",
+          "R$ 38.5k"
+        ],
+        [
+          "Instagram Reels",
+          "187",
+          "Marcos",
+          "92",
+          "Bruno",
+          "2",
+          "R$ 12.6k"
+        ]
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "text": "Modo TV",
+      "className": "items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 hidden md:flex bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-6 py-3 text-lg"
+    },
+    {
+      "text": "Atualizar",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-3 py-2 md:px-6 md:py-3 text-sm md:text-lg"
+    },
+    {
+      "text": "Março 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[200px] bg-[#151E35] border-white/20 text-white hover:bg-white/5"
+    },
+    {
+      "text": "Esta Semana",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium px-4 py-2 text-base bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Este Mês",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 font-outfit font-medium px-4 py-2 text-base bg-[#0066FF] text-white hover:bg-[#0066FF]/90"
+    },
+    {
+      "text": "Período Personalizado",
+      "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium justify-start px-4 py-2 text-base min-w-[240px] bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Todos Canais",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[150px] bg-[#0B1120] border-white/10 text-white"
+    },
+    {
+      "text": "Todos Status",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[150px] bg-[#0B1120] border-white/10 text-white"
+    },
+    {
+      "text": "Todos Objetivos",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[150px] bg-[#0B1120] border-white/10 text-white"
+    },
+    {
+      "text": "Exportar CSV",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 px-4 py-2 bg-[#0B1120] border-white/10 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Ver Análise Completa",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-purple-500/20 border-2 border-purple-500 text-purple-300 hover:bg-purple-500 hover:text-white transition-all px-6 py-3"
+    }
+  ],
+  "inputs": [
+    {
+      "type": "text",
+      "name": "",
+      "id": "",
+      "placeholder": "Buscar campanha...",
+      "value": ""
+    }
+  ],
+  "bodyText": "🎯 Tráfego Pago\n\nAnálise completa do investimento em mídia e resultados comerciais\n\nModo TV\nAtualizar\n\nSábado, 14 De Mar. De 2026\n\nAtualizado: 00:52\n\nVisão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\n\nFiltrar Período:\n\nMês:\nMarço 2026\nEsta Semana\nEste Mês\nPeríodo Personalizado\n\nPeríodo:\n\n01/03/2026 - 31/03/2026\n\nDados ao vivo da Meta Ads\n📊 Metas De Tráfego - Março De 2026\n💰 Meta de Investimento - R$ 220.000\n8%\nR$ 18.497\n\nSaldo disponível: R$ 201.503 | 17 dias restantes\n\n📊 Meta de Leads - 1.100 leads\n9%\n99 leads\n\nFaltam 1.001 leads para a meta! 🎯\n\n💵 Meta de CAC - Máx. R$ 2.500\n✅\nCAC atual: R$ 804\n\n68% abaixo da meta! 🎉\n\n💰 Métricas Principais\nNo Budget\nINVESTIMENTO TOTAL\n\nR$ 18.497\n\n8% da meta mensal\n\n-90% vs mês anterior\n\nLEADS GERADOS\n\n99 leads\n\nMédia: 3.3 leads/dia\n\n↓ -92% vs mês anterior\n\nExcelente\nLEADS QUALIFICADOS\n\n59 leads\n\nTaxa de qualificação: 59.6%\n\n↓ -92% vs mês anterior\n\nFECHAMENTOS\n\n23 contratos\n\nR$ 75.893 em vendas\n\nTaxa de fechamento: 39.0%\n\nBom\nROAS\n\n4.10x\n\nA cada R$ 1 investido retornou R$ 4.10\n\n0x\n5x\n10x\nDentro da Meta ✅\nCAC (CUSTO DE AQUISIÇÃO)\n\nR$ 804\n\nMeta: R$ 2.500\n\n↑ -80% vs mês anterior\n\n💎 ROI (Return on Investment) - INVESTIMENTO vs FATURAMENTO\n\nINVESTIDO\n\nR$ 18.497\n\n→\n\nFATURADO\n\nR$ 75.893\n\nROI: 310% 🚀\n💰\n\nLucro Líquido:\n\nR$ 57.396\n\n📊\n\nPara cada R$ 1 investido retornou:\n\nR$ 4.10\n\nFunil de Tráfego - Jornada Completa do Lead\n\nINVESTIMENTO\n\nR$ 18.497\n\nIMPRESSÕES\n\n476.060\n\nCPM: R$ 39\n\n100%\n\ndo total\n\n0.53% CTR ↓\n\nCLIQUES\n\n2.541\n\nCPC: R$ 7\n\n0.53%\n\ndo total\n\n3.9% ↓\n\nLEADS GERADOS\n\n99\n\nCPL: R$ 187\n\n0.02%\n\ndo total\n\n301.0% ↓\n\nCALLS AGENDADAS (MQLS)\n\n298\n\nCusto/MQL: R$ 62\n\n0.063%\n\ndo total\n\n78.9% ↓\n\nCALLS REALIZADAS\n\n235\n\nCusto/Call: R$ 79\n\n0.049%\n\ndo total\n\n54.0% ↓\n\nCALLS QUALIFICADAS (SQL)\n\n127\n\nCusto/SQL: R$ 146\n\n0.0267%\n\ndo total\n\n18.1% ↓\n\nFECHAMENTOS\n\n23\n\nCAC: R$ 804\n\n0.0048%\n\ndo total\n\nRECEITA GERADA\n\nR$ 75.893\n\nROAS: 4.10x | ROI: 310%\n\n📋 Tabela Detalhada de Campanhas\nTodos Canais\nTodos Status\nTodos Objetivos\nExportar CSV\nCAMPANHA\n\t\nCANAL\n\t\nOBJETIVO\n\t\nINVEST.\n\t\nLEADS\n\t\nQUALIF.\n\t\nFECHA.\n\t\nROAS\n\t\nROI\n\t\nCAC\n\tSTATUS\nB2B | Leads | Formulário | Instagram | 04/12\tMeta Ads\tFormulário\tR$ 4.7k\t54\t32(59.3%)\t6\t4.1x\t310%\tR$ 788\tBom\nTeste - FORM SaaS Padrão + Site | Teste Criativo | FULL ADV\tMeta Ads\tOutros\tR$ 4.6k\t8\t5(62.5%)\t6\t4.1x\t310%\tR$ 759\tBom\nFORM NATIVO | CRIATIVOS MATHEUS | AQUSIÇÃO (PÚBLICO FRIO) — 2.0\tMeta Ads\tFormulário\tR$ 2.5k\t9\t5(55.6%)\t3\t4.1x\t310%\tR$ 821\tBom\nFORM NATIVO | CRIATIVOS ANTONIO | AQUSIÇÃO (PÚBLICO FRIO) — Cópia — Cópia\tMeta Ads\tFormulário\tR$ 2.4k\t5\t3(60.0%)\t3\t4.1x\t310%\tR$ 816\tBom\nFORM NATIVO | CRIATIVOS MATHEUS | AQUSIÇÃO (PÚBLICO FRIO)\tMeta Ads\tFormulário\tR$ 2.2k\t9\t5(55.6%)\t3\t4.1x\t310%\tR$ 733\tBom\nMVP | FORM NATIVO | AQUSIÇÃO (PÚBLICO FRIO)\tMeta Ads\tFormulário\tR$ 2.1k\t14\t8(57.1%)\t3\t4.1x\t310%\tR$ 703\tBom\nTOTAIS\t6 campanhas\t\tR$ 18.5k\t99\t58\t24\t4.1x\t310%\tR$ 771\t\n📢 Análise por Canal\n📊\nMETA ADS ADS\n100%\n\nINVESTIMENTO\n\nR$ 18.5k\n\nLEADS\n\n99\n\nQUALIFICADOS\n\n58\n\nFECHAMENTOS\n\n24\n\nROAS\n\n4.1x\n\nCAC\n\nR$ 771\n",
+  "hasCharts": false,
+  "chartCount": 0
+}

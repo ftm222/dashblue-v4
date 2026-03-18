@@ -1,4 +1,5 @@
-import { supabase } from "@/lib/supabase";
+import { db, supabase } from "@/lib/supabase";
+
 import type {
   KPI,
   KPIKey,
@@ -19,6 +20,7 @@ import type {
   LogEntry,
   LogWithProfile,
   PersonWithSquad,
+  Collaborator,
 } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -49,6 +51,8 @@ function safeDiv(a: number, b: number): number {
   return b > 0 ? a / b : 0;
 }
 
+type EvidenceRow = { funnel_step: string; value?: number; sdr_id?: string | null; closer_id?: string | null };
+
 // ---------------------------------------------------------------------------
 // fetchKPIs — Overview / Marketing / SDR / Closer
 // ---------------------------------------------------------------------------
@@ -62,13 +66,13 @@ interface EvidenceAgg {
 }
 
 async function aggregateEvidence(period: PeriodRange): Promise<EvidenceAgg> {
-  const { data } = await supabase
+  const { data } = await db
     .from("evidence")
     .select("funnel_step, value")
     .gte("created_at", isoDate(period.from))
     .lte("created_at", isoDate(period.to));
 
-  const rows = data ?? [];
+  const rows = (data ?? []) as { funnel_step: string; value?: number }[];
   const counts: Record<string, number> = {};
   let revenue = 0;
 
@@ -87,13 +91,13 @@ async function aggregateEvidence(period: PeriodRange): Promise<EvidenceAgg> {
 }
 
 async function aggregateCampaigns(period: PeriodRange) {
-  const { data } = await supabase
+  const { data } = await db
     .from("campaigns")
     .select("investment, leads, booked, received, won, revenue")
     .gte("period_start", period.from.toISOString().slice(0, 10))
     .lte("period_end", period.to.toISOString().slice(0, 10));
 
-  const rows = data ?? [];
+  const rows = (data ?? []) as { investment: number; leads: number; booked: number; received: number; won: number; revenue: number }[];
   return {
     investment: rows.reduce((s, r) => s + r.investment, 0),
     leads: rows.reduce((s, r) => s + r.leads, 0),
@@ -202,7 +206,7 @@ export async function fetchFunnel(
   period: PeriodRange,
   entity?: { personId?: string },
 ): Promise<FunnelStep[]> {
-  let query = supabase
+  let query = db
     .from("evidence")
     .select("*")
     .gte("created_at", isoDate(period.from))
@@ -213,20 +217,21 @@ export async function fetchFunnel(
   }
 
   const { data } = await query;
-  const rows = data ?? [];
+  const rows = (data ?? []) as { funnel_step: string }[];
 
   const countsMap: Record<string, number> = {};
   for (const row of rows) {
     countsMap[row.funnel_step] = (countsMap[row.funnel_step] ?? 0) + 1;
   }
 
-  const { data: mappings } = await supabase
+  const { data: mappings } = await db
     .from("funnel_mappings")
     .select("*")
     .order("sort_order");
 
-  const steps = (mappings ?? []).length > 0
-    ? (mappings ?? []).sort((a, b) => a.sort_order - b.sort_order)
+  const mappingRows = (mappings ?? []) as { step_key: string; step_label?: string; sort_order: number }[];
+  const steps = mappingRows.length > 0
+    ? mappingRows.sort((a, b) => a.sort_order - b.sort_order)
     : FUNNEL_ORDER.map((key, i) => ({ step_key: key, step_label: FUNNEL_LABELS[key] ?? key, sort_order: i }));
 
   const counts = steps.map((s) => countsMap[s.step_key] ?? 0);
@@ -234,7 +239,7 @@ export async function fetchFunnel(
 
   return steps.map((s, i) => ({
     key: s.step_key,
-    label: s.step_label,
+    label: s.step_label ?? s.step_key,
     count: counts[i],
     conversionFromPrevious: i === 0 ? undefined : round2(safeDiv(counts[i], counts[i - 1]) * 100),
     conversionFromTop: i === 0 ? undefined : round2(safeDiv(counts[i], topCount) * 100),
@@ -249,7 +254,7 @@ export async function fetchPeople(
   role: "sdr" | "closer",
   period: PeriodRange,
 ): Promise<Person[]> {
-  const { data: people } = await supabase
+  const { data: people } = await db
     .from("people")
     .select("*, squads(name)")
     .eq("role", role)
@@ -257,35 +262,37 @@ export async function fetchPeople(
 
   if (!people || people.length === 0) return [];
 
-  const personIds = people.map((p) => p.id);
+  type PeopleRow = { id: string; name: string; avatar_url?: string | null; role: string; squads?: { name: string } | null };
+  const peopleRows = (people ?? []) as PeopleRow[];
+  const personIds = peopleRows.map((p) => p.id);
   const idCol = role === "sdr" ? "sdr_id" : "closer_id";
 
-  const { data: evidence } = await supabase
+  const { data: evidence } = await db
     .from("evidence")
     .select("*")
     .in(idCol, personIds)
     .gte("created_at", isoDate(period.from))
     .lte("created_at", isoDate(period.to));
 
-  const { data: callLogs } = await supabase
+  const { data: callLogs } = await db
     .from("call_logs")
     .select("*")
     .in("person_id", personIds)
     .gte("called_at", isoDate(period.from))
     .lte("called_at", isoDate(period.to));
 
-  const { data: contracts } = await supabase
+  const { data: contracts } = await db
     .from("contracts")
     .select("*")
     .in(idCol, personIds)
     .gte("created_at", isoDate(period.from))
     .lte("created_at", isoDate(period.to));
 
-  const evRows = evidence ?? [];
-  const clRows = callLogs ?? [];
-  const ctRows = contracts ?? [];
+  const evRows = (evidence ?? []) as { funnel_step: string; value?: number; sdr_id?: string | null; closer_id?: string | null }[];
+  const clRows = (callLogs ?? []) as { person_id?: string; answered?: boolean; duration_seconds?: number; call_type?: string }[];
+  const ctRows = (contracts ?? []) as { sdr_id?: string | null; closer_id?: string | null; value?: number }[];
 
-  return people.map((p) => {
+  return peopleRows.map((p) => {
     const myEvidence = evRows.filter((e) =>
       role === "sdr" ? e.sdr_id === p.id : e.closer_id === p.id,
     );
@@ -353,9 +360,9 @@ export async function fetchPeople(
     const totalCalls = myCalls.length;
     const answeredCalls = myCalls.filter((c) => c.answered).length;
     const missedCalls = totalCalls - answeredCalls;
-    const durations = myCalls.filter((c) => c.answered && c.duration_seconds > 0);
+    const durations = myCalls.filter((c) => c.answered && (c.duration_seconds ?? 0) > 0);
     const avgDurationMinutes = round2(
-      safeDiv(durations.reduce((s, c) => s + c.duration_seconds, 0), durations.length) / 60,
+      safeDiv(durations.reduce((s, c) => s + (c.duration_seconds ?? 0), 0), durations.length) / 60,
     );
     const r1Calls = myCalls.filter((c) => c.call_type === "r1").length;
     const r2Calls = myCalls.filter((c) => c.call_type === "r2").length;
@@ -404,14 +411,16 @@ export async function fetchPeople(
 export async function fetchCampaigns(
   period: PeriodRange,
 ): Promise<Campaign[]> {
-  const { data } = await supabase
+  const { data } = await db
     .from("campaigns")
     .select("*")
     .gte("period_start", period.from.toISOString().slice(0, 10))
     .lte("period_end", period.to.toISOString().slice(0, 10))
     .order("created_at", { ascending: false });
 
-  return (data ?? []).map((c) => ({
+  type CampaignRow = { id: string; name: string; source?: string; medium?: string; investment: number; impressions: number; clicks: number; leads: number; booked: number; received: number; won: number; revenue: number };
+  const rows = (data ?? []) as CampaignRow[];
+  return rows.map((c) => ({
     id: c.id,
     name: c.name,
     source: c.source ?? "",
@@ -442,7 +451,7 @@ export async function fetchEvidence(
 ): Promise<{ data: EvidenceRecord[]; pagination: CursorPagination }> {
   const offset = cursor ? parseInt(cursor, 10) : 0;
 
-  let query = supabase
+  let query = db
     .from("evidence")
     .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
@@ -459,7 +468,8 @@ export async function fetchEvidence(
 
   const { data, count } = await query;
   const total = count ?? 0;
-  const rows = data ?? [];
+  type EvidenceRow = { id: string; contact_name: string; phone?: string | null; email?: string | null; crm_url?: string | null; utm_source?: string | null; utm_medium?: string | null; utm_campaign?: string | null; funnel_step: string; sdr_id?: string | null; closer_id?: string | null; value?: number; created_at: string; tags?: string[]; badges?: unknown[] };
+  const rows = (data ?? []) as EvidenceRow[];
   const nextOffset = offset + PAGE_SIZE;
 
   const sdrIds = [...new Set(rows.map((r) => r.sdr_id).filter(Boolean))] as string[];
@@ -468,11 +478,12 @@ export async function fetchEvidence(
 
   let peopleMap: Record<string, string> = {};
   if (allPeopleIds.length > 0) {
-    const { data: peopleData } = await supabase
+    const { data: peopleData } = await db
       .from("people")
       .select("id, name")
       .in("id", allPeopleIds);
-    for (const p of peopleData ?? []) {
+    const peopleRows = (peopleData ?? []) as { id: string; name: string }[];
+    for (const p of peopleRows) {
       peopleMap[p.id] = p.name;
     }
   }
@@ -490,7 +501,7 @@ export async function fetchEvidence(
       funnelStep: r.funnel_step,
       sdr: r.sdr_id ? peopleMap[r.sdr_id] : undefined,
       closer: r.closer_id ? peopleMap[r.closer_id] : undefined,
-      value: r.value > 0 ? r.value : undefined,
+      value: (r.value ?? 0) > 0 ? (r.value ?? undefined) : undefined,
       createdAt: r.created_at,
       tags: r.tags ?? [],
       badges: (r.badges ?? []) as ("assinado" | "pago" | "ticket_ausente")[],
@@ -514,13 +525,13 @@ export async function fetchDiagnostics(
   const diagnostics: DiagnosticCard[] = [];
   let diagId = 0;
 
-  const { data: evidence } = await supabase
+  const { data: evidence } = await db
     .from("evidence")
     .select("funnel_step, value, sdr_id, closer_id")
     .gte("created_at", isoDate(period.from))
     .lte("created_at", isoDate(period.to));
 
-  const rows = evidence ?? [];
+  const rows = (evidence ?? []) as { funnel_step: string; value?: number; sdr_id?: string | null; closer_id?: string | null }[];
   if (rows.length === 0) return [];
 
   const leads = rows.filter((r) => r.funnel_step === "leads").length;
@@ -559,14 +570,16 @@ export async function fetchDiagnostics(
     });
   }
 
-  const { data: campaigns } = await supabase
+  const { data: campaigns } = await db
     .from("campaigns")
     .select("investment, leads")
     .gte("period_start", period.from.toISOString().slice(0, 10))
     .lte("period_end", period.to.toISOString().slice(0, 10));
 
-  const totalInvestment = (campaigns ?? []).reduce((s, c) => s + (c.investment ?? 0), 0);
-  const totalCampaignLeads = (campaigns ?? []).reduce((s, c) => s + (c.leads ?? 0), 0);
+  type CampaignAggRow = { investment?: number; leads?: number; booked?: number; received?: number; won?: number; revenue?: number };
+  const campaignRows = (campaigns ?? []) as CampaignAggRow[];
+  const totalInvestment = campaignRows.reduce((s, c) => s + (c.investment ?? 0), 0);
+  const totalCampaignLeads = campaignRows.reduce((s, c) => s + (c.leads ?? 0), 0);
   const cpl = totalCampaignLeads > 0 ? totalInvestment / totalCampaignLeads : 0;
 
   if (cpl > 0 && ticketMedio > 0 && cpl > ticketMedio / 3) {
@@ -581,13 +594,15 @@ export async function fetchDiagnostics(
     });
   }
 
-  const { data: people } = await supabase
+  const { data: people } = await db
     .from("people")
     .select("id, name, role")
     .eq("active", true);
 
-  if (people && people.length > 0) {
-    const sdrsWithoutLeads = people
+  type PeopleRoleRow = { id: string; name: string; role: string };
+  const peopleRows = (people ?? []) as PeopleRoleRow[];
+  if (peopleRows.length > 0) {
+    const sdrsWithoutLeads = peopleRows
       .filter((p) => p.role === "sdr")
       .filter((p) => !rows.some((r) => r.sdr_id === p.id));
 
@@ -603,7 +618,7 @@ export async function fetchDiagnostics(
       });
     }
 
-    const closersWithoutWon = people
+    const closersWithoutWon = peopleRows
       .filter((p) => p.role === "closer")
       .filter((p) => !rows.some((r) => r.closer_id === p.id && r.funnel_step === "won"));
 
@@ -643,18 +658,19 @@ export async function fetchDiagnostics(
 // ---------------------------------------------------------------------------
 
 export async function fetchAlerts(): Promise<Alert[]> {
-  const { data } = await supabase
+  const { data } = await db
     .from("alerts")
     .select("*")
     .or("expires_at.is.null,expires_at.gt.now()")
     .order("created_at", { ascending: false });
 
-  return (data ?? []).map((a) => ({
+  const rows = (data ?? []) as { id: string; type: string; message: string; link?: string | null; dismissible?: boolean }[];
+  return rows.map((a) => ({
     id: a.id,
     type: a.type as Alert["type"],
     message: a.message,
     link: a.link ?? undefined,
-    dismissible: a.dismissible,
+    dismissible: a.dismissible ?? true,
   }));
 }
 
@@ -663,12 +679,14 @@ export async function fetchAlerts(): Promise<Alert[]> {
 // ---------------------------------------------------------------------------
 
 export async function fetchSetupChecklist(): Promise<SetupChecklistItem[]> {
-  const { data } = await supabase
+  const { data } = await db
     .from("setup_checklist")
     .select("*")
     .order("key");
 
-  return (data ?? []).map((item) => ({
+  type ChecklistRow = { key: string; label: string; completed: boolean; route: string };
+  const rows = (data ?? []) as ChecklistRow[];
+  return rows.map((item) => ({
     key: item.key,
     label: item.label,
     completed: item.completed,
@@ -682,7 +700,7 @@ export async function fetchSetupChecklist(): Promise<SetupChecklistItem[]> {
 
 /** Lista integrações via API (evita RLS quando organization_id está desatualizado) */
 export async function fetchIntegrations(): Promise<Integration[]> {
-  const { data: sess } = await supabase.auth.getSession();
+  const { data: sess } = await db.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) return [];
 
@@ -707,24 +725,28 @@ export async function fetchGoals(
   const periodStart = period.from.toISOString().slice(0, 10);
   const periodEnd = period.to.toISOString().slice(0, 10);
 
-  const { data: goals } = await supabase
+  const { data: goalsData } = await db
     .from("goals")
     .select("*")
     .is("person_id", null)
     .lte("period_start", periodEnd)
     .gte("period_end", periodStart);
 
-  if (!goals || goals.length === 0) return [];
+  type GoalRow = { id: string; type: string; target: number; period_start: string; period_end: string };
+  const goals = (goalsData ?? []) as GoalRow[];
+  if (goals.length === 0) return [];
 
   const ev = await aggregateEvidence(period);
-  const { data: paidContracts } = await supabase
+  const { data: paidContracts } = await db
     .from("contracts")
     .select("*")
     .eq("status", "signed_paid")
     .gte("created_at", isoDate(period.from))
     .lte("created_at", isoDate(period.to));
 
-  const paidRevenue = (paidContracts ?? []).reduce((s, c) => s + (c.value ?? 0), 0);
+  type ContractRow = { value?: number };
+  const ctRows = (paidContracts ?? []) as ContractRow[];
+  const paidRevenue = ctRows.reduce((s, c) => s + (c.value ?? 0), 0);
 
   const currentValues: Record<string, number> = {
     revenue: paidRevenue || ev.revenue,
@@ -751,12 +773,14 @@ export async function fetchGoals(
 // ---------------------------------------------------------------------------
 
 export async function fetchTags() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("tags")
     .select("*")
     .order("created_at");
   if (error) throw error;
-  return (data ?? []).map((t) => ({
+  type TagRow = { id: string; original: string; alias: string };
+  const rows = (data ?? []) as TagRow[];
+  return rows.map((t) => ({
     id: t.id,
     name: t.original,
     alias: t.alias,
@@ -765,7 +789,7 @@ export async function fetchTags() {
 
 export async function insertTag(tag: { name: string; alias: string }) {
   const organization_id = await getCurrentOrgId();
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("tags")
     .insert({ original: tag.name, alias: tag.alias, organization_id })
     .select()
@@ -778,12 +802,12 @@ export async function updateTag(id: string, fields: { name?: string; alias?: str
   const update: Record<string, string> = {};
   if (fields.name !== undefined) update.original = fields.name;
   if (fields.alias !== undefined) update.alias = fields.alias;
-  const { error } = await supabase.from("tags").update(update).eq("id", id);
+  const { error } = await db.from("tags").update(update).eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteTag(id: string) {
-  const { error } = await supabase.from("tags").delete().eq("id", id);
+  const { error } = await db.from("tags").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -791,18 +815,20 @@ export async function deleteTag(id: string) {
 // MUTATIONS — Collaborators (profiles)
 // ---------------------------------------------------------------------------
 
-export async function fetchCollaborators() {
-  const { data, error } = await supabase
+export async function fetchCollaborators(): Promise<Collaborator[]> {
+  const { data, error } = await db
     .from("profiles")
     .select("*")
     .order("name");
   if (error) throw error;
-  return (data ?? []).map((p) => ({
+  type ProfileRow = { id: string; name: string; email: string; role: string; active?: boolean };
+  const rows = (data ?? []) as ProfileRow[];
+  return rows.map((p) => ({
     id: p.id,
     name: p.name,
     email: p.email,
     role: p.role as "owner" | "admin" | "manager" | "viewer",
-    active: p.active,
+    active: p.active ?? true,
   }));
 }
 
@@ -829,7 +855,7 @@ export async function insertCollaborator(collab: { name: string; email: string; 
 }
 
 export async function updateCollaborator(id: string, fields: { active?: boolean; role?: "owner" | "admin" | "manager" | "viewer" }) {
-  const { error } = await supabase.from("profiles").update(fields).eq("id", id);
+  const { error } = await db.from("profiles").update(fields).eq("id", id);
   if (error) throw error;
 }
 
@@ -838,12 +864,14 @@ export async function updateCollaborator(id: string, fields: { active?: boolean;
 // ---------------------------------------------------------------------------
 
 export async function fetchFunnelMappings() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("funnel_mappings")
     .select("*")
     .order("sort_order");
   if (error) throw error;
-  return (data ?? []).map((m) => ({
+  type FunnelMappingRow = { id: string; step_key: string; step_label: string; crm_field?: string; crm_value?: string };
+  const rows = (data ?? []) as FunnelMappingRow[];
+  return rows.map((m) => ({
     id: m.id,
     stepKey: m.step_key,
     stepLabel: m.step_label,
@@ -864,7 +892,7 @@ export async function upsertFunnelMappings(
     crm_value: m.crmValue,
     organization_id,
   }));
-  const { error } = await supabase.from("funnel_mappings").upsert(rows, { onConflict: "id" });
+  const { error } = await db.from("funnel_mappings").upsert(rows, { onConflict: "id" });
   if (error) throw error;
 }
 
@@ -873,7 +901,7 @@ export async function upsertFunnelMappings(
 // ---------------------------------------------------------------------------
 
 export async function updateGoalTarget(goalId: string, target: number) {
-  const { error } = await supabase.from("goals").update({ target }).eq("id", goalId);
+  const { error } = await db.from("goals").update({ target }).eq("id", goalId);
   if (error) throw error;
 }
 
@@ -888,7 +916,7 @@ export async function insertTeamGoal(params: {
   squadId?: string | null;
 }) {
   const organization_id = await getCurrentOrgId();
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("goals")
     .insert({
       person_id: null,
@@ -918,7 +946,7 @@ export async function upsertIndividualGoal(params: {
   squadId?: string | null;
 }) {
   const organization_id = await getCurrentOrgId();
-  const { error } = await supabase.from("goals").upsert(
+  const { error } = await db.from("goals").upsert(
     {
       person_id: params.personId,
       type: params.type as "revenue" | "booked" | "leads" | "received" | "won",
@@ -940,7 +968,7 @@ export async function upsertIndividualGoal(params: {
 // ---------------------------------------------------------------------------
 
 export async function updateProfile(id: string, fields: { name?: string; email?: string; phone?: string | null }) {
-  const { error } = await supabase.from("profiles").update(fields).eq("id", id);
+  const { error } = await db.from("profiles").update(fields).eq("id", id);
   if (error) throw error;
 }
 
@@ -950,7 +978,7 @@ export async function updateProfile(id: string, fields: { name?: string; email?:
 
 /** Cria integração via API (bypassa RLS - evita erro de permissão) */
 export async function createIntegration(fields: { name: string; type: "crm" | "ads" }) {
-  const { data: sess } = await supabase.auth.getSession();
+  const { data: sess } = await db.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) throw new Error("Sessão expirada. Faça login novamente.");
 
@@ -970,7 +998,7 @@ export async function createIntegration(fields: { name: string; type: "crm" | "a
 
 /** Atualiza status da integração via API (evita RLS quando organization_id está desatualizado) */
 export async function updateIntegrationStatus(id: string, status: "connected" | "disconnected") {
-  const { data: sess } = await supabase.auth.getSession();
+  const { data: sess } = await db.auth.getSession();
   const token = sess.session?.access_token;
   if (!token) throw new Error("Sessão expirada. Faça login novamente.");
 
@@ -987,12 +1015,46 @@ export async function updateIntegrationStatus(id: string, status: "connected" | 
   if (!res.ok) throw new Error(json.message || "Erro ao atualizar integração.");
 }
 
+/** Exclui uma integração */
+export async function deleteIntegration(id: string) {
+  const { data: sess } = await db.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || "Erro ao excluir integração.");
+}
+
+/** Atualiza webhook_secret da integração (chave para validação de webhooks do CRM) */
+export async function updateIntegrationWebhookSecret(id: string, webhookSecret: string) {
+  const { data: sess } = await db.auth.getSession();
+  const token = sess.session?.access_token;
+  if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+
+  const base = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+  const res = await fetch(`${base}/api/integrations/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ webhook_secret: webhookSecret }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || "Erro ao atualizar chave do webhook.");
+}
+
 // ---------------------------------------------------------------------------
 // MUTATIONS — Setup (reset checklist + disconnect CRM)
 // ---------------------------------------------------------------------------
 
 export async function resetSetupChecklist() {
-  const { error } = await supabase
+  const { error } = await db
     .from("setup_checklist")
     .update({ completed: false })
     .neq("key", "");
@@ -1000,7 +1062,7 @@ export async function resetSetupChecklist() {
 }
 
 export async function disconnectCRM() {
-  const { error } = await supabase
+  const { error } = await db
     .from("integrations")
     .update({ status: "disconnected", last_sync: null })
     .eq("type", "crm");
@@ -1016,7 +1078,7 @@ export async function fetchLogs(page: number, pageSize: number): Promise<{ data:
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, count, error } = await supabase
+  const { data, count, error } = await db
     .from("logs")
     .select("*, profiles:user_id(name)", { count: "exact" })
     .order("created_at", { ascending: false })
@@ -1025,8 +1087,8 @@ export async function fetchLogs(page: number, pageSize: number): Promise<{ data:
   if (error) throw error;
 
   return {
-    data: (data ?? []).map((log) => {
-      const typed = log as unknown as LogWithProfile;
+    data: (data ?? []).map((log: unknown) => {
+      const typed = log as LogWithProfile;
       return {
         id: typed.id,
         timestamp: typed.created_at,
@@ -1044,13 +1106,13 @@ export async function fetchLogs(page: number, pageSize: number): Promise<{ data:
 // ---------------------------------------------------------------------------
 
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
   if (error) throw error;
   return data;
 }
 
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  const { error } = await db.auth.signOut();
   if (error) throw error;
 }
 
@@ -1065,10 +1127,10 @@ export type ProfileData = {
 };
 
 export async function getCurrentProfile(): Promise<ProfileData | null> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
   if (!user) return null;
 
-  const { data } = await supabase
+  const { data } = await db
     .from("profiles")
     .select("*")
     .eq("id", user.id)
@@ -1082,12 +1144,13 @@ export async function getCurrentProfile(): Promise<ProfileData | null> {
 // ---------------------------------------------------------------------------
 
 export async function fetchFinancialData(): Promise<FinancialSummary> {
-  const { data } = await supabase
+  const { data } = await db
     .from("contracts")
     .select("*")
     .order("created_at", { ascending: false });
 
-  const rows = data ?? [];
+  type ContractRow = { sdr_id?: string | null; closer_id?: string | null; squad_id?: string | null; id: string; client_name: string; value: number; status: string; signed_at?: string | null; paid_at?: string | null; created_at: string };
+  const rows = (data ?? []) as ContractRow[];
 
   const sdrIds = [...new Set(rows.map((r) => r.sdr_id).filter(Boolean))] as string[];
   const closerIds = [...new Set(rows.map((r) => r.closer_id).filter(Boolean))] as string[];
@@ -1096,13 +1159,13 @@ export async function fetchFinancialData(): Promise<FinancialSummary> {
   let nameMap: Record<string, string> = {};
   const allPIds = [...new Set([...sdrIds, ...closerIds])];
   if (allPIds.length > 0) {
-    const { data: pd } = await supabase.from("people").select("id, name").in("id", allPIds);
+    const { data: pd } = await db.from("people").select("id, name").in("id", allPIds);
     for (const p of pd ?? []) nameMap[p.id] = p.name;
   }
 
   let squadMap: Record<string, string> = {};
   if (squadIds.length > 0) {
-    const { data: sd } = await supabase.from("squads").select("id, name").in("id", squadIds);
+    const { data: sd } = await db.from("squads").select("id, name").in("id", squadIds);
     for (const s of sd ?? []) squadMap[s.id] = s.name;
   }
 
@@ -1158,13 +1221,13 @@ export async function fetchFinancialData(): Promise<FinancialSummary> {
 // fetchSquads
 // ---------------------------------------------------------------------------
 
-export async function fetchSquads() {
-  const { data, error } = await supabase
+export async function fetchSquads(): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await db
     .from("squads")
     .select("id, name")
     .order("name");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as { id: string; name: string }[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1172,21 +1235,21 @@ export async function fetchSquads() {
 // ---------------------------------------------------------------------------
 
 async function getCurrentOrgId(): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
   if (!user) throw new Error("Não autenticado");
   const orgId = user.user_metadata?.organization_id as string | undefined;
   if (orgId) return orgId;
-  const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+  const { data: profile } = await db.from("profiles").select("organization_id").eq("id", user.id).single();
   if (!profile?.organization_id) throw new Error("Usuário sem organização vinculada");
   return profile.organization_id;
 }
 
-export async function fetchAllPeople(role?: "sdr" | "closer") {
-  let query = supabase.from("people").select("*, squads(name)").order("name");
+export async function fetchAllPeople(role?: "sdr" | "closer"): Promise<{ id: string; name: string; role: "sdr" | "closer"; squad_id?: string | null; squads?: { name: string } | null }[]> {
+  let query = db.from("people").select("id, name, role, squad_id, squads(name)").order("name");
   if (role) query = query.eq("role", role);
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as { id: string; name: string; role: "sdr" | "closer"; squad_id?: string | null; squads?: { name: string } | null }[];
 }
 
 export async function createPerson(fields: {
@@ -1196,7 +1259,7 @@ export async function createPerson(fields: {
   avatar_url?: string | null;
 }) {
   const organization_id = await getCurrentOrgId();
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("people")
     .insert({ ...fields, active: true, organization_id })
     .select("*, squads(name)")
@@ -1206,7 +1269,7 @@ export async function createPerson(fields: {
 }
 
 export async function updatePerson(id: string, fields: Record<string, unknown>) {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("people")
     .update(fields)
     .eq("id", id)
@@ -1217,7 +1280,7 @@ export async function updatePerson(id: string, fields: Record<string, unknown>) 
 }
 
 export async function deletePerson(id: string) {
-  const { error } = await supabase
+  const { error } = await db
     .from("people")
     .update({ active: false })
     .eq("id", id);
@@ -1240,7 +1303,7 @@ export async function createContract(fields: {
   paid_at?: string | null;
 }) {
   const organization_id = await getCurrentOrgId();
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("contracts")
     .insert({ ...fields, organization_id })
     .select("*")
@@ -1250,7 +1313,7 @@ export async function createContract(fields: {
 }
 
 export async function updateContract(id: string, fields: Record<string, unknown>) {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("contracts")
     .update(fields)
     .eq("id", id)
@@ -1261,7 +1324,7 @@ export async function updateContract(id: string, fields: Record<string, unknown>
 }
 
 export async function deleteContract(id: string) {
-  const { error } = await supabase.from("contracts").delete().eq("id", id);
+  const { error } = await db.from("contracts").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -1285,7 +1348,7 @@ export async function createCampaign(fields: {
   period_end: string;
 }) {
   const organization_id = await getCurrentOrgId();
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("campaigns")
     .insert({
       ...fields,
@@ -1308,7 +1371,7 @@ export async function createCampaign(fields: {
 }
 
 export async function updateCampaign(id: string, fields: Record<string, unknown>) {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("campaigns")
     .update(fields)
     .eq("id", id)
@@ -1319,7 +1382,7 @@ export async function updateCampaign(id: string, fields: Record<string, unknown>
 }
 
 export async function deleteCampaign(id: string) {
-  const { error } = await supabase.from("campaigns").delete().eq("id", id);
+  const { error } = await db.from("campaigns").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -1328,7 +1391,7 @@ export async function deleteCampaign(id: string) {
 // ---------------------------------------------------------------------------
 
 export async function changePassword(newPassword: string) {
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  const { error } = await db.auth.updateUser({ password: newPassword });
   if (error) throw error;
 }
 
@@ -1337,41 +1400,41 @@ export async function changePassword(newPassword: string) {
 // ---------------------------------------------------------------------------
 
 export async function fetchProfileSettings(): Promise<Record<string, unknown>> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
   if (!user) return {};
-  const { data } = await supabase.from("profiles").select("settings").eq("id", user.id).single();
+  const { data } = await db.from("profiles").select("settings").eq("id", user.id).single();
   return (data?.settings as Record<string, unknown>) ?? {};
 }
 
 export async function saveProfileSettings(settings: Record<string, unknown>) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
   if (!user) throw new Error("Não autenticado");
-  const { error } = await supabase.from("profiles").update({ settings }).eq("id", user.id);
+  const { error } = await db.from("profiles").update({ settings }).eq("id", user.id);
   if (error) throw error;
 }
 
 export async function fetchOrgSettings(): Promise<Record<string, unknown>> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
   if (!user) return {};
   let orgId = user.user_metadata?.organization_id;
   if (!orgId) {
-    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+    const { data: profile } = await db.from("profiles").select("organization_id").eq("id", user.id).single();
     orgId = profile?.organization_id ?? undefined;
   }
   if (!orgId) return {};
-  const { data } = await supabase.from("organizations").select("settings").eq("id", orgId).single();
+  const { data } = await db.from("organizations").select("settings").eq("id", orgId).single();
   return (data?.settings as Record<string, unknown>) ?? {};
 }
 
 export async function saveOrgSettings(settings: Record<string, unknown>) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
   if (!user) throw new Error("Não autenticado");
   let orgId = user.user_metadata?.organization_id;
   if (!orgId) {
-    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.id).single();
+    const { data: profile } = await db.from("profiles").select("organization_id").eq("id", user.id).single();
     orgId = profile?.organization_id ?? undefined;
   }
   if (!orgId) throw new Error("Sem organização");
-  const { error } = await supabase.from("organizations").update({ settings }).eq("id", orgId);
+  const { error } = await db.from("organizations").update({ settings }).eq("id", orgId);
   if (error) throw error;
 }

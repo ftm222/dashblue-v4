@@ -9,7 +9,10 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, db, isSupabaseConfigured } from "@/lib/supabase";
+
+type ProfileRow = { id: string; name: string; email: string; phone: string | null; avatar_url: string | null; role: string; organization_id: string | null };
+type OrgRow = { id: string; name: string; slug: string; logo_url: string | null; plan: string; subscription_status: string; trial_ends_at: string | null; max_members: number; max_integrations: number };
 import type { User, Session } from "@supabase/supabase-js";
 import type { Profile, Organization } from "@/types";
 
@@ -47,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   const fetchProfileAndOrg = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data } = await db
       .from("profiles")
       .select("*")
       .eq("id", userId)
@@ -67,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(p);
 
     if (data.organization_id) {
-      const { data: orgData } = await supabase
+      const { data: orgData } = await db
         .from("organizations")
         .select("id, name, slug, logo_url, plan, subscription_status, trial_ends_at, max_members, max_integrations")
         .eq("id", data.organization_id)
@@ -95,14 +98,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then((res) => {
+      const s = res?.data?.session ?? null;
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
         fetchProfileAndOrg(s.user.id);
       }
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
 
     const {
       data: { subscription },

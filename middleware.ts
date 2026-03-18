@@ -24,7 +24,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Public pages — pass through (AuthProvider handles client-side redirects)
-  const isPublicPage = PUBLIC_PATHS.some((p) => pathname === p);
+  const normalizedPath = pathname === "" ? "/" : pathname;
+  const isPublicPage = PUBLIC_PATHS.some((p) => normalizedPath === p || normalizedPath === p + "/");
   if (isPublicPage || !pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
@@ -94,6 +95,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

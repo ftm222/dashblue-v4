@@ -28,7 +28,6 @@ export function useLocalStorage<T>(key: string, fallback: T) {
       /* ignore */
     }
     setHydrated(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

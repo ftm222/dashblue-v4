@@ -39,7 +39,8 @@ export async function getAuthUserWithOrg(request: Request): Promise<AuthUserResu
       .select("organization_id")
       .eq("id", data.user.id)
       .single();
-    orgId = profile?.organization_id ?? undefined;
+    const profileRow = profile as { organization_id?: string } | null;
+    orgId = profileRow?.organization_id ?? undefined;
     cameFromProfile = Boolean(orgId);
   }
 

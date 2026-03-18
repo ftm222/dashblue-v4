@@ -42,8 +42,8 @@ export function ContractFormDialog({ open, onOpenChange }: Props) {
     paid_at: "",
   });
 
-  const sdrs = (people ?? []).filter((p: { role: string; active: boolean }) => p.role === "sdr" && p.active);
-  const closers = (people ?? []).filter((p: { role: string; active: boolean }) => p.role === "closer" && p.active);
+  const sdrs = (people ?? []).filter((p) => p.role === "sdr" && (p as { active?: boolean }).active !== false);
+  const closers = (people ?? []).filter((p) => p.role === "closer" && (p as { active?: boolean }).active !== false);
 
   function handleSubmit() {
     createMut.mutate(

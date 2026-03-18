@@ -36,7 +36,8 @@ export async function GET(request: Request) {
       .select("settings")
       .eq("id", orgId)
       .single();
-    const settings = (data?.settings as Record<string, unknown>) ?? {};
+    const row = data as { settings?: unknown } | null;
+    const settings = (row?.settings as Record<string, unknown>) ?? {};
     const stripe = (settings.stripe ?? {}) as Record<string, string>;
     const masked: Record<string, string> = {};
     for (const key of STRIPE_KEYS) {
@@ -77,7 +78,8 @@ export async function POST(request: Request) {
       .select("settings")
       .eq("id", orgId)
       .single();
-    const current = (org?.settings as Record<string, unknown>) ?? {};
+    const orgRow = org as { settings?: unknown } | null;
+    const current = (orgRow?.settings as Record<string, unknown>) ?? {};
     const currentStripe = (current.stripe ?? {}) as Record<string, string>;
     const mergedStripe = clear ? {} : { ...currentStripe, ...stripe };
     const merged = { ...current, stripe: mergedStripe };

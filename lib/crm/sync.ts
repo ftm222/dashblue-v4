@@ -3,6 +3,9 @@ import { getCRMAdapter } from "./registry";
 import { isCRMConfig } from "./types";
 import type { CRMConfig, CRMTokens } from "./types";
 
+/** Alias para contornar inferência de tipos do Proxy (evita 'never') */
+const adminDb = adminClient as any;
+
 interface SyncResult {
   created: number;
   updated: number;
@@ -25,7 +28,7 @@ async function ensureValidTokens(integrationId: string, config: CRMConfig): Prom
     tokens: newTokens,
     ...(newTokens.company_domain && { company_domain: newTokens.company_domain }),
   };
-  await adminClient
+  await adminDb
     .from("integrations")
     .update({ config: updatedConfig })
     .eq("id", integrationId);
@@ -42,7 +45,7 @@ function mapContactToFunnelStep(
 }
 
 export async function syncIntegration(integrationId: string): Promise<SyncResult> {
-  const { data: integration, error: intError } = await adminClient
+  const { data: integration, error: intError } = await adminDb
     .from("integrations")
     .select("*")
     .eq("id", integrationId)
@@ -58,7 +61,14 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
   const config: CRMConfig = integration.config;
   const orgId: string = integration.organization_id;
 
-  await adminClient
+  const tokenOnlyProviders = ["generic", "asaas", "rdstation", "zoho", "bitrix24", "salesforce"];
+  if (tokenOnlyProviders.includes(config.provider)) {
+    throw new Error(
+      "Sincronização para este CRM está em desenvolvimento. CRMs com OAuth completo (Kommo, HubSpot, Pipedrive) já suportam sincronização."
+    );
+  }
+
+  await adminDb
     .from("integrations")
     .update({ status: "syncing" })
     .eq("id", integrationId);
@@ -69,7 +79,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
 
     const contacts = await adapter.fetchContacts(tokens, integration.last_sync || undefined, config);
 
-    const { data: mappings } = await adminClient
+    const { data: mappings } = await adminDb
       .from("funnel_mappings")
       .select("step_key, crm_value")
       .eq("organization_id", orgId)
@@ -77,13 +87,14 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
 
     const funnelMappings = mappings ?? [];
 
-    const { data: orgPeople } = await adminClient
+    const { data: orgPeople } = await adminDb
       .from("people")
       .select("id, name, role")
       .eq("organization_id", orgId)
       .eq("active", true);
 
-    const peopleList = orgPeople ?? [];
+    type PeopleRow = { id: string; name: string; role: string };
+    const peopleList = (orgPeople ?? []) as PeopleRow[];
 
     function resolvePersonId(
       responsibleName: string | undefined,
@@ -107,13 +118,13 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
       const batch = contacts.slice(i, i + BATCH_SIZE);
 
       const externalIds = batch.map((c) => c.external_id);
-      const { data: existingRows } = await adminClient
+      const { data: existingRows } = await adminDb
         .from("evidence")
         .select("id, crm_lead_id")
         .eq("organization_id", orgId)
         .in("crm_lead_id", externalIds);
 
-      const existingMap = new Map(
+      const existingMap = new Map<string, string>(
         (existingRows ?? []).map((r: { id: string; crm_lead_id: string }) => [r.crm_lead_id, r.id]),
       );
 
@@ -150,7 +161,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
       }
 
       if (toInsert.length > 0) {
-        const { error: insertErr } = await adminClient.from("evidence").insert(toInsert);
+        const { error: insertErr } = await adminDb.from("evidence").insert(toInsert);
         if (insertErr) {
           errors += toInsert.length;
           errorDetails.push({ externalId: "batch-insert", message: insertErr.message });
@@ -161,7 +172,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
 
       const updateResults = await Promise.allSettled(
         toUpdate.map(({ id, record }) =>
-          adminClient.from("evidence").update(record).eq("id", id),
+          adminDb.from("evidence").update(record).eq("id", id),
         ),
       );
 
@@ -180,7 +191,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
       }
     }
 
-    await adminClient
+    await adminDb
       .from("integrations")
       .update({
         status: "connected",
@@ -188,7 +199,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
       })
       .eq("id", integrationId);
 
-    await adminClient.from("logs").insert({
+    await adminDb.from("logs").insert({
       action: "crm_sync",
       entity_type: "integration",
       entity_id: integrationId,
@@ -210,14 +221,14 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
       message: `${created} criados, ${updated} atualizados${errors > 0 ? `, ${errors} erros` : ""}`,
     };
   } catch (err) {
-    await adminClient
+    await adminDb
       .from("integrations")
       .update({ status: "error" })
       .eq("id", integrationId);
 
     const message = err instanceof Error ? err.message : "Erro desconhecido";
 
-    await adminClient.from("logs").insert({
+    await adminDb.from("logs").insert({
       action: "crm_sync_error",
       entity_type: "integration",
       entity_id: integrationId,
@@ -229,7 +240,7 @@ export async function syncIntegration(integrationId: string): Promise<SyncResult
 }
 
 export async function fetchCRMStages(integrationId: string) {
-  const { data: integration } = await adminClient
+  const { data: integration } = await adminDb
     .from("integrations")
     .select("config")
     .eq("id", integrationId)
@@ -241,6 +252,11 @@ export async function fetchCRMStages(integrationId: string) {
     throw new Error("Integração sem tokens configurados");
   }
   const config: CRMConfig = integration.config;
+
+  const tokenOnlyProviders = ["generic", "asaas", "rdstation", "zoho", "bitrix24", "salesforce"];
+  if (tokenOnlyProviders.includes(config.provider)) {
+    return [];
+  }
 
   const tokens = await ensureValidTokens(integrationId, config);
   const adapter = getCRMAdapter(config.provider);

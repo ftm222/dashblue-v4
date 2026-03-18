@@ -1,0 +1,218 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/sdr",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Performance SDR",
+      "className": "text-white font-outfit font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Total de Calls",
+      "className": "text-[#94A3B8] font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "Taxa Média de Qualificação",
+      "className": "text-[#94A3B8] font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "Taxa Média de Show",
+      "className": "text-[#94A3B8] font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "SDR Destaque",
+      "className": "text-white/90 font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H2",
+      "text": "Pódio dos Top 3 SDRs",
+      "className": "text-[#0B1120] font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Andrey",
+      "className": "text-white font-outfit text-2xl font-bold mb-2 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Vinícius",
+      "className": "text-white font-outfit text-2xl font-bold mb-2 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Brunno Vaz",
+      "className": "text-white font-outfit text-2xl font-bold mb-2 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Vinícius",
+      "className": "text-white font-outfit text-2xl font-bold mb-2 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Andrey",
+      "className": "text-white font-outfit text-2xl font-bold mb-2 text-center"
+    },
+    {
+      "tag": "H3",
+      "text": "Brunno Vaz",
+      "className": "text-white font-outfit text-2xl font-bold mb-2 text-center"
+    },
+    {
+      "tag": "H2",
+      "text": "Comparação de Performance",
+      "className": "text-white font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Vinícius",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Andrey",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Brunno Vaz",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H2",
+      "text": "Detalhamento Individual",
+      "className": "text-[#0B1120] font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Vinícius",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Andrey",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Brunno Vaz",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H2",
+      "text": "Análise Gráfica Comparativa",
+      "className": "text-white font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "📊 Calls por SDR",
+      "className": "text-white font-outfit text-xl md:text-2xl font-bold mb-4 md:mb-8"
+    },
+    {
+      "tag": "H3",
+      "text": "🎯 Volume vs Qualidade",
+      "className": "text-white font-outfit text-xl md:text-2xl font-bold mb-2 md:mb-4"
+    }
+  ],
+  "metrics": [],
+  "tables": [
+    {
+      "headers": [
+        "SDR",
+        "Squad",
+        "Calls",
+        "R1",
+        "R2",
+        "Qualificadas",
+        "Taxa Qual.",
+        "Realizadas",
+        "No-Shows",
+        "Taxa Show",
+        "Vendas"
+      ],
+      "rows": [
+        [
+          "Vinícius",
+          "Hot Dogs",
+          "76",
+          "51",
+          "19",
+          "42",
+          "55.3%🟢",
+          "64",
+          "12",
+          "84.2%🟢",
+          "R$ 28.333,339 contratos"
+        ],
+        [
+          "Andrey",
+          "Corvo Azul",
+          "105",
+          "83",
+          "19",
+          "39",
+          "37.1%🟡",
+          "81",
+          "21",
+          "77.1%🟢",
+          "R$ 27.560,007 contratos"
+        ],
+        [
+          "Brunno Vaz",
+          "Ki Karnes",
+          "98",
+          "91",
+          "5",
+          "37",
+          "37.8%🟡",
+          "70",
+          "27",
+          "71.4%🟢",
+          "R$ 14.000,004 contratos"
+        ]
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "text": "Modo TV",
+      "className": "items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 hidden md:flex bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-6 py-3 text-lg"
+    },
+    {
+      "text": "Atualizar",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-3 py-2 md:px-6 md:py-3 text-sm md:text-lg"
+    },
+    {
+      "text": "Março 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[200px] bg-[#151E35] border-white/20 text-white hover:bg-white/5"
+    },
+    {
+      "text": "Esta Semana",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium px-4 py-2 text-base bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Este Mês",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 font-outfit font-medium px-4 py-2 text-base bg-[#0066FF] text-white hover:bg-[#0066FF]/90"
+    },
+    {
+      "text": "Período Personalizado",
+      "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium justify-start px-4 py-2 text-base min-w-[240px] bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Previous slide",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground absolute h-8 w-8 rounded-full top-1/2 -translate-y-1/2 left-2"
+    },
+    {
+      "text": "Next slide",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground absolute h-8 w-8 rounded-full top-1/2 -translate-y-1/2 right-2"
+    }
+  ],
+  "inputs": [],
+  "bodyText": "Performance SDR\n\nAnálise detalhada da equipe de prospecção\n\nModo TV\nAtualizar\n\nSábado, 14 De Mar. De 2026\n\nAtualizado: 00:52\n\nVisão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\n\nFiltrar Período:\n\nMês:\nMarço 2026\nEsta Semana\nEste Mês\nPeríodo Personalizado\n\nPeríodo:\n\n01/03/2026 - 31/03/2026\n\nTOTAL DE CALLS\n\n279\n\nMeta mensal: 550 calls\n\nProgresso\n51%\n✅\nTAXA MÉDIA DE QUALIFICAÇÃO\n\n43.4%\n\nMeta: 50%\n\nProgresso\n87%\n📊\nTAXA MÉDIA DE SHOW\n\n77.6%\n\nMeta: 75%\n\nProgresso\n103%\nSDR DESTAQUE\n\nVinícius\n\nR$ 28.333,33\n\n9 contratos originados\n\nPódio dos Top 3 SDRs\n2º\nAndrey\nCORVO AZUL\n\nR$ 27.560,00\n\n105 calls realizadas\n\n1º\n🏆\nVinícius\nHOT DOGS\n\nR$ 28.333,33\n\n76 calls realizadas\n\n🏆 DESTAQUE DO MÊS\n3º\nBrunno Vaz\nKI KARNES\n\nR$ 14.000,00\n\n98 calls realizadas\n\nComparação de Performance\nSDR\n\tSQUAD\t\nCALLS\n\tR1\tR2\tQUALIFICADAS\t\nTAXA QUAL.\n\tREALIZADAS\tNO-SHOWS\t\nTAXA SHOW\n\t\nVENDAS\n\n\nVinícius\n\tHOT DOGS\t76\t51\t19\t42\t\n55.3%\n🟢\n\t64\t12\t\n84.2%\n🟢\n\t\n\nR$ 28.333,33\n\n9 contratos\n\n\n\nAndrey\n\tCORVO AZUL\t105\t83\t19\t39\t\n37.1%\n🟡\n\t81\t21\t\n77.1%\n🟢\n\t\n\nR$ 27.560,00\n\n7 contratos\n\n\n\nBrunno Vaz\n\tKI KARNES\t98\t91\t5\t37\t\n37.8%\n🟡\n\t70\t27\t\n71.4%\n🟢\n\t\n\nR$ 14.000,00\n\n4 contratos\n\nDetalhamento Individual\nVinícius\nHOT DOGS\n\nVENDAS ORIGINADAS\n\nR$ 28.333,33\n\n9 contratos\n\nAndrey\nCORVO AZUL\n\nVENDAS ORIGINADAS\n\nR$ 27.560,00\n\n7 contratos\n\nBrunno Vaz\nKI KARNES\n\nVENDAS ORIGINADAS\n\nR$ 14.000,00\n\n4 contratos\n\nAnálise Gráfica Comparativa\n📊 Calls por SDR\n0\n30\n60\n90\n120\nAndrey\nBrunnoVaz\nVinícius\n🎯 Volume vs Qualidade\n\nTamanho da bolha = receita originada\n\n0\n30\n60\n90\n120\nNúmero de Calls\n0\n25\n50\n75\n100\nTaxa de Show (%)\nMeta: 75%\n\nTodos os direitos reservados por Blue Ocean®️\n\n25",
+  "hasCharts": true,
+  "chartCount": 105
+}

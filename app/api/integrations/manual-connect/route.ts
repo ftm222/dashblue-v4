@@ -18,9 +18,9 @@ export async function POST(request: Request) {
       throw new ApiError("VALIDATION", "integrationId, provider e access_token são obrigatórios.", 400);
     }
 
-    const validProviders = ["kommo", "hubspot", "pipedrive", "generic", "asaas"];
+    const validProviders = ["kommo", "hubspot", "pipedrive", "generic", "asaas", "rdstation", "zoho", "bitrix24", "salesforce"];
     if (!validProviders.includes(provider)) {
-      throw new ApiError("INVALID_PROVIDER", "Provider deve ser: kommo, hubspot, pipedrive, generic ou asaas.", 400);
+      throw new ApiError("INVALID_PROVIDER", "Provider inválido. Use: kommo, hubspot, pipedrive, rdstation, zoho, bitrix24, salesforce, asaas ou generic.", 400);
     }
 
     const token = String(access_token).trim();
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       expires_at: Date.now() + MANUAL_TOKEN_EXPIRY_MS,
     };
 
-    const isGenericProvider = provider === "generic" || provider === "asaas";
+    const isGenericProvider = ["generic", "asaas", "rdstation", "zoho", "bitrix24", "salesforce"].includes(provider);
     if (!isGenericProvider) {
       const adapter = getCRMAdapter(provider as "kommo" | "hubspot" | "pipedrive");
       const isValid = await adapter.testConnection(tokens);

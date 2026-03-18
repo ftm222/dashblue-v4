@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
+    "dev": "bash -c 'ulimit -n 10240 2>/dev/null; exec next dev --port 3000 --hostname 127.0.0.1 --turbo'",
+    "dev:alt": "next dev --port 3001 --hostname 127.0.0.1",
     "dev:clean": "node scripts/limpar-e-iniciar.mjs",
     "dev:reset": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
     "build": "next build",

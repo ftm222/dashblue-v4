@@ -73,7 +73,7 @@ function StatusDistributionChart({ data }: { data: { name: string; value: number
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
-                  formatter={(value: number, name: string) => [`${value} contratos`, name]}
+                  formatter={(value, name) => [`${value ?? 0} contratos`, String(name)]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -140,7 +140,7 @@ function RevenueBySquadChart({ data }: { data: { squad: string; total: number; p
                   borderRadius: "8px",
                   fontSize: "12px",
                 }}
-                formatter={(value: number, name: string) => [fmtCurrency(value), name]}
+                formatter={(value, name) => [fmtCurrency(Number(value) || 0), String(name ?? "")]}
               />
               <Legend
                 iconType="circle"
@@ -188,7 +188,7 @@ function ForecastChart({ data }: { data: { scenario: string; value: number; colo
                   borderRadius: "8px",
                   fontSize: "12px",
                 }}
-                formatter={(value: number) => [fmtCurrency(value), "Receita Prevista"]}
+                formatter={(value) => [fmtCurrency(Number(value) || 0), "Receita Prevista"]}
               />
               <Bar dataKey="value" name="Receita Prevista" radius={[6, 6, 0, 0]}>
                 {data.map((entry) => (

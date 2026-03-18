@@ -30,13 +30,16 @@ export const supabase = new Proxy({} as SupabaseClient<Database>, {
       return getStubProperty(prop);
     }
     const client = getSupabaseClient();
-    const value = (client as Record<string, unknown>)[prop];
+    const value = (client as unknown as Record<string, unknown>)[prop];
     if (typeof value === "function") {
       return value.bind(client);
     }
     return value;
   },
 });
+
+/** Alias para contornar inferência de tipos do Proxy (evita 'never' em .from) */
+export const db = supabase as any;
 
 // Stub que retorna dados vazios quando Supabase não está configurado,
 // para que a landing page e o AuthProvider não crashem.

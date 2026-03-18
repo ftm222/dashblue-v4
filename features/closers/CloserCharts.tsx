@@ -75,24 +75,17 @@ function CustomPieTooltip({ active, payload }: { active?: boolean; payload?: Arr
   );
 }
 
-function CustomPieLabel({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percentage,
-  name,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percentage: number;
-  name: string;
+function CustomPieLabel(props: {
+  cx?: number;
+  cy?: number;
+  midAngle?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  percent?: number;
+  name?: string;
 }) {
-  if (percentage < 8) return null;
+  const { cx = 0, cy = 0, midAngle = 0, innerRadius = 0, outerRadius = 0, percent = 0 } = props;
+  if (percent < 8) return null;
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -107,7 +100,7 @@ function CustomPieLabel({
       dominantBaseline="central"
       className="text-[10px] font-medium"
     >
-      {percentage.toFixed(0)}%
+      {(percent ?? 0).toFixed(0)}%
     </text>
   );
 }
@@ -203,7 +196,7 @@ export function CloserCharts({ closers }: CloserChartsProps) {
                 dataKey="revenue"
                 strokeWidth={2}
                 stroke="hsl(var(--card))"
-                label={CustomPieLabel}
+                label={((p: { cx?: number; cy?: number; midAngle?: number; innerRadius?: number; outerRadius?: number; percent?: number; name?: string }) => CustomPieLabel(p)) as never}
                 labelLine={false}
               >
                 {data.map((entry, i) => (

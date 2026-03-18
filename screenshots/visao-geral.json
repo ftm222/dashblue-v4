@@ -1,0 +1,78 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Dashboard Comercial",
+      "className": "text-white font-outfit font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Status das Metas",
+      "className": "text-white font-outfit font-bold text-center tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-8 md:mb-16"
+    },
+    {
+      "tag": "H2",
+      "text": "Indicadores Principais",
+      "className": "text-[#0B1120] font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H2",
+      "text": "Funil de Conversão",
+      "className": "text-white font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H2",
+      "text": "Guerra de Squads",
+      "className": "text-navy-ultra-dark font-outfit text-5xl font-bold mb-16 text-center tracking-tight"
+    },
+    {
+      "tag": "H3",
+      "text": "SQUAD HOT DOGS",
+      "className": "text-navy-ultra-dark font-outfit text-4xl font-bold"
+    },
+    {
+      "tag": "H3",
+      "text": "SQUAD CORVO AZUL",
+      "className": "text-navy-ultra-dark font-outfit text-4xl font-bold"
+    },
+    {
+      "tag": "H3",
+      "text": "SQUAD KI KARNES",
+      "className": "text-navy-ultra-dark font-outfit text-4xl font-bold"
+    }
+  ],
+  "metrics": [],
+  "tables": [],
+  "buttons": [
+    {
+      "text": "Modo TV",
+      "className": "items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 hidden md:flex bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-6 py-3 text-lg"
+    },
+    {
+      "text": "Atualizar",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-3 py-2 md:px-6 md:py-3 text-sm md:text-lg"
+    },
+    {
+      "text": "Março 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[200px] bg-[#151E35] border-white/20 text-white hover:bg-white/5"
+    },
+    {
+      "text": "Esta Semana",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium px-4 py-2 text-base bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Este Mês",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 font-outfit font-medium px-4 py-2 text-base bg-[#0066FF] text-white hover:bg-[#0066FF]/90"
+    },
+    {
+      "text": "Período Personalizado",
+      "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium justify-start px-4 py-2 text-base min-w-[240px] bg-transparent border-white/20 text-white hover:bg-white/10"
+    }
+  ],
+  "inputs": [],
+  "bodyText": "Dashboard Comercial\nModo TV\nAtualizar\n\nSábado, 14 De Mar. De 2026\n\nAtualizado: 00:52\n\nVisão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\n\nFiltrar Período:\n\nMês:\nMarço 2026\nEsta Semana\nEste Mês\nPeríodo Personalizado\n\nPeríodo:\n\n01/03/2026 - 31/03/2026\n\nStatus das Metas\n\nMETA MENSAL\n\nR$ 350.000,00\n\n22%\n\ndo objetivo\n\nR$ 75.893,33\n\nFaltam R$ 274.106,67 para a meta\n\n12 dias úteis restantes\n\nMETA SEMANAL\n\nR$ 87.500,00\n\n27%\n\ndo objetivo\n\nR$ 23.800,00\n\nFaltam R$ 63.700,00 para a meta\n\nAtenção\n\nMETA DIÁRIA\n\nR$ 15.909,09\n\n0%\n\ndo objetivo\n\nR$ 0,00\n\nFaltam R$ 15.909,09 para a meta\n\nATENÇÃO\n\nIndicadores Principais\n\nRECEITA TOTAL\n\n75.9k\n\n23 contratos fechados\n\nTICKET MÉDIO\n\n3.3k\n\nMeta: R$ 4.200\n\nCONTRATOS\n\n23\n\nMeta mensal: 88 (26%)\n\nLEADS TOTAL\n\n0\n\n298 MQLs (0%)\n\nTAXA DE SHOW\n\n78.9%\n\n235 realizadas / 298 agendadas\n\nTAXA CONVERSÃO\n\n18.1%\n\n23 fechados / 127 qualificados\n\nFunil de Conversão\n\nLEADS\n\n0\n\n100% do total\n\n0% qualificação ↓\n\nCALLS AGENDADAS (MQL)\n\n298\n\n0% do total\n\n78.9% comparecimento ↓\n\nCALLS REALIZADAS\n\n235\n\n0% do total\n\n54.0% qualificação ↓\n\nCALLS QUALIFICADAS\n\n127\n\n0% do total\n\n18.1% conversão ↓\n\nCONTRATOS FECHADOS\n\n23\n\n0% do total\n\nR$ 75.893,33\n\nReceita Fechada\n\nGuerra de Squads\nLÍDER\nHD\nSQUAD HOT DOGS\n\n31.3k\n\n10 contratos fechados\n\nMEMBROS\n\n• Vinícius (SDR)\n• Cauã (Closer)\n• Bruno (Closer)\nCA\nSQUAD CORVO AZUL\n\n27.6k\n\n7 contratos fechados\n\nMEMBROS\n\n• Andrey (SDR)\n• Marcos (Closer)\n• Gabriel Franklin (Closer)\nKK\nSQUAD KI KARNES\n\n17.0k\n\n5 contratos fechados\n\nMEMBROS\n\n• Gabriel Fernandes (Closer)\n• Brunno Vaz (SDR)\n• Davi (Closer)\n\nSQUAD HOT DOGS ESTÁ NA LIDERANÇA\n\nVantagem: R$ 3.773,33(5.0%)\n\nTodos os direitos reservados por Blue Ocean®️",
+  "hasCharts": false,
+  "chartCount": 0
+}

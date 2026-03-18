@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus, Loader2, AlertCircle, UserPlus, Users } from "lucide-react";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
@@ -58,7 +58,7 @@ interface PersonRow {
   squads?: { name: string } | null;
 }
 
-export default function CollaboratorsPage() {
+function CollaboratorsPageContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<"equipe" | "acesso">("equipe");
@@ -94,6 +94,20 @@ export default function CollaboratorsPage() {
         </TabsContent>
       </Tabs>
     </AdminPageWrapper>
+  );
+}
+
+export default function CollaboratorsPage() {
+  return (
+    <Suspense fallback={
+      <AdminPageWrapper title="Colaboradores" description="Carregando...">
+        <div className="flex items-center justify-center min-h-[200px]">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </AdminPageWrapper>
+    }>
+      <CollaboratorsPageContent />
+    </Suspense>
   );
 }
 
@@ -407,7 +421,7 @@ function AcessoTab() {
         </div>
       )}
 
-      {collaborators && (
+      {collaborators && collaborators.length > 0 && (
         <>
           <div className="flex justify-end">
             <Button size="sm" onClick={() => setDialogOpen(true)}>
@@ -427,7 +441,7 @@ function AcessoTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {collaborators.map((c) => (
+                {(Array.isArray(collaborators) ? collaborators : []).map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-medium">{c.name}</TableCell>
                     <TableCell className="text-muted-foreground">{c.email}</TableCell>

@@ -70,7 +70,9 @@ export async function POST(request: Request) {
     try {
       body = JSON.parse(rawBody);
     } catch {
-      body = {};
+      if (rawBody && rawBody.includes("=")) {
+        body = Object.fromEntries(new URLSearchParams(rawBody)) as unknown as Record<string, unknown>;
+      }
     }
 
     await (admin.from("logs") as any).insert({

@@ -69,7 +69,8 @@ export function isCRMConfig(value: unknown): value is CRMConfig {
   if (!value || typeof value !== "object") return false;
   const obj = value as Record<string, unknown>;
   if (typeof obj.provider !== "string") return false;
-  if (!["kommo", "hubspot", "pipedrive"].includes(obj.provider)) return false;
+  const validProviders = ["kommo", "hubspot", "pipedrive", "generic", "asaas", "rdstation", "zoho", "bitrix24", "salesforce"];
+  if (!validProviders.includes(obj.provider)) return false;
   if (!obj.tokens || typeof obj.tokens !== "object") return false;
   const tokens = obj.tokens as Record<string, unknown>;
   return (

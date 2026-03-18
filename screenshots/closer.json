@@ -1,0 +1,303 @@
+{
+  "title": "Dashboard Blue Ocean - Visão Geral",
+  "url": "https://dashblueocean.com/closer",
+  "headings": [
+    {
+      "tag": "H1",
+      "text": "Performance Closer",
+      "className": "text-white font-outfit font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Receita Total",
+      "className": "text-[#94A3B8] font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "Ticket Médio Geral",
+      "className": "text-[#94A3B8] font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "Taxa de Conversão Média",
+      "className": "text-[#94A3B8] font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "🏆 Closer Destaque",
+      "className": "text-white/90 font-outfit uppercase tracking-wider text-lg mb-3"
+    },
+    {
+      "tag": "H2",
+      "text": "Meta Individual por Closer",
+      "className": "text-[#0B1120] font-outfit font-bold tracking-tight text-4xl mb-3"
+    },
+    {
+      "tag": "H3",
+      "text": "Bruno",
+      "className": "text-[#0B1120] font-outfit font-bold text-center text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Cauã",
+      "className": "text-[#0B1120] font-outfit font-bold text-center text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Marcos",
+      "className": "text-[#0B1120] font-outfit font-bold text-center text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Franklin",
+      "className": "text-[#0B1120] font-outfit font-bold text-center text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Davi",
+      "className": "text-[#0B1120] font-outfit font-bold text-center text-2xl"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Fernandes",
+      "className": "text-[#0B1120] font-outfit font-bold text-center text-2xl"
+    },
+    {
+      "tag": "H2",
+      "text": "Pódio dos Top 3 Closers",
+      "className": "text-[#0B1120] font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Fernandes",
+      "className": "text-white font-outfit text-xl font-bold mb-2 break-words line-clamp-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Cauã",
+      "className": "text-white font-outfit text-xl font-bold mb-2 break-words line-clamp-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Marcos",
+      "className": "text-white font-outfit text-xl font-bold mb-2 break-words line-clamp-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Cauã",
+      "className": "text-white font-outfit text-xl font-bold mb-2 break-words line-clamp-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Fernandes",
+      "className": "text-white font-outfit text-xl font-bold mb-2 break-words line-clamp-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Marcos",
+      "className": "text-white font-outfit text-xl font-bold mb-2 break-words line-clamp-2"
+    },
+    {
+      "tag": "H2",
+      "text": "Comparação de Performance",
+      "className": "text-white font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Cauã",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Fernandes",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Marcos",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Franklin",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Bruno",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H3",
+      "text": "Davi",
+      "className": "text-white font-outfit font-bold text-lg"
+    },
+    {
+      "tag": "H2",
+      "text": "Detalhamento Individual",
+      "className": "text-[#0B1120] font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "Bruno",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Cauã",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Marcos",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Franklin",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Davi",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H3",
+      "text": "Gabriel Fernandes",
+      "className": "text-[#0B1120] font-outfit text-3xl font-bold mb-2"
+    },
+    {
+      "tag": "H2",
+      "text": "Análise Gráfica Comparativa",
+      "className": "text-white font-outfit font-bold text-center tracking-tight text-5xl mb-16"
+    },
+    {
+      "tag": "H3",
+      "text": "💰 Receita por Closer",
+      "className": "text-white font-outfit text-xl md:text-2xl font-bold mb-4 md:mb-8"
+    },
+    {
+      "tag": "H3",
+      "text": "📊 Distribuição de Receita",
+      "className": "text-white font-outfit text-xl md:text-2xl font-bold mb-4 md:mb-8"
+    }
+  ],
+  "metrics": [],
+  "tables": [
+    {
+      "headers": [
+        "Closer",
+        "Squad",
+        "Calls Realizadas",
+        "Calls Qualificadas",
+        "Contratos",
+        "Taxa Conversão",
+        "Receita Total",
+        "Ticket Médio",
+        "Taxa Assinatura",
+        "Taxa Pagamento"
+      ],
+      "rows": [
+        [
+          "Cauã",
+          "Hot Dogs",
+          "40",
+          "27",
+          "7",
+          "🟡25.9%",
+          "R$ 22.000,007 contratos",
+          "🟡R$ 3.142,86",
+          "100.0%",
+          "56.8%"
+        ],
+        [
+          "Gabriel Fernandes",
+          "Ki Karnes",
+          "38",
+          "21",
+          "4",
+          "🔴19.0%",
+          "R$ 15.000,004 contratos",
+          "🟡R$ 3.750,00",
+          "100.0%",
+          "66.7%"
+        ],
+        [
+          "Marcos",
+          "Corvo Azul",
+          "38",
+          "18",
+          "3",
+          "🔴16.7%",
+          "R$ 14.300,003 contratos",
+          "🟢R$ 4.766,67",
+          "100.0%",
+          "100.0%"
+        ],
+        [
+          "Gabriel Franklin",
+          "Corvo Azul",
+          "44",
+          "21",
+          "4",
+          "🔴19.0%",
+          "R$ 13.260,004 contratos",
+          "🟡R$ 3.315,00",
+          "100.0%",
+          "31.4%"
+        ],
+        [
+          "Bruno",
+          "Hot Dogs",
+          "30",
+          "18",
+          "3",
+          "🔴16.7%",
+          "R$ 9.333,333 contratos",
+          "🟡R$ 3.111,11",
+          "100.0%",
+          "100.0%"
+        ]
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "text": "Modo TV",
+      "className": "items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 hidden md:flex bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-6 py-3 text-lg"
+    },
+    {
+      "text": "Atualizar",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 bg-[#0066FF]/10 border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white transition-all px-3 py-2 md:px-6 md:py-3 text-sm md:text-lg"
+    },
+    {
+      "text": "Março 2026",
+      "className": "flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-[200px] bg-[#151E35] border-white/20 text-white hover:bg-white/5"
+    },
+    {
+      "text": "Esta Semana",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium px-4 py-2 text-base bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Este Mês",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 font-outfit font-medium px-4 py-2 text-base bg-[#0066FF] text-white hover:bg-[#0066FF]/90"
+    },
+    {
+      "text": "Período Personalizado",
+      "className": "inline-flex items-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border hover:text-accent-foreground h-10 font-outfit font-medium justify-start px-4 py-2 text-base min-w-[240px] bg-transparent border-white/20 text-white hover:bg-white/10"
+    },
+    {
+      "text": "Previous slide",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground absolute h-8 w-8 rounded-full top-1/2 -translate-y-1/2 left-2"
+    },
+    {
+      "text": "Next slide",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground absolute h-8 w-8 rounded-full top-1/2 -translate-y-1/2 right-2"
+    }
+  ],
+  "inputs": [],
+  "bodyText": "Performance Closer\n\nAnálise detalhada da equipe de fechamento\n\nModo TV\nAtualizar\n\nSábado, 14 De Mar. De 2026\n\nAtualizado: 00:52\n\nVisão Geral\nCloser\nSDR\nSquads\nFinanceiro\nTráfego\nAdmin\nIA 🤖\n\nFiltrar Período:\n\nMês:\nMarço 2026\nEsta Semana\nEste Mês\nPeríodo Personalizado\n\nPeríodo:\n\n01/03/2026 - 31/03/2026\n\n💰\nRECEITA TOTAL\n\nR$ 75.893,33\n\n22 contratos fechados\n\nMeta: R$ 350.000,00\n22%\n📊\nTICKET MÉDIO GERAL\n\nR$ 3.449,70\n\nMeta: R$ 4.200,00\n\nProgresso\n82%\n🎯\nTAXA DE CONVERSÃO MÉDIA\n\n17.0%\n\nMeta: 28%\n\nProgresso\n61%\n🏆 CLOSER DESTAQUE\n\nCauã\n\nR$ 22.000,00\n\n7 contratos fechados\n\nMeta Individual por Closer\n\nModelo MRR • Marco 2026\n\nBruno\n\nSquad Hot Dogs\n\nMeta\n16%\nRealizado\nR$ 9.333,33\nMeta\nR$ 58.333,00\nFaltam R$ 48.999,67\nCauã\n\nSquad Hot Dogs\n\nMeta\n38%\nRealizado\nR$ 22.000,00\nMeta\nR$ 58.333,00\nFaltam R$ 36.333,00\nMarcos\n\nSquad Corvo Azul\n\nMeta\n25%\nRealizado\nR$ 14.300,00\nMeta\nR$ 58.333,00\nFaltam R$ 44.033,00\nGabriel Franklin\n\nSquad Corvo Azul\n\nMeta\n23%\nRealizado\nR$ 13.260,00\nMeta\nR$ 58.333,00\nFaltam R$ 45.073,00\nDavi\n\nSquad Ki Karnes\n\nMeta\n3%\nRealizado\nR$ 2.000,00\nMeta\nR$ 58.333,00\nFaltam R$ 56.333,00\nGabriel Fernandes\n\nSquad Ki Karnes\n\nMeta\n26%\nRealizado\nR$ 15.000,00\nMeta\nR$ 58.333,00\nFaltam R$ 43.333,00\nPódio dos Top 3 Closers\n2º\nGabriel Fernandes\nKI KARNES\n\nRECEITA TOTAL\n\nR$ 15.000,00\n\n4 contratos fechados\n\nTicket médio: R$ 3.750,00\n\n1º\nCauã\nHOT DOGS\n\nRECEITA TOTAL\n\nR$ 22.000,00\n\n7 contratos fechados\n\nTicket médio: R$ 3.142,86\n\nTOP CLOSER DO MÊS\n3º\nMarcos\nCORVO AZUL\n\nRECEITA TOTAL\n\nR$ 14.300,00\n\n3 contratos fechados\n\nTicket médio: R$ 4.766,67\n\nComparação de Performance\nCLOSER\n\t\nSQUAD\n\t\nCALLS REALIZADAS\n\t\nCALLS QUALIFICADAS\n\t\nCONTRATOS\n\t\nTAXA CONVERSÃO\n\t\nRECEITA TOTAL\n\t\nTICKET MÉDIO\n\t\nTAXA ASSINATURA\n\t\nTAXA PAGAMENTO\n\n\nCauã\n\tHOT DOGS\t40\t27\t7\t\n🟡\n25.9%\n\t\n\nR$ 22.000,00\n\n7 contratos\n\n\t\n🟡\nR$ 3.142,86\n\t\n100.0%\n\t\n56.8%\n\n\nGabriel Fernandes\n\tKI KARNES\t38\t21\t4\t\n🔴\n19.0%\n\t\n\nR$ 15.000,00\n\n4 contratos\n\n\t\n🟡\nR$ 3.750,00\n\t\n100.0%\n\t\n66.7%\n\n\nMarcos\n\tCORVO AZUL\t38\t18\t3\t\n🔴\n16.7%\n\t\n\nR$ 14.300,00\n\n3 contratos\n\n\t\n🟢\nR$ 4.766,67\n\t\n100.0%\n\t\n100.0%\n\n\nGabriel Franklin\n\tCORVO AZUL\t44\t21\t4\t\n🔴\n19.0%\n\t\n\nR$ 13.260,00\n\n4 contratos\n\n\t\n🟡\nR$ 3.315,00\n\t\n100.0%\n\t\n31.4%\n\n\nBruno\n\tHOT DOGS\t30\t18\t3\t\n🔴\n16.7%\n\t\n\nR$ 9.333,33\n\n3 contratos\n\n\t\n🟡\nR$ 3.111,11\n\t\n100.0%\n\t\n100.0%\n\n\nDavi\n\tKI KARNES\t40\t21\t1\t\n🔴\n4.8%\n\t\n\nR$ 2.000,00\n\n1 contratos\n\n\t\n🔴\nR$ 2.000,00\n\t\n100.0%\n\t\n100.0%\nDetalhamento Individual\nBruno\nHOT DOGS\n\nRECEITA TOTAL\n\nR$ 9.333,33\n\n3 contratos\n\nCauã\nHOT DOGS\n\nRECEITA TOTAL\n\nR$ 22.000,00\n\n7 contratos\n\nMarcos\nCORVO AZUL\n\nRECEITA TOTAL\n\nR$ 14.300,00\n\n3 contratos\n\nGabriel Franklin\nCORVO AZUL\n\nRECEITA TOTAL\n\nR$ 13.260,00\n\n4 contratos\n\nDavi\nKI KARNES\n\nRECEITA TOTAL\n\nR$ 2.000,00\n\n1 contratos\n\nGabriel Fernandes\nKI KARNES\n\nRECEITA TOTAL\n\nR$ 15.000,00\n\n4 contratos\n\nAnálise Gráfica Comparativa\n💰 Receita por Closer\nR$ 0k\nR$ 6k\nR$ 11k\nR$ 17k\nR$ 22k\nCauã\nGabrielFernandes\nMarcos\nGabrielFranklin\nBruno\nDavi\n📊 Distribuição de Receita\nBruno: 12.3%\nCauã: 29.0%\nMarcos: 18.8%\nGabriel Franklin: 17.5%\nDavi: 2.6%\n",
+  "hasCharts": true,
+  "chartCount": 127
+}

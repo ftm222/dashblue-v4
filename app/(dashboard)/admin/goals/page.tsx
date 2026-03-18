@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   DollarSign,
@@ -41,7 +41,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { cn } from "@/lib/utils";
-import type { Goal, Person, IndividualGoalConfig } from "@/types";
+import type { Goal, Person, IndividualGoalConfig, PersonWithSquad } from "@/types";
 import { SDR_GOAL_METRICS, CLOSER_GOAL_METRICS } from "@/lib/goal-metrics";
 
 const GOAL_CONFIG = {
@@ -64,7 +64,7 @@ function initials(name: string) {
   return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 }
 
-export default function GoalsPage() {
+function GoalsPageContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<"gerais" | "individuais">("gerais");
@@ -215,13 +215,13 @@ function MetasGeraisTab() {
     );
   }
 
-  const availableTypes = ["revenue", "booked"] as const;
+  const availableTypes = useMemo(() => ["revenue", "booked"] as const, []);
 
   useEffect(() => {
     if (dialogOpen && !availableTypes.includes(newType)) {
       setNewType(availableTypes[0]);
     }
-  }, [dialogOpen, newType]);
+  }, [dialogOpen, newType, availableTypes]);
 
   if (isLoading) {
     return (
@@ -528,7 +528,7 @@ function MetasIndividuaisTab() {
   const [newTarget, setNewTarget] = useState("");
   const [newDescription, setNewDescription] = useState("");
 
-  const peopleByRole = (allPeople ?? []).filter((p) => p.role === newRole);
+  const peopleByRole = ((allPeople ?? []) as PersonWithSquad[]).filter((p) => p.role === newRole);
   const configsByRole = newRole === "sdr" ? SDR_GOAL_METRICS : CLOSER_GOAL_METRICS;
   const metricLabels = Object.fromEntries(ALL_INDIVIDUAL_METRICS.map((c) => [c.metric, c.label]));
 
@@ -758,5 +758,17 @@ function MetasIndividuaisTab() {
         </DialogContent>
       </Dialog>
     </Tabs>
+  );
+}
+
+export default function GoalsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <GoalsPageContent />
+    </Suspense>
   );
 }

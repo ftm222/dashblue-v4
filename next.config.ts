@@ -29,6 +29,14 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async redirects() {
+    return [
+      { source: "/login/", destination: "/login", permanent: true },
+      { source: "/register/", destination: "/register", permanent: true },
+      { source: "/forgot-password/", destination: "/forgot-password", permanent: true },
+      { source: "/reset-password/", destination: "/reset-password", permanent: true },
+    ];
+  },
   experimental: {
     optimizePackageImports: [
       "lucide-react",
@@ -53,6 +61,17 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
     ];
+  },
+  // Fallback quando não usar --turbo: reduz EMFILE no macOS
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        poll: 2000,
+        ignored: ["**/node_modules", "**/.git"],
+      };
+    }
+    return config;
   },
 };
 
