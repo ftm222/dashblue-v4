@@ -91,11 +91,13 @@ async function aggregateEvidence(period: PeriodRange): Promise<EvidenceAgg> {
 }
 
 async function aggregateCampaigns(period: PeriodRange) {
+  const fromStr = period.from.toISOString().slice(0, 10);
+  const toStr = period.to.toISOString().slice(0, 10);
   const { data } = await db
     .from("campaigns")
     .select("investment, leads, booked, received, won, revenue")
-    .gte("period_start", period.from.toISOString().slice(0, 10))
-    .lte("period_end", period.to.toISOString().slice(0, 10));
+    .lte("period_start", toStr)
+    .gte("period_end", fromStr);
 
   const rows = (data ?? []) as { investment: number; leads: number; booked: number; received: number; won: number; revenue: number }[];
   return {
@@ -411,11 +413,13 @@ export async function fetchPeople(
 export async function fetchCampaigns(
   period: PeriodRange,
 ): Promise<Campaign[]> {
+  const fromStr = period.from.toISOString().slice(0, 10);
+  const toStr = period.to.toISOString().slice(0, 10);
   const { data } = await db
     .from("campaigns")
     .select("*")
-    .gte("period_start", period.from.toISOString().slice(0, 10))
-    .lte("period_end", period.to.toISOString().slice(0, 10))
+    .lte("period_start", toStr)
+    .gte("period_end", fromStr)
     .order("created_at", { ascending: false });
 
   type CampaignRow = { id: string; name: string; source?: string; medium?: string; investment: number; impressions: number; clicks: number; leads: number; booked: number; received: number; won: number; revenue: number };
@@ -570,11 +574,13 @@ export async function fetchDiagnostics(
     });
   }
 
+  const diagFrom = period.from.toISOString().slice(0, 10);
+  const diagTo = period.to.toISOString().slice(0, 10);
   const { data: campaigns } = await db
     .from("campaigns")
     .select("investment, leads")
-    .gte("period_start", period.from.toISOString().slice(0, 10))
-    .lte("period_end", period.to.toISOString().slice(0, 10));
+    .lte("period_start", diagTo)
+    .gte("period_end", diagFrom);
 
   type CampaignAggRow = { investment?: number; leads?: number; booked?: number; received?: number; won?: number; revenue?: number };
   const campaignRows = (campaigns ?? []) as CampaignAggRow[];

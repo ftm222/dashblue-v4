@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
+import { campaignCreateSchema, validateBody } from "@/lib/validations";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(request: Request) {
   try {
@@ -24,29 +26,29 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { orgId } = await getAuthUserWithOrg(request);
-    const body = await request.json();
+    const { user, orgId } = await getAuthUserWithOrg(request);
+    const raw = await request.json();
+    const { data: body, error: validationError } = validateBody(campaignCreateSchema, raw);
+    if (!body) {
+      throw new ApiError("VALIDATION", validationError!, 400);
+    }
 
     const { name, source, medium, investment, impressions, clicks, leads, booked, received, won, revenue, period_start, period_end } = body;
-
-    if (!name || !period_start || !period_end) {
-      throw new ApiError("VALIDATION", "name, period_start e period_end são obrigatórios.", 400);
-    }
 
     const admin = getAdminClient();
     const { data, error } = await (admin.from("campaigns") as any)
       .insert({
         name,
-        source: source || "",
-        medium: medium || "",
-        investment: investment || 0,
-        impressions: impressions || 0,
-        clicks: clicks || 0,
-        leads: leads || 0,
-        booked: booked || 0,
-        received: received || 0,
-        won: won || 0,
-        revenue: revenue || 0,
+        source: source ?? "",
+        medium: medium ?? "",
+        investment: investment ?? 0,
+        impressions: impressions ?? 0,
+        clicks: clicks ?? 0,
+        leads: leads ?? 0,
+        booked: booked ?? 0,
+        received: received ?? 0,
+        won: won ?? 0,
+        revenue: revenue ?? 0,
         period_start,
         period_end,
         organization_id: orgId,
@@ -55,6 +57,15 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
+
+    await logAudit(admin, {
+      userId: user.id,
+      orgId,
+      action: "campaign_create",
+      entityType: "campaign",
+      entityId: data.id,
+      details: { name: data.name, source: data.source },
+    });
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (err) {

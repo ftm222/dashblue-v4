@@ -72,6 +72,94 @@ export const evidenceFilterSchema = z.object({
   cursor: z.string().optional(),
 });
 
+// --- API Routes (contracts, people, campaigns, integrations) ---
+
+const optionalUuid = () => z.union([z.string().uuid(), z.literal(""), z.null()]).optional()
+  .transform((v) => (v === "" || v === null ? null : v));
+
+export const contractCreateSchema = z.object({
+  client_name: z.string().min(1, "client_name é obrigatório").max(500),
+  value: z.coerce.number().min(0, "value deve ser >= 0"),
+  status: z.enum(["signed_paid", "signed_unpaid", "unsigned"]),
+  sdr_id: optionalUuid(),
+  closer_id: optionalUuid(),
+  squad_id: optionalUuid(),
+  evidence_id: optionalUuid(),
+  signed_at: z.string().nullable().optional(),
+  paid_at: z.string().nullable().optional(),
+});
+
+export const contractUpdateSchema = z.object({
+  client_name: z.string().min(1).max(500).optional(),
+  value: z.coerce.number().min(0).optional(),
+  status: z.enum(["signed_paid", "signed_unpaid", "unsigned"]).optional(),
+  sdr_id: optionalUuid(),
+  closer_id: optionalUuid(),
+  squad_id: optionalUuid(),
+  evidence_id: optionalUuid(),
+  signed_at: z.string().nullable().optional(),
+  paid_at: z.string().nullable().optional(),
+}).refine((d) => Object.keys(d).length > 0, "Pelo menos um campo deve ser enviado");
+
+export const personCreateSchema = z.object({
+  name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres").max(200),
+  role: z.enum(["sdr", "closer"]),
+  squad_id: optionalUuid(),
+  avatar_url: z.string().max(2000).nullable().optional(),
+});
+
+export const personUpdateSchema = z.object({
+  name: z.string().min(2).max(200).optional(),
+  role: z.enum(["sdr", "closer"]).optional(),
+  squad_id: optionalUuid(),
+  avatar_url: z.string().max(2000).nullable().optional(),
+  active: z.boolean().optional(),
+}).refine((d) => Object.keys(d).length > 0, "Pelo menos um campo deve ser enviado");
+
+const dateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato: YYYY-MM-DD");
+
+const optionalNum = (opts?: { min?: number; int?: boolean }) => {
+  const base = opts?.int ? z.coerce.number().int() : z.coerce.number();
+  return base.min(opts?.min ?? 0).optional();
+};
+
+export const campaignCreateSchema = z.object({
+  name: z.string().min(1, "name é obrigatório").max(500),
+  period_start: dateStringSchema,
+  period_end: dateStringSchema,
+  source: z.string().max(200).optional(),
+  medium: z.string().max(200).optional(),
+  investment: optionalNum(),
+  impressions: optionalNum({ int: true }),
+  clicks: optionalNum({ int: true }),
+  leads: optionalNum({ int: true }),
+  booked: optionalNum({ int: true }),
+  received: optionalNum({ int: true }),
+  won: optionalNum({ int: true }),
+  revenue: optionalNum(),
+});
+
+export const campaignUpdateSchema = z.object({
+  name: z.string().min(1).max(500).optional(),
+  period_start: dateStringSchema.optional(),
+  period_end: dateStringSchema.optional(),
+  source: z.string().max(200).optional(),
+  medium: z.string().max(200).optional(),
+  investment: optionalNum(),
+  impressions: optionalNum({ int: true }),
+  clicks: optionalNum({ int: true }),
+  leads: optionalNum({ int: true }),
+  booked: optionalNum({ int: true }),
+  received: optionalNum({ int: true }),
+  won: optionalNum({ int: true }),
+  revenue: optionalNum(),
+}).refine((d) => Object.keys(d).length > 0, "Pelo menos um campo deve ser enviado");
+
+export const integrationCreateSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório").max(200).transform((s) => s.trim()),
+  type: z.enum(["crm", "ads"]),
+});
+
 export function validateBody<T>(schema: z.ZodSchema<T>, data: unknown): { data: T; error: null } | { data: null; error: string } {
   const result = schema.safeParse(data);
   if (result.success) {

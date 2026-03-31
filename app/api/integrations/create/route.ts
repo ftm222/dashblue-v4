@@ -2,27 +2,23 @@ import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase-admin";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
+import { integrationCreateSchema, validateBody } from "@/lib/validations";
 
 export async function POST(request: Request) {
   try {
     const { orgId } = await getAuthUserWithOrg(request);
-    const body = await request.json();
+    const raw = await request.json();
+    const { data: body, error: validationError } = validateBody(integrationCreateSchema, raw);
+    if (!body) {
+      throw new ApiError("VALIDATION", validationError!, 400);
+    }
 
     const { name, type } = body;
-
-    if (!name || typeof name !== "string" || !name.trim()) {
-      throw new ApiError("VALIDATION", "Nome da integração é obrigatório.", 400);
-    }
-
-    const validTypes = ["crm", "ads"];
-    if (!type || !validTypes.includes(type)) {
-      throw new ApiError("VALIDATION", "Tipo deve ser 'crm' ou 'ads'.", 400);
-    }
 
     const admin = getAdminClient();
     const { data: integration, error } = await (admin.from("integrations") as any)
       .insert({
-        name: name.trim(),
+        name,
         type,
         status: "disconnected",
         organization_id: orgId,

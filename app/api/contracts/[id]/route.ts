@@ -2,15 +2,21 @@ import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
+import { contractUpdateSchema, validateBody } from "@/lib/validations";
+import { logAudit } from "@/lib/audit";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { orgId } = await getAuthUserWithOrg(request);
+    const { user, orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
-    const body = await request.json();
+    const raw = await request.json();
+    const { data: body, error: validationError } = validateBody(contractUpdateSchema, raw);
+    if (!body) {
+      throw new ApiError("VALIDATION", validationError!, 400);
+    }
 
     const { client_name, value, status, sdr_id, closer_id, squad_id, evidence_id, signed_at, paid_at } = body;
 
@@ -18,12 +24,12 @@ export async function PUT(
     if (client_name !== undefined) fields.client_name = client_name;
     if (value !== undefined) fields.value = value;
     if (status !== undefined) fields.status = status;
-    if (sdr_id !== undefined) fields.sdr_id = sdr_id || null;
-    if (closer_id !== undefined) fields.closer_id = closer_id || null;
-    if (squad_id !== undefined) fields.squad_id = squad_id || null;
-    if (evidence_id !== undefined) fields.evidence_id = evidence_id || null;
-    if (signed_at !== undefined) fields.signed_at = signed_at || null;
-    if (paid_at !== undefined) fields.paid_at = paid_at || null;
+    if (sdr_id !== undefined) fields.sdr_id = sdr_id;
+    if (closer_id !== undefined) fields.closer_id = closer_id;
+    if (squad_id !== undefined) fields.squad_id = squad_id;
+    if (evidence_id !== undefined) fields.evidence_id = evidence_id;
+    if (signed_at !== undefined) fields.signed_at = signed_at;
+    if (paid_at !== undefined) fields.paid_at = paid_at;
 
     const admin = getAdminClient();
     const { data, error } = await (admin.from("contracts") as any)
@@ -34,6 +40,15 @@ export async function PUT(
       .single();
 
     if (error) throw error;
+
+    await logAudit(admin, {
+      userId: user.id,
+      orgId,
+      action: "contract_update",
+      entityType: "contract",
+      entityId: id,
+      details: fields,
+    });
 
     return NextResponse.json({ data });
   } catch (err) {
@@ -46,7 +61,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { orgId } = await getAuthUserWithOrg(request);
+    const { user, orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
 
     const admin = getAdminClient();
@@ -57,6 +72,15 @@ export async function DELETE(
       .eq("organization_id", orgId);
 
     if (error) throw error;
+
+    await logAudit(admin, {
+      userId: user.id,
+      orgId,
+      action: "contract_delete",
+      entityType: "contract",
+      entityId: id,
+      details: {},
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

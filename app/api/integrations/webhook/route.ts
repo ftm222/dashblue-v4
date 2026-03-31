@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase-admin";
-import { syncIntegration } from "@/lib/crm/sync";
+import { enqueueJob } from "@/lib/jobs";
 import { isCRMConfig } from "@/lib/crm/types";
 import type { CRMConfig } from "@/lib/crm/types";
 import { rateLimit, getClientIP } from "@/lib/rate-limit";
@@ -38,11 +38,11 @@ export async function POST(request: Request) {
     const admin = getAdminClient();
     const { data: integration } = await admin
       .from("integrations")
-      .select("id, config")
+      .select("id, config, organization_id")
       .eq("id", integrationId)
       .single();
 
-    const int = integration as { id: string; config?: unknown } | null;
+    const int = integration as { id: string; config?: unknown; organization_id?: string } | null;
     if (!int) {
       return NextResponse.json({ error: "Integration not found" }, { status: 404 });
     }
@@ -79,6 +79,7 @@ export async function POST(request: Request) {
       action: "webhook_received",
       entity_type: "integration",
       entity_id: integrationId,
+      organization_id: int.organization_id,
       details: {
         message: `Webhook recebido de ${config.provider}`,
         provider: config.provider,
@@ -86,9 +87,12 @@ export async function POST(request: Request) {
       },
     });
 
-    const result = await syncIntegration(integrationId);
+    const jobResult = await enqueueJob("crm:sync", { integrationId });
+    if (!jobResult.success) {
+      throw new Error(jobResult.error ?? "Falha na sincronização");
+    }
 
-    return NextResponse.json({ ok: true, result });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Webhook error";
     return NextResponse.json({ error: message }, { status: 500 });

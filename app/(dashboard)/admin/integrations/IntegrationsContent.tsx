@@ -56,7 +56,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { Integration } from "@/types";
 
-type CRMProvider = "kommo" | "hubspot" | "pipedrive" | "generic" | "asaas" | "rdstation" | "zoho" | "bitrix24" | "salesforce";
+type CRMProvider = "kommo" | "hubspot" | "pipedrive" | "generic" | "asaas" | "rdstation" | "zoho" | "bitrix24" | "salesforce" | "meta";
 
 type TokenDialogState = {
   integration: Integration;
@@ -82,6 +82,8 @@ const PROVIDER_MAP: Record<string, { provider: string; logo: string }> = {
   "Bitrix24": { provider: "bitrix24", logo: "B" },
   "Salesforce": { provider: "salesforce", logo: "S" },
   "Asaas": { provider: "asaas", logo: "A" },
+  "Meta Ads": { provider: "meta", logo: "M" },
+  "Meta": { provider: "meta", logo: "M" },
 };
 
 const PROVIDER_COLORS: Record<string, string> = {
@@ -357,14 +359,15 @@ export function IntegrationsPageContent() {
   function openTokenDialog(integration: Integration, provider?: CRMProvider) {
     const providerInfo = getProvider(integration.name);
     const p = (provider ?? providerInfo?.provider ?? "generic") as CRMProvider;
-    const supported = ["kommo", "hubspot", "pipedrive", "asaas", "generic", "rdstation", "zoho", "bitrix24", "salesforce"];
-    if (supported.includes(p) || providerInfo || integration.name.toLowerCase().match(/kommo|hubspot|pipedrive|asaas/)) {
-      setTokenDialog({ integration, provider: p });
+    const supported = ["kommo", "hubspot", "pipedrive", "asaas", "generic", "rdstation", "zoho", "bitrix24", "salesforce", "meta"];
+    const isAdsMeta = integration.type === "ads" && (p === "meta" || integration.name.toLowerCase().includes("meta"));
+    if (supported.includes(p) || providerInfo || integration.name.toLowerCase().match(/kommo|hubspot|pipedrive|asaas/) || isAdsMeta) {
+      setTokenDialog({ integration, provider: isAdsMeta ? "meta" : p });
       setTokenInput("");
       setCompanyDomainInput("");
       setApiUrlInput("");
     } else {
-      setToast({ type: "error", message: "Selecione um CRM suportado." });
+      setToast({ type: "error", message: "Selecione um CRM ou plataforma de Ads suportada." });
     }
   }
 
@@ -425,7 +428,7 @@ export function IntegrationsPageContent() {
         setToast({ type: "error", message: resData.message || resData.error || "Erro ao conectar." });
       } else {
         setTokenDialog(null);
-        setToast({ type: "success", message: "CRM conectado com sucesso!" });
+        setToast({ type: "success", message: resData.message || "Conectado com sucesso!" });
         refetch();
       }
     } catch {
@@ -581,8 +584,6 @@ export function IntegrationsPageContent() {
                       <Badge className="shrink-0 gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-transparent">
                         <CheckCircle2 className="h-3 w-3" /> Instalado
                       </Badge>
-                    ) : item.provider === "meta" ? (
-                      <Badge variant="secondary" className="shrink-0">Em breve</Badge>
                     ) : (
                       <Badge variant="outline" className="shrink-0 gap-1">
                         <Plus className="h-3 w-3" /> Instalar
@@ -665,15 +666,15 @@ export function IntegrationsPageContent() {
                       <Key className="h-3.5 w-3.5" /> Configurar Stripe
                     </Button>
                   )
-                ) : selectedCatalog.provider === "meta" ? (
-                  <Button variant="secondary" size="sm" className="w-full" disabled>Em breve</Button>
                 ) : connectedInt ? (
                   (() => {
                     const isConnected = connectedInt.status === "connected";
                     const isSyncing = syncing === connectedInt.id;
                     const providerInfo = getProvider(connectedInt.name);
                     const tokenOnlyProviders = ["rdstation", "zoho", "bitrix24", "salesforce", "generic", "asaas"];
-                    const supportsSync = !tokenOnlyProviders.includes(providerInfo?.provider ?? "");
+                    const supportsSync = connectedInt.type === "ads"
+                      ? providerInfo?.provider === "meta"
+                      : !tokenOnlyProviders.includes(providerInfo?.provider ?? "");
                     return (
                       <>
                         {isConnected && supportsSync && (
@@ -700,31 +701,22 @@ export function IntegrationsPageContent() {
                   (() => {
                     const existing = integrations.find((i) => getProvider(i.name)?.provider === selectedCatalog.provider);
                     const targetIntegration = existing ?? null;
-                    const handleConnectClick = async () => {
-                      if (!targetIntegration) {
-                        await handleAddCRM(selectedCatalog.name, selectedCatalog.provider as CRMProvider);
-                        refetch();
-                        const created = await new Promise<Integration | null>((resolve) => {
-                          const check = () => {
-                            const found = integrations.find((i) => getProvider(i.name)?.provider === selectedCatalog.provider);
-                            if (found) resolve(found);
-                            else setTimeout(check, 300);
-                          };
-                          refetch().then(() => setTimeout(check, 500));
-                        });
-                        if (created) openTokenDialog(created);
-                        else setToast({ type: "error", message: "Integração criada. Clique novamente para conectar." });
-                      } else {
-                        openTokenDialog(targetIntegration);
+                    const handleAddAndConnect = async () => {
+                      if (targetIntegration) {
+                        openTokenDialog(targetIntegration, selectedCatalog.provider as CRMProvider);
+                        return;
                       }
-                    };
-                    const runAddThenConnect = async () => {
-                      await handleAddCRM(selectedCatalog.name, selectedCatalog.provider as CRMProvider);
-                      refetch();
-                      const list = data ?? [];
-                      const found = list.find((i) => getProvider(i.name)?.provider === selectedCatalog.provider);
-                      if (found) openTokenDialog(found);
-                      else setToast({ type: "success", message: "Integração adicionada. Se não conectar, clique em \"Conectar\" novamente após o recarregamento." });
+                      const intType = selectedCatalog.category === "ads" ? "ads" : "crm";
+                      try {
+                        const created = await createMut.mutateAsync({ name: selectedCatalog.name, type: intType });
+                        refetch();
+                        openTokenDialog(
+                          { id: created.id, name: created.name, type: created.type, status: created.status, lastSync: undefined },
+                          selectedCatalog.provider as CRMProvider,
+                        );
+                      } catch {
+                        setToast({ type: "error", message: "Erro ao criar integração. Tente novamente." });
+                      }
                     };
                     return (
                       <>
@@ -759,8 +751,13 @@ export function IntegrationsPageContent() {
                           className="w-full gap-1.5"
                           onClick={() => {
                             const i = integrations.find((x) => getProvider(x.name)?.provider === selectedCatalog.provider);
-                            if (i) openTokenDialog(i, selectedCatalog.provider as CRMProvider);
-                            else handleAddCRM(selectedCatalog.name, selectedCatalog.provider as CRMProvider);
+                            if (selectedCatalog.provider === "meta" || selectedCatalog.category === "ads") {
+                              handleAddAndConnect();
+                            } else if (i) {
+                              openTokenDialog(i, selectedCatalog.provider as CRMProvider);
+                            } else {
+                              handleAddCRM(selectedCatalog.name, selectedCatalog.provider as CRMProvider);
+                            }
                           }}
                         >
                           <Key className="h-3.5 w-3.5" /> Inserir Token / API Key
@@ -1047,7 +1044,9 @@ export function IntegrationsPageContent() {
               <DialogHeader>
                 <DialogTitle>Conectar {tokenDialog.integration.name} com Token</DialogTitle>
                 <DialogDescription>
-                  Insira sua chave de API ou token. Você encontra isso no painel de desenvolvedor ou configurações da API do seu CRM.
+                  {tokenDialog.provider === "meta"
+                    ? "Insira o Access Token do Meta (Graph API). Obtenha em developers.facebook.com → Graph API Explorer com permissões ads_read e ads_management."
+                    : "Insira sua chave de API ou token. Você encontra isso no painel de desenvolvedor ou configurações da API do seu CRM."}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">

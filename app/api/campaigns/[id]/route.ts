@@ -2,24 +2,27 @@ import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
+import { campaignUpdateSchema, validateBody } from "@/lib/validations";
+import { logAudit } from "@/lib/audit";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { orgId } = await getAuthUserWithOrg(request);
+    const { user, orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
-    const body = await request.json();
-
-    const allowedFields = [
-      "name", "source", "medium", "investment", "impressions", "clicks",
-      "leads", "booked", "received", "won", "revenue", "period_start", "period_end",
-    ];
+    const raw = await request.json();
+    const { data: body, error: validationError } = validateBody(campaignUpdateSchema, raw);
+    if (!body) {
+      throw new ApiError("VALIDATION", validationError!, 400);
+    }
 
     const fields: Record<string, unknown> = {};
-    for (const key of allowedFields) {
-      if (body[key] !== undefined) fields[key] = body[key];
+    for (const key of Object.keys(body)) {
+      if (body[key as keyof typeof body] !== undefined) {
+        fields[key] = body[key as keyof typeof body];
+      }
     }
 
     const admin = getAdminClient();
@@ -32,6 +35,15 @@ export async function PUT(
 
     if (error) throw error;
 
+    await logAudit(admin, {
+      userId: user.id,
+      orgId,
+      action: "campaign_update",
+      entityType: "campaign",
+      entityId: id,
+      details: fields,
+    });
+
     return NextResponse.json({ data });
   } catch (err) {
     return apiErrorResponse(err);
@@ -43,7 +55,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { orgId } = await getAuthUserWithOrg(request);
+    const { user, orgId } = await getAuthUserWithOrg(request);
     const { id } = await params;
 
     const admin = getAdminClient();
@@ -54,6 +66,15 @@ export async function DELETE(
       .eq("organization_id", orgId);
 
     if (error) throw error;
+
+    await logAudit(admin, {
+      userId: user.id,
+      orgId,
+      action: "campaign_delete",
+      entityType: "campaign",
+      entityId: id,
+      details: {},
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

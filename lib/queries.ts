@@ -115,6 +115,7 @@ export function usePeople(
     queryKey: ["people", role, periodKey(period)],
     queryFn: () => fetchPeople(role, period),
     ...options,
+    enabled: (options?.enabled !== false) && typeof window !== "undefined",
   });
 }
 
@@ -167,6 +168,7 @@ export function useAlerts(
     queryKey: ["alerts"],
     queryFn: fetchAlerts,
     ...options,
+    enabled: (options?.enabled !== false) && typeof window !== "undefined",
   });
 }
 
@@ -217,6 +219,7 @@ export function useFinancialData(
     queryKey: ["financial"],
     queryFn: fetchFinancialData,
     ...options,
+    enabled: (options?.enabled !== false) && typeof window !== "undefined",
   });
 }
 

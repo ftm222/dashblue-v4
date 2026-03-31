@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase-admin";
 import { ApiError, apiErrorResponse } from "@/lib/api-error";
 import { getAuthUserWithOrg } from "@/lib/api-auth";
+import { personCreateSchema, validateBody } from "@/lib/validations";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(request: Request) {
   try {
@@ -31,16 +33,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { orgId } = await getAuthUserWithOrg(request);
-    const body = await request.json();
+    const { user, orgId } = await getAuthUserWithOrg(request);
+    const raw = await request.json();
+    const { data: body, error: validationError } = validateBody(personCreateSchema, raw);
+    if (!body) {
+      throw new ApiError("VALIDATION", validationError!, 400);
+    }
 
     const { name, role, squad_id, avatar_url } = body;
-    if (!name || !role) {
-      throw new ApiError("VALIDATION", "name e role são obrigatórios.", 400);
-    }
-    if (!["sdr", "closer"].includes(role)) {
-      throw new ApiError("VALIDATION", "role deve ser sdr ou closer.", 400);
-    }
 
     const admin = getAdminClient();
     const { data, error } = await (admin.from("people") as any)
@@ -56,6 +56,15 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
+
+    await logAudit(admin, {
+      userId: user.id,
+      orgId,
+      action: "person_create",
+      entityType: "person",
+      entityId: data.id,
+      details: { name: data.name, role: data.role },
+    });
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (err) {

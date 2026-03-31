@@ -54,11 +54,18 @@ export async function enqueueJob(
 
 // Pre-register common jobs
 import { syncIntegration } from "@/lib/crm/sync";
+import { syncAdsIntegration } from "@/lib/ads/sync";
 
 defineJob("crm:sync", async (payload) => {
   const integrationId = payload.integrationId as string;
   if (!integrationId) throw new Error("integrationId is required");
   await syncIntegration(integrationId);
+}, { retries: 3, backoffMs: 2000 });
+
+defineJob("ads:sync", async (payload) => {
+  const integrationId = payload.integrationId as string;
+  if (!integrationId) throw new Error("integrationId is required");
+  await syncAdsIntegration(integrationId);
 }, { retries: 3, backoffMs: 2000 });
 
 defineJob("email:send", async (payload) => {
