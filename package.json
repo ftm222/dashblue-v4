@@ -14,8 +14,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "db:migrate": "node supabase/run-migration.mjs",
-    "db:verify": "node scripts/verify-db.mjs"
+    "db:migrate": "node --env-file=.env.local supabase/run-migration.mjs",
+    "db:verify": "node --env-file=.env.local scripts/verify-db.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.2",

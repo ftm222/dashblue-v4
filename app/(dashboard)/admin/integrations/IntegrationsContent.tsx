@@ -33,6 +33,7 @@ import { IntegrationLogo } from "@/components/integrations/IntegrationLogo";
 import { useIntegrations, useUpdateIntegrationStatus, useUpdateWebhookSecret, useCreateIntegration, useDeleteIntegration } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
 import { AdminPageWrapper } from "@/features/admin/AdminPageWrapper";
+import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -134,7 +135,16 @@ const API_URL_PLACEHOLDERS: Record<string, string> = {
   generic: "ex: https://api.seudominio.com ou deixe vazio",
 };
 
+function catalogMatchesIntegration(item: CatalogIntegration, i: Integration): boolean {
+  if (item.provider === "stripe") return false;
+  const p = getProvider(i.name);
+  if (p?.provider === item.provider) return true;
+  if (i.name.toLowerCase().includes(item.provider.toLowerCase())) return true;
+  return false;
+}
+
 export function IntegrationsPageContent() {
+  const { organization } = useAuth();
   const { data, isLoading, isError, refetch } = useIntegrations();
   const integrations = data ?? [];
   const updateMut = useUpdateIntegrationStatus();
@@ -441,18 +451,48 @@ export function IntegrationsPageContent() {
   const isGenericProvider = ["generic", "asaas", "rdstation", "zoho", "bitrix24", "salesforce"].includes(tokenDialog?.provider ?? "");
   const crmIntegrations = integrations.filter((i) => i.type === "crm");
 
-  // Resolve integração conectada para um item do catálogo
-  function getConnectedForCatalog(item: CatalogIntegration): Integration | null {
-    if (item.provider === "stripe") return null;
-    return integrations.find((i) => {
-      const p = getProvider(i.name);
-      return p?.provider === item.provider || i.name.toLowerCase().includes(item.provider);
-    }) ?? null;
+  /** Limite efetivo: planos antigos com 1 integração bloqueavam várias contas do mesmo provedor; mínimo 25 conexões. */
+  function effectiveMaxIntegrations(): number {
+    const raw = organization?.max_integrations ?? 999;
+    return raw <= 1 ? 25 : raw;
+  }
+
+  /** Todas as integrações da organização que correspondem ao item do catálogo (ex.: várias contas Meta Ads). */
+  function getCatalogConnections(item: CatalogIntegration): Integration[] {
+    if (item.provider === "stripe") return [];
+    return integrations.filter((i) => catalogMatchesIntegration(item, i));
   }
 
   function isCatalogItemInstalled(item: CatalogIntegration): boolean {
     if (item.provider === "stripe") return !!stripeConfig?.secret_key;
-    return !!getConnectedForCatalog(item);
+    return getCatalogConnections(item).length > 0;
+  }
+
+  async function handleAddAnotherConnection() {
+    if (!selectedCatalog) return;
+    const maxInt = effectiveMaxIntegrations();
+    if (integrations.length >= maxInt) {
+      setToast({
+        type: "error",
+        message: `Limite de ${maxInt} integração(ões) do plano atingido. Remova uma integração ou faça upgrade.`,
+      });
+      return;
+    }
+    const list = getCatalogConnections(selectedCatalog);
+    const n = list.length + 1;
+    const name = n === 1 ? selectedCatalog.name : `${selectedCatalog.name} (${n})`;
+    const intType = selectedCatalog.category === "ads" ? "ads" : "crm";
+    try {
+      await createMut.mutateAsync({ name, type: intType });
+      await refetch();
+      setToast({
+        type: "success",
+        message: "Nova conexão adicionada. Use os botões abaixo para OAuth ou token nesta conta.",
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao criar integração.";
+      setToast({ type: "error", message: msg });
+    }
   }
 
   const filteredCatalog = INTEGRATION_CATALOG.filter((item) => {
@@ -561,7 +601,7 @@ export function IntegrationsPageContent() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCatalog.map((item) => {
             const installed = isCatalogItemInstalled(item);
-            const connectedInt = getConnectedForCatalog(item);
+            const connCount = getCatalogConnections(item).length;
             return (
               <Card
                 key={item.id}
@@ -581,9 +621,14 @@ export function IntegrationsPageContent() {
                       </div>
                     </div>
                     {installed ? (
-                      <Badge className="shrink-0 gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-transparent">
-                        <CheckCircle2 className="h-3 w-3" /> Instalado
-                      </Badge>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-transparent">
+                          <CheckCircle2 className="h-3 w-3" /> Instalado
+                        </Badge>
+                        {connCount > 1 && (
+                          <span className="text-[10px] text-muted-foreground tabular-nums">{connCount} conexões</span>
+                        )}
+                      </div>
                     ) : (
                       <Badge variant="outline" className="shrink-0 gap-1">
                         <Plus className="h-3 w-3" /> Instalar
@@ -597,9 +642,7 @@ export function IntegrationsPageContent() {
         </div>
 
         {/* Painel de detalhe ao selecionar */}
-        {selectedCatalog && (() => {
-          const connectedInt = getConnectedForCatalog(selectedCatalog);
-          return (
+        {selectedCatalog && (
           <Card className="h-fit lg:sticky lg:top-6">
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -666,111 +709,165 @@ export function IntegrationsPageContent() {
                       <Key className="h-3.5 w-3.5" /> Configurar Stripe
                     </Button>
                   )
-                ) : connectedInt ? (
-                  (() => {
-                    const isConnected = connectedInt.status === "connected";
-                    const isSyncing = syncing === connectedInt.id;
-                    const providerInfo = getProvider(connectedInt.name);
-                    const tokenOnlyProviders = ["rdstation", "zoho", "bitrix24", "salesforce", "generic", "asaas"];
-                    const supportsSync = connectedInt.type === "ads"
-                      ? providerInfo?.provider === "meta"
-                      : !tokenOnlyProviders.includes(providerInfo?.provider ?? "");
+                ) : (() => {
+                  const connections = getCatalogConnections(selectedCatalog);
+                  const tokenOnlyProviders = ["rdstation", "zoho", "bitrix24", "salesforce", "generic", "asaas"];
+                  const maxInt = effectiveMaxIntegrations();
+                  const atIntegrationLimit = integrations.length >= maxInt;
+
+                  if (connections.length > 0) {
                     return (
                       <>
-                        {isConnected && supportsSync && (
-                          <Button variant="default" size="sm" className="w-full gap-1.5" disabled={isSyncing} onClick={() => handleSync(connectedInt)}>
-                            <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
-                            {isSyncing ? "Sincronizando..." : "Sincronizar"}
-                          </Button>
-                        )}
-                        {providerInfo?.provider === "kommo" && (
-                          <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={() => setWebhookDialog(connectedInt)}>
-                            <ExternalLink className="h-3.5 w-3.5" /> URL do Webhook
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="sm" className="w-full text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setDisconnectDialog(connectedInt)}>
-                          <Unlink className="h-3.5 w-3.5" /> Desconectar
-                        </Button>
-                        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setDeleteDialog(connectedInt)}>
-                          Excluir integração
-                        </Button>
-                      </>
-                    );
-                  })()
-                ) : (
-                  (() => {
-                    const existing = integrations.find((i) => getProvider(i.name)?.provider === selectedCatalog.provider);
-                    const targetIntegration = existing ?? null;
-                    const handleAddAndConnect = async () => {
-                      if (targetIntegration) {
-                        openTokenDialog(targetIntegration, selectedCatalog.provider as CRMProvider);
-                        return;
-                      }
-                      const intType = selectedCatalog.category === "ads" ? "ads" : "crm";
-                      try {
-                        const created = await createMut.mutateAsync({ name: selectedCatalog.name, type: intType });
-                        refetch();
-                        openTokenDialog(
-                          { id: created.id, name: created.name, type: created.type, status: created.status, lastSync: undefined },
-                          selectedCatalog.provider as CRMProvider,
-                        );
-                      } catch {
-                        setToast({ type: "error", message: "Erro ao criar integração. Tente novamente." });
-                      }
-                    };
-                    return (
-                      <>
-                        {["kommo", "hubspot", "pipedrive"].includes(selectedCatalog.provider) && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="w-full gap-1.5"
-                            disabled={connecting !== null || createMut.isPending}
-                            onClick={async () => {
-                              const i = integrations.find((x) => getProvider(x.name)?.provider === selectedCatalog.provider);
-                              if (i) {
-                                handleConnect(i);
-                              } else {
-                                try {
-                                  const created = await createMut.mutateAsync({ name: selectedCatalog.name, type: "crm" });
-                                  refetch();
-                                  handleConnect({ id: created.id, name: created.name, type: created.type, status: created.status, lastSync: undefined } as Integration);
-                                } catch {
-                                  setToast({ type: "error", message: "Erro ao criar integração. Tente novamente." });
-                                }
-                              }
-                            }}
-                          >
-                            {(connecting || createMut.isPending) ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
-                            Conectar via OAuth
-                          </Button>
-                        )}
+                        <div>
+                          <h4 className="text-sm font-medium">Conexões ({connections.length})</h4>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Cada linha é uma conta vinculada (ex.: várias contas Meta Ads). Sincronize e gerencie por conexão.
+                          </p>
+                        </div>
+                        {connections.map((connectedInt) => {
+                          const isConnected = connectedInt.status === "connected";
+                          const isSyncing = syncing === connectedInt.id;
+                          const providerInfo = getProvider(connectedInt.name);
+                          const supportsSync = connectedInt.type === "ads"
+                            ? providerInfo?.provider === "meta"
+                            : !tokenOnlyProviders.includes(providerInfo?.provider ?? "");
+                          const st = STATUS_CONFIG[connectedInt.status];
+                          const StIcon = st.icon;
+                          return (
+                            <div key={connectedInt.id} className="rounded-lg border bg-muted/30 p-3 space-y-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-sm font-medium break-words min-w-0" title={connectedInt.name}>{connectedInt.name}</p>
+                                <Badge className={`shrink-0 gap-1 text-[10px] ${st.className}`}>
+                                  <StIcon className="h-3 w-3" /> {st.label}
+                                </Badge>
+                              </div>
+                              {isConnected && supportsSync && (
+                                <Button variant="default" size="sm" className="w-full gap-1.5" disabled={isSyncing} onClick={() => handleSync(connectedInt)}>
+                                  <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+                                  {isSyncing ? "Sincronizando..." : "Sincronizar"}
+                                </Button>
+                              )}
+                              {providerInfo?.provider === "kommo" && (
+                                <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={() => setWebhookDialog(connectedInt)}>
+                                  <ExternalLink className="h-3.5 w-3.5" /> URL do Webhook
+                                </Button>
+                              )}
+                              {["kommo", "hubspot", "pipedrive"].includes(selectedCatalog.provider) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full gap-1.5"
+                                  disabled={connecting !== null}
+                                  onClick={() => handleConnect(connectedInt)}
+                                >
+                                  {connecting === connectedInt.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                                  {isConnected ? "Reconectar via OAuth" : "Conectar via OAuth"}
+                                </Button>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full gap-1.5"
+                                onClick={() => openTokenDialog(connectedInt, selectedCatalog.provider as CRMProvider)}
+                              >
+                                <Key className="h-3.5 w-3.5" /> Inserir Token / API Key
+                              </Button>
+                              <Button variant="ghost" size="sm" className="w-full text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => setDisconnectDialog(connectedInt)}>
+                                <Unlink className="h-3.5 w-3.5" /> Desconectar
+                              </Button>
+                              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setDeleteDialog(connectedInt)}>
+                                Excluir integração
+                              </Button>
+                            </div>
+                          );
+                        })}
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           className="w-full gap-1.5"
-                          onClick={() => {
+                          disabled={atIntegrationLimit || createMut.isPending}
+                          onClick={() => void handleAddAnotherConnection()}
+                        >
+                          {createMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                          Adicionar outra conexão
+                        </Button>
+                        {atIntegrationLimit && (
+                          <p className="text-xs text-amber-700 dark:text-amber-400">
+                            Limite de {maxInt} integração(ões) do plano atingido. Exclua uma integração ou faça upgrade.
+                          </p>
+                        )}
+                      </>
+                    );
+                  }
+
+                  const handleAddAndConnectFirst = async () => {
+                    const intType = selectedCatalog.category === "ads" ? "ads" : "crm";
+                    try {
+                      const created = await createMut.mutateAsync({ name: selectedCatalog.name, type: intType });
+                      await refetch();
+                      openTokenDialog(
+                        { id: created.id, name: created.name, type: created.type, status: created.status, lastSync: undefined },
+                        selectedCatalog.provider as CRMProvider,
+                      );
+                    } catch {
+                      setToast({ type: "error", message: "Erro ao criar integração. Tente novamente." });
+                    }
+                  };
+
+                  return (
+                    <>
+                      {["kommo", "hubspot", "pipedrive"].includes(selectedCatalog.provider) && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="w-full gap-1.5"
+                          disabled={connecting !== null || createMut.isPending || atIntegrationLimit}
+                          onClick={async () => {
                             const i = integrations.find((x) => getProvider(x.name)?.provider === selectedCatalog.provider);
-                            if (selectedCatalog.provider === "meta" || selectedCatalog.category === "ads") {
-                              handleAddAndConnect();
-                            } else if (i) {
-                              openTokenDialog(i, selectedCatalog.provider as CRMProvider);
-                            } else {
-                              handleAddCRM(selectedCatalog.name, selectedCatalog.provider as CRMProvider);
+                            if (i) {
+                              handleConnect(i);
+                              return;
+                            }
+                            try {
+                              const created = await createMut.mutateAsync({ name: selectedCatalog.name, type: "crm" });
+                              await refetch();
+                              handleConnect({ id: created.id, name: created.name, type: created.type, status: created.status, lastSync: undefined } as Integration);
+                            } catch {
+                              setToast({ type: "error", message: "Erro ao criar integração. Tente novamente." });
                             }
                           }}
                         >
-                          <Key className="h-3.5 w-3.5" /> Inserir Token / API Key
+                          {(connecting || createMut.isPending) ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                          Conectar via OAuth
                         </Button>
-                      </>
-                    );
-                  })()
-                )}
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-1.5"
+                        disabled={atIntegrationLimit}
+                        onClick={() => {
+                          if (selectedCatalog.provider === "meta" || selectedCatalog.category === "ads") {
+                            void handleAddAndConnectFirst();
+                          } else {
+                            void handleAddCRM(selectedCatalog.name, selectedCatalog.provider as CRMProvider);
+                          }
+                        }}
+                      >
+                        <Key className="h-3.5 w-3.5" /> Inserir Token / API Key
+                      </Button>
+                      {atIntegrationLimit && (
+                        <p className="text-xs text-amber-700 dark:text-amber-400">
+                          Limite de {maxInt} integração(ões) do plano atingido.
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
-          );
-        })()}
+        )}
       </div>
       )}
 

@@ -243,9 +243,9 @@ async function run() {
 
   await exec("seed plans", `
     INSERT INTO public.plans (id, name, description, price_monthly, price_yearly, max_members, max_integrations, features, sort_order) VALUES
-      ('free',       'Free',       'Para experimentar',         0,    0,    3,   1,   '["Dashboard básico", "1 integração CRM", "3 membros"]'::jsonb, 0),
-      ('starter',    'Starter',    'Para times pequenos',       197,  1970, 10,  3,   '["Tudo do Free", "10 membros", "3 integrações", "Modo TV"]'::jsonb, 1),
-      ('pro',        'Pro',        'Para operações completas',  497,  4970, 50,  10,  '["Tudo do Starter", "50 membros", "10 integrações", "AI"]'::jsonb, 2),
+      ('free',       'Free',       'Para experimentar',         0,    0,    3,   25,  '["Dashboard básico", "Várias conexões (CRM/Ads)", "3 membros"]'::jsonb, 0),
+      ('starter',    'Starter',    'Para times pequenos',       197,  1970, 10,  25,  '["Tudo do Free", "10 membros", "25 integrações", "Modo TV"]'::jsonb, 1),
+      ('pro',        'Pro',        'Para operações completas',  497,  4970, 50,  100, '["Tudo do Starter", "50 membros", "100 integrações", "AI"]'::jsonb, 2),
       ('enterprise', 'Enterprise', 'Para grandes operações',    0,    0,    999, 999, '["Tudo do Pro", "Ilimitado", "SLA dedicado"]'::jsonb, 3)
     ON CONFLICT (id) DO NOTHING
   `);

@@ -38,7 +38,14 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
+const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  ...(process.env.NODE_ENV === "development" ? ["/dev-login"] : []),
+];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -135,9 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const isAuthRoute = ["/login", "/register", "/forgot-password", "/reset-password"].some(
-      (r) => pathname.startsWith(r),
-    );
+    const isAuthRoute = [
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/reset-password",
+      ...(process.env.NODE_ENV === "development" ? ["/dev-login"] : []),
+    ].some((r) => pathname.startsWith(r));
     if (user && isAuthRoute) {
       const isNewUser = user.user_metadata?.is_new_user === true ||
         (user.created_at && Date.now() - new Date(user.created_at).getTime() < 60_000);

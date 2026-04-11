@@ -1,5 +1,10 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+
+/** Diretório deste arquivo — raiz fixa para Turbopack/tracing (não depender de lockfile em pasta acima). */
+const appDir = path.dirname(fileURLToPath(import.meta.url));
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -29,6 +34,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  turbopack: {
+    root: appDir,
+  },
+  outputFileTracingRoot: appDir,
   async redirects() {
     return [
       { source: "/login/", destination: "/login", permanent: true },

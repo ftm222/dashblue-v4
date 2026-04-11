@@ -26,6 +26,8 @@ import type {
   FinancialSummary,
   FunnelMapping,
   LogEntry,
+  AIInsight,
+  AIArea,
 } from "@/types";
 import {
   fetchKPIs,
@@ -60,7 +62,10 @@ import {
   fetchLogs,
   signIn,
   signOut,
+  fetchAllInsights,
+  fetchInsightsByArea,
   fetchSquads,
+  createSquad,
   fetchAllPeople,
   createPerson,
   updatePerson,
@@ -160,6 +165,40 @@ export function useDiagnostics(
     ...options,
   });
 }
+
+// ---------------------------------------------------------------------------
+// AI Insights
+// ---------------------------------------------------------------------------
+
+export function useAIInsights(
+  period: PeriodRange,
+  areas?: AIArea[],
+  options?: Partial<UseQueryOptions<AIInsight[]>>,
+) {
+  return useQuery<AIInsight[]>({
+    queryKey: ["ai-insights", periodKey(period), areas ?? "all"],
+    queryFn: () => fetchAllInsights(period, areas),
+    staleTime: 1000 * 60 * 5,
+    ...options,
+  });
+}
+
+export function useAIInsightsByArea(
+  period: PeriodRange,
+  area: AIArea,
+  options?: Partial<UseQueryOptions<AIInsight[]>>,
+) {
+  return useQuery<AIInsight[]>({
+    queryKey: ["ai-insights", periodKey(period), area],
+    queryFn: () => fetchInsightsByArea(period, area),
+    staleTime: 1000 * 60 * 5,
+    ...options,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Alerts
+// ---------------------------------------------------------------------------
 
 export function useAlerts(
   options?: Partial<UseQueryOptions<Alert[]>>
@@ -473,6 +512,19 @@ export function useSignOut() {
 
 export function useSquads() {
   return useQuery({ queryKey: ["squads"], queryFn: fetchSquads });
+}
+
+export function useCreateSquad() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => createSquad(name),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["squads"] });
+      qc.invalidateQueries({ queryKey: ["people"] });
+      qc.invalidateQueries({ queryKey: ["all-people"] });
+      qc.invalidateQueries({ queryKey: ["kpis"] });
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -30,7 +30,7 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -45,7 +45,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/overview");
+    const u = data.user;
+    const isNewUser =
+      u?.user_metadata?.is_new_user === true ||
+      (u?.created_at != null && Date.now() - new Date(u.created_at).getTime() < 60_000);
+
+    router.push(isNewUser ? "/admin/setup" : "/overview");
   }
 
   return (

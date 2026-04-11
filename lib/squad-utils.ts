@@ -82,6 +82,40 @@ export function groupBySquad(sdrs: Person[], closers: Person[]): SquadData[] {
   return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
 }
 
+/**
+ * Inclui squads cadastrados na org que ainda não têm SDR/closer vinculado
+ * (a agregação só a partir de `people` não os mostraria).
+ */
+export function mergeSquadsFromRegistry(
+  fromPeople: SquadData[],
+  registeredSquads: { id: string; name: string }[],
+): SquadData[] {
+  const byName = new Map<string, SquadData>();
+  for (const s of fromPeople) {
+    byName.set(s.name, s);
+  }
+  for (const reg of registeredSquads) {
+    if (!byName.has(reg.name)) {
+      byName.set(reg.name, {
+        name: reg.name,
+        revenue: 0,
+        contracts: 0,
+        members: [],
+        callsRealized: 0,
+        callsQualified: 0,
+        leads: 0,
+        booked: 0,
+        received: 0,
+        showRate: 0,
+        conversionRate: 0,
+        qualificationRate: 0,
+        ticketMedio: 0,
+      });
+    }
+  }
+  return Array.from(byName.values()).sort((a, b) => b.revenue - a.revenue);
+}
+
 export function fmtCurrency(value: number): string {
   return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

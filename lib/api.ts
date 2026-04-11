@@ -520,143 +520,41 @@ export async function fetchEvidence(
 }
 
 // ---------------------------------------------------------------------------
-// fetchDiagnostics — análise baseada em dados reais
+// fetchDiagnostics — backward compat bridge (delegates to lib/ai/ modules)
 // ---------------------------------------------------------------------------
+
+const AREA_TO_DOMAIN: Record<string, DiagnosticCard["domain"]> = {
+  overview: "funnel",
+  marketing: "marketing",
+  sdrs: "sdrs",
+  closers: "closers",
+  squads: "funnel",
+  financeiro: "funnel",
+  evidence: "funnel",
+};
+
+const SEVERITY_MAP: Record<string, DiagnosticCard["severity"]> = {
+  critical: "critical",
+  high: "high",
+  medium: "medium",
+  info: "low",
+};
 
 export async function fetchDiagnostics(
   period: PeriodRange,
 ): Promise<DiagnosticCard[]> {
-  const diagnostics: DiagnosticCard[] = [];
-  let diagId = 0;
+  const { fetchAllInsights: getInsights } = await import("@/lib/ai/router");
+  const insights = await getInsights(period, ["overview", "marketing", "sdrs", "closers"]);
 
-  const { data: evidence } = await db
-    .from("evidence")
-    .select("funnel_step, value, sdr_id, closer_id")
-    .gte("created_at", isoDate(period.from))
-    .lte("created_at", isoDate(period.to));
-
-  const rows = (evidence ?? []) as { funnel_step: string; value?: number; sdr_id?: string | null; closer_id?: string | null }[];
-  if (rows.length === 0) return [];
-
-  const leads = rows.filter((r) => r.funnel_step === "leads").length;
-  const booked = rows.filter((r) => r.funnel_step === "booked").length;
-  const received = rows.filter((r) => r.funnel_step === "received").length;
-  const won = rows.filter((r) => r.funnel_step === "won").length;
-  const totalRevenue = rows
-    .filter((r) => r.funnel_step === "won")
-    .reduce((s, r) => s + (r.value ?? 0), 0);
-
-  const showRate = booked > 0 ? (received / booked) * 100 : 0;
-  const conversionRate = leads > 0 ? (won / leads) * 100 : 0;
-  const ticketMedio = won > 0 ? totalRevenue / won : 0;
-
-  if (showRate > 0 && showRate < 60) {
-    diagnostics.push({
-      id: `diag-${++diagId}`,
-      domain: "sdrs",
-      bottleneck: "Taxa de comparecimento baixa",
-      impact: `Show rate de ${showRate.toFixed(1)}% — abaixo dos 60% recomendados. ${booked - received} oportunidades perdidas.`,
-      recommendation: "Revisar processo de confirmação de agenda: enviar lembretes por WhatsApp/SMS 1h antes.",
-      evidenceLink: "/evidence?funnelStep=booked",
-      severity: showRate < 40 ? "critical" : "high",
-    });
-  }
-
-  if (leads > 0 && conversionRate < 10) {
-    diagnostics.push({
-      id: `diag-${++diagId}`,
-      domain: "funnel",
-      bottleneck: "Conversão geral crítica",
-      impact: `Apenas ${conversionRate.toFixed(1)}% dos leads são convertidos em vendas.`,
-      recommendation: "Analisar cada etapa do funil para identificar onde está o maior drop-off.",
-      evidenceLink: "/evidence",
-      severity: conversionRate < 5 ? "critical" : "high",
-    });
-  }
-
-  const diagFrom = period.from.toISOString().slice(0, 10);
-  const diagTo = period.to.toISOString().slice(0, 10);
-  const { data: campaigns } = await db
-    .from("campaigns")
-    .select("investment, leads")
-    .lte("period_start", diagTo)
-    .gte("period_end", diagFrom);
-
-  type CampaignAggRow = { investment?: number; leads?: number; booked?: number; received?: number; won?: number; revenue?: number };
-  const campaignRows = (campaigns ?? []) as CampaignAggRow[];
-  const totalInvestment = campaignRows.reduce((s, c) => s + (c.investment ?? 0), 0);
-  const totalCampaignLeads = campaignRows.reduce((s, c) => s + (c.leads ?? 0), 0);
-  const cpl = totalCampaignLeads > 0 ? totalInvestment / totalCampaignLeads : 0;
-
-  if (cpl > 0 && ticketMedio > 0 && cpl > ticketMedio / 3) {
-    diagnostics.push({
-      id: `diag-${++diagId}`,
-      domain: "marketing",
-      bottleneck: "CPL elevado vs ticket médio",
-      impact: `CPL de R$ ${cpl.toFixed(2)} é maior que 1/3 do ticket médio (R$ ${ticketMedio.toFixed(2)}).`,
-      recommendation: "Otimizar campanhas: testar novos criativos, revisar segmentação e pausar campanhas de baixo ROI.",
-      evidenceLink: "/marketing",
-      severity: cpl > ticketMedio / 2 ? "critical" : "medium",
-    });
-  }
-
-  const { data: people } = await db
-    .from("people")
-    .select("id, name, role")
-    .eq("active", true);
-
-  type PeopleRoleRow = { id: string; name: string; role: string };
-  const peopleRows = (people ?? []) as PeopleRoleRow[];
-  if (peopleRows.length > 0) {
-    const sdrsWithoutLeads = peopleRows
-      .filter((p) => p.role === "sdr")
-      .filter((p) => !rows.some((r) => r.sdr_id === p.id));
-
-    if (sdrsWithoutLeads.length > 0) {
-      diagnostics.push({
-        id: `diag-${++diagId}`,
-        domain: "sdrs",
-        bottleneck: `${sdrsWithoutLeads.length} SDR(s) sem leads no período`,
-        impact: `${sdrsWithoutLeads.map((p) => p.name).join(", ")} não geraram leads.`,
-        recommendation: "Verificar se os SDRs estão ativos e se as evidências estão corretamente vinculadas.",
-        evidenceLink: "/sdrs",
-        severity: "medium",
-      });
-    }
-
-    const closersWithoutWon = peopleRows
-      .filter((p) => p.role === "closer")
-      .filter((p) => !rows.some((r) => r.closer_id === p.id && r.funnel_step === "won"));
-
-    if (closersWithoutWon.length > 0) {
-      diagnostics.push({
-        id: `diag-${++diagId}`,
-        domain: "closers",
-        bottleneck: `${closersWithoutWon.length} Closer(s) sem vendas no período`,
-        impact: `${closersWithoutWon.map((p) => p.name).join(", ")} não fecharam negócios.`,
-        recommendation: "Acompanhar pipeline de cada closer e identificar gargalos na negociação.",
-        evidenceLink: "/closers",
-        severity: "medium",
-      });
-    }
-  }
-
-  if (booked > 0 && received > 0) {
-    const bookToClose = received > 0 ? (won / received) * 100 : 0;
-    if (bookToClose < 20 && bookToClose > 0) {
-      diagnostics.push({
-        id: `diag-${++diagId}`,
-        domain: "closers",
-        bottleneck: "Baixa taxa de fechamento",
-        impact: `Apenas ${bookToClose.toFixed(1)}% das reuniões resultam em venda.`,
-        recommendation: "Treinar closers em técnicas de fechamento e revisar a qualificação dos leads.",
-        evidenceLink: "/closers",
-        severity: bookToClose < 10 ? "high" : "medium",
-      });
-    }
-  }
-
-  return diagnostics;
+  return insights.map((ins) => ({
+    id: ins.id,
+    domain: AREA_TO_DOMAIN[ins.area] ?? "funnel",
+    bottleneck: ins.title,
+    impact: ins.description,
+    recommendation: ins.recommendation,
+    evidenceLink: ins.evidenceLink ?? "/evidence",
+    severity: SEVERITY_MAP[ins.severity] ?? "medium",
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -1236,6 +1134,24 @@ export async function fetchSquads(): Promise<{ id: string; name: string }[]> {
   return (data ?? []) as { id: string; name: string }[];
 }
 
+export async function createSquad(name: string): Promise<{ id: string; name: string }> {
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("Informe o nome do squad.");
+  const organization_id = await getCurrentOrgId();
+  const { data, error } = await db
+    .from("squads")
+    .insert({ name: trimmed, organization_id })
+    .select("id, name")
+    .single();
+  if (error) {
+    if (error.code === "23505" || error.message?.includes("unique")) {
+      throw new Error("Já existe um squad com esse nome na organização.");
+    }
+    throw error;
+  }
+  return data as { id: string; name: string };
+}
+
 // ---------------------------------------------------------------------------
 // CRUD — People (SDRs / Closers)
 // ---------------------------------------------------------------------------
@@ -1400,6 +1316,12 @@ export async function changePassword(newPassword: string) {
   const { error } = await db.auth.updateUser({ password: newPassword });
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------------------
+// AI Insights (motor de regras)
+// ---------------------------------------------------------------------------
+
+export { fetchAllInsights, fetchInsightsByArea } from "@/lib/ai/router";
 
 // ---------------------------------------------------------------------------
 // Settings — Profile & Organization

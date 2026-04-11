@@ -265,6 +265,52 @@ export interface FinancialContract {
   createdAt: string;
 }
 
+// ---------------------------------------------------------------------------
+// AI Insights (motor de regras + ML futuro)
+// ---------------------------------------------------------------------------
+
+export type AIArea =
+  | "overview"
+  | "marketing"
+  | "sdrs"
+  | "closers"
+  | "squads"
+  | "financeiro"
+  | "evidence";
+
+export type AISeverity = "critical" | "high" | "medium" | "info";
+
+export interface AIMetric {
+  label: string;
+  value: number;
+  benchmark: number;
+}
+
+export interface AIInsight {
+  id: string;
+  area: AIArea;
+  severity: AISeverity;
+  title: string;
+  description: string;
+  recommendation: string;
+  metric?: AIMetric;
+  evidenceLink?: string;
+}
+
+export const AI_AREA_LABELS: Record<AIArea, string> = {
+  overview: "Visão Geral",
+  marketing: "Marketing",
+  sdrs: "SDRs",
+  closers: "Closers",
+  squads: "Squads",
+  financeiro: "Financeiro",
+  evidence: "Evidências",
+};
+
+// ---------------------------------------------------------------------------
+// Financial
+// ---------------------------------------------------------------------------
+
 export interface FinancialSummary {
   totalRevenue: number;
   totalContracts: number;
